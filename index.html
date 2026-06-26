@@ -254,7 +254,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <button class="fb" data-f="egresso" onclick="apF('egresso',this)">Egressos</button>
       <button class="fb" data-f="discente" onclick="apF('discente',this)">Ativos</button>
     </div>
-    <div style="margin-left:auto;display:flex;gap:6px">
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <div style="position:relative">
+        <input id="graph-search" type="text" placeholder="🔍 Buscar pessoa..." 
+          style="padding:5px 12px 5px 10px;border-radius:18px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit;outline:none;width:190px;background:#f8faff;transition:border-color .15s"
+          oninput="searchGraph(this.value)" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='var(--bd)'"/>
+        <div id="search-results" style="display:none;position:absolute;top:34px;left:0;width:260px;background:#fff;border:1.5px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;max-height:220px;overflow-y:auto"></div>
+      </div>
       <button class="fb" onclick="recentrar()" title="Centralizar">⊙ Centralizar</button>
       <button class="fb" id="btn-add-link" style="display:none" onclick="openEdLink()">+ Vincular</button>
     </div>
@@ -325,7 +331,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
           <label>Email de contato público</label><input id="pfeml" type="email" placeholder="seu@email.com"/>
           <label>Mini-bio (aparece no painel lateral do grafo)</label>
           <textarea id="pfbio" placeholder="Pesquisador em recursos hídricos, atuando em..."></textarea>
-          <div class="mac"><button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savePerfil()">Salvar perfil</button></div>
+          <div class="mac">
+            <button class="bsm" onclick="checkDuplicate()" style="font-size:11px">Verificar duplicação</button>
+            <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savePerfil()">Salvar e integrar à rede</button>
+          </div>
+          <div id="dup-alert" style="display:none;margin-top:10px;padding:10px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;font-size:12px;color:#92400e"></div>
         </div>
       </div>
     </div>
@@ -440,7 +450,7 @@ const DOCENTES_SEED=[
   {id:"doc-anderson", label:"Anderson Marques do Amaral",     initials:"AM",area:"Ecologia e Gestão Ambiental",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"—"},
   {id:"doc-claumir",  label:"Claumir Cesar Muniz",            initials:"CC",area:"Segurança hídrica · Desastres naturais",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"MPA 025"},
   {id:"doc-erico",    label:"Érico Fernando O. Martins",      initials:"EF",area:"Geotecnologia · Metodologias de gestão",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"MPA 007"},
-  {id:"doc-ernandes", label:"Ernandes Sobreira O. Junior",    initials:"ES",area:"Biogeoquímica · GEE · Segurança hídrica",cat:"COLABORADOR",cidade:"Cáceres-MT",disciplinas:"PPGCA / CELBE / LIPAN"},
+  {id:"doc-ernandes", label:"Ernandes Sobreira Oliveira Junior",initials:"ES",area:"Biogeoquímica · GEE · Segurança hídrica · Ecossistemas aquáticos",cat:"COLABORADOR",cidade:"Cáceres-MT",disciplinas:"PPGCA / CELBE / LIPAN / ProfÁgua",email:"ernandes.sobreira@unemat.br"},
   {id:"doc-fatima",   label:"Fátima Aparecida S. Iocca",      initials:"FA",area:"Ferramentas de gestão · Instrumentos da política RH",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"MPA 002 · MPA 005 · MPA 006"},
   {id:"doc-francisco",label:"Francisco Lledo dos Santos",     initials:"FL",area:"Hidrologia avançada · Ferramentas de gestão",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"MPA 011"},
   {id:"doc-rodrigo",  label:"Rodrigo Bruno Zanin",            initials:"RZ",area:"Geotecnologia · Metodologias de gestão",cat:"PERMANENTE",cidade:"Cáceres-MT",disciplinas:"MPA 007"},
@@ -607,7 +617,7 @@ function goP(id,btn){
 const GRAD={docente:['#93c5fd','#1d4ed8'],egresso:['#6ee7b7','#059669'],discente:['#fcd34d','#d97706']};
 const STROKE={docente:'#1e40af',egresso:'#065f46',discente:'#b45309'};
 const LCOLOR={orient:'#3b82f6',coorient:'#8b5cf6',banca:'#10b981',acao:'#f59e0b',colab:'#06b6d4'};
-const SZN={docente:30,egresso:19,discente:15};
+const SZN={docente:24,egresso:14,discente:11};
 
 function buildGraph(){
   if(!document.getElementById('pg-rede').classList.contains('on')) return;
@@ -672,17 +682,19 @@ function buildGraph(){
   sim=d3.forceSimulation(nodes)
     .force('link',d3.forceLink(links).id(d=>d._id)
       .distance(d=>{
-        if(d.source.type==='docente'||d.target.type==='docente') return 90;
-        return 55;
+        if(d.source.type==='docente'||d.target.type==='docente') return 48;
+        return 32;
       }).strength(d=>{
-        if(d.source.type==='docente'||d.target.type==='docente') return .8;
-        return .5;
+        if(d.source.type==='docente'||d.target.type==='docente') return 1.0;
+        return .7;
       }))
-    .force('charge',d3.forceManyBody().strength(d=>d.type==='docente'?-320:-120))
-    .force('center',d3.forceCenter(W/2,H/2).strength(.08))
-    .force('collision',d3.forceCollide().radius(d=>SZN[d.type||'discente']+14).strength(.85))
-    .alphaDecay(.015)
-    .velocityDecay(.35);
+    .force('charge',d3.forceManyBody().strength(d=>d.type==='docente'?-180:-60).distanceMax(200))
+    .force('center',d3.forceCenter(W/2,H/2).strength(.4))
+    .force('x',d3.forceX(W/2).strength(.06))
+    .force('y',d3.forceY(H/2).strength(.06))
+    .force('collision',d3.forceCollide().radius(d=>SZN[d.type||'discente']+8).strength(.9))
+    .alphaDecay(.02)
+    .velocityDecay(.45);
 
   // Links
   glks=gGrp.append('g').selectAll('line').data(links).enter().append('line')
@@ -980,15 +992,37 @@ function updPFav(){
 async function savePerfil(){
   if(!USER){toast('Faça login.');return;}
   var nm=document.getElementById('pfnm').value.trim()||USER.displayName;
-  var data={id:'user-'+USER.uid,label:nm,nome:nm,
+  // Check if a seed node with similar name already exists; if so, enrich it instead of creating new
+  var seedMatch=null;
+  var nmLow=nm.toLowerCase().replace(/[^a-z]/g,'');
+  Object.entries(MEMBERS).forEach(([k,m])=>{
+    if(m.seeded&&!m.uid){
+      var mLow=(m.label||'').toLowerCase().replace(/[^a-z]/g,'');
+      if(mLow===nmLow||mLow.includes(nmLow.substring(0,8))||nmLow.includes(mLow.substring(0,8))){
+        seedMatch={key:k,member:m};
+      }
+    }
+  });
+  var targetKey=seedMatch?seedMatch.key:'user-'+USER.uid;
+  var existingData=seedMatch?seedMatch.member:{};
+  var data={...existingData,
+    id:targetKey,label:nm,nome:nm,
     initials:nm.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').substring(0,2).toUpperCase(),
-    type:document.getElementById('pftp').value,ano:document.getElementById('pfano').value.trim(),
-    area:document.getElementById('pfarea').value.trim(),inst:document.getElementById('pfinst').value.trim(),
-    email:document.getElementById('pfeml').value.trim(),cidade:document.getElementById('pfcid').value.trim(),
+    type:document.getElementById('pftp').value,ano:document.getElementById('pfano').value.trim()||existingData.ano||'',
+    area:document.getElementById('pfarea').value.trim()||existingData.area||'',
+    inst:document.getElementById('pfinst').value.trim(),
+    email:document.getElementById('pfeml').value.trim(),
+    cidade:document.getElementById('pfcid').value.trim()||existingData.cidade||'Cáceres-MT',
     bio:document.getElementById('pfbio').value.trim(),
-    photoURL:(UPROF&&UPROF.photoURL)||USER.photoURL||'',uid:USER.uid,updatedAt:Date.now()};
-  await DB.ref('aquanet/members/user-'+USER.uid).set(data);
-  UPROF=data; toast('Perfil salvo! Recarregue a rede para ver seu nó.');
+    photoURL:(UPROF&&UPROF.photoURL)||USER.photoURL||'',
+    uid:USER.uid,updatedAt:Date.now(),seeded:false};
+  // Remove old user node if we're merging into seed node
+  if(seedMatch&&MEMBERS['user-'+USER.uid]){
+    await DB.ref('aquanet/members/user-'+USER.uid).remove();
+  }
+  await DB.ref('aquanet/members/'+targetKey).set(data);
+  UPROF=data;
+  toast('Perfil salvo e integrado à rede!');
 }
 
 // ─── ADMIN ────────────────────────────────────────────────────────────────────
@@ -1025,8 +1059,80 @@ async function delLink(key){if(!confirm('Excluir este vínculo?')) return;await 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
 function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),3000);}
 
+// ─── DUPLICATE CHECK ──────────────────────────────────────────────────────────
+function checkDuplicate(){
+  if(!USER){toast('Faça login.');return;}
+  var nm=(document.getElementById('pfnm').value||USER.displayName||'').toLowerCase().replace(/[^a-z]/g,'');
+  var found=[];
+  Object.entries(MEMBERS).forEach(([k,m])=>{
+    var mLow=(m.label||'').toLowerCase().replace(/[^a-z]/g,'');
+    if(k!=='user-'+USER.uid && mLow.length>4 && (mLow===nm||mLow.includes(nm.substring(0,8))||nm.includes(mLow.substring(0,8)))){
+      found.push({key:k,label:m.label,type:m.type,ano:m.ano});
+    }
+  });
+  var al=document.getElementById('dup-alert');
+  if(found.length){
+    al.style.display='block';
+    al.innerHTML='<strong>⚠️ Nó existente encontrado:</strong> '+found.map(f=>f.label+' ('+f.type+(f.ano?' · '+f.ano:'')+')').join(', ')+
+      '<br><span style="font-size:11px;margin-top:4px;display:block">Ao clicar em "Salvar e integrar", seu perfil será mesclado a esse nó existente, eliminando a duplicação.</span>';
+  } else {
+    al.style.display='block';
+    al.style.background='#d1fae5';al.style.borderColor='#6ee7b7';al.style.color='#065f46';
+    al.innerHTML='✅ Nenhum nó duplicado encontrado. Será criado um nó novo para você.';
+  }
+}
+
+window.checkDuplicate=checkDuplicate;
+window.focusNode=focusNode;
+
+// ─── GRAPH SEARCH ─────────────────────────────────────────────────────────────
+function searchGraph(q){
+  var res=document.getElementById('search-results');
+  if(!q||q.length<2){res.style.display='none';return;}
+  var lq=q.toLowerCase();
+  var matches=Object.values(MEMBERS).filter(m=>(m.label||m.nome||'').toLowerCase().includes(lq)).slice(0,8);
+  if(!matches.length){res.style.display='none';return;}
+  res.style.display='block';
+  var typeIcon={docente:'🔵',egresso:'🟢',discente:'🟡'};
+  res.innerHTML=matches.map(m=>'<div onclick="focusNode(''+m.id+'')" style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fff'">'+
+    '<span>'+typeIcon[m.type]+'</span>'+
+    '<div><div style="font-weight:700;color:#1a1a1a">'+(m.label||m.nome||'')+'</div>'+
+    '<div style="font-size:10px;color:#999">'+(m.type==='docente'?'Docente':m.type==='egresso'?'Egresso · '+(m.ano||''):('Discente · '+(m.ano||'')))+'</div></div>'+
+    '</div>').join('');
+}
+
+function focusNode(nodeId){
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('graph-search').value='';
+  // find node and open side panel
+  if(!gnds) return;
+  var found=null;
+  gnds.each(function(d){if(d._id===nodeId||d.id===nodeId) found=d;});
+  if(found){
+    openSP(found);
+    highlightNode(found);
+    activeNode=found;
+    // zoom to node
+    if(svSel&&zoomBeh&&found.x&&found.y){
+      var el=document.getElementById('gsvg');
+      var W=el.clientWidth||800, H=el.clientHeight||560;
+      var scale=2.2;
+      var tx=W/2-found.x*scale;
+      var ty=H/2-found.y*scale;
+      svSel.transition().duration(700).call(zoomBeh.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+    }
+  }
+}
+
+// Close search on outside click
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#graph-search')&&!e.target.closest('#search-results'))
+    document.getElementById('search-results').style.display='none';
+});
+
+// ─── EXPOSE ────────────────────────────────────────────────────────────────────
 // Expose globals
-window.goP=goP;window.apF=apF;window.recentrar=recentrar;
+window.goP=goP;window.apF=apF;window.recentrar=recentrar;window.searchGraph=searchGraph;
 window.closeSP=closeSP;window.resetHighlight=resetHighlight;
 window.clM=clM;window.openMac=openMac;window.savAcao=savAcao;window.delAcao=delAcao;window.verAcao=verAcao;
 window.savePerfil=savePerfil;window.doLogin=doLogin;window.doLogout=doLogout;
