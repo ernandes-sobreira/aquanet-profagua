@@ -1029,25 +1029,65 @@ async function savePerfil(){
 function renderAd(){
   if(!isAdm()) return;
   var ml=Object.values(MEMBERS).sort((a,b)=>(a.label||'').localeCompare(b.label||''));
-  var doc=ml.filter(m=>m.type==='docente').length, eg=ml.filter(m=>m.type==='egresso').length, di=ml.filter(m=>m.type==='discente').length;
-  document.getElementById('adst').innerHTML=[['Docentes',doc,'#dbeafe','#1d4ed8'],['Egressos',eg,'#d1fae5','#065f46'],['Ativos',di,'#fef3c7','#b45309'],['Total',ml.length,'#f3f4f6','#374151']].map(([l,v,bg,tc])=>'<div style="background:'+bg+';border-radius:12px;padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:'+tc+'">'+v+'</div><div style="font-size:11px;color:'+tc+';opacity:.7;font-weight:600">'+l+'</div></div>').join('');
-  document.getElementById('adlst').innerHTML=ml.map(m=>{
-    var c={docente:'#1d4ed8',egresso:'#059669',discente:'#d97706'}[m.type]||'#555';
-    return'<div class="adrow"><div class="adri"><strong>'+(m.label||m.nome||'')+'</strong><span>'+(m.area||m.type||'')+(m.ano?' · '+m.ano:'')+'</span></div><span style="background:#f1f5f9;color:'+c+';padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700">'+(m.type||'')+'</span><div class="adra"><button class="bsm dan" onclick="delMbr(\''+m.id+'\',\''+((m.label||m.nome||'')).replace(/'/g,"'")+'\')" style="font-size:11px;padding:2px 8px">Excluir</button></div></div>';
+  var doc=ml.filter(m=>m.type==='docente').length;
+  var eg=ml.filter(m=>m.type==='egresso').length;
+  var di=ml.filter(m=>m.type==='discente').length;
+  document.getElementById('adst').innerHTML=[
+    ['Docentes',doc,'#dbeafe','#1d4ed8'],['Egressos',eg,'#d1fae5','#065f46'],
+    ['Ativos',di,'#fef3c7','#b45309'],['Total',ml.length,'#f3f4f6','#374151']
+  ].map(function(x){
+    return '<div style="background:'+x[2]+';border-radius:12px;padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:'+x[3]+'">'+x[1]+'</div><div style="font-size:11px;color:'+x[3]+';opacity:.7;font-weight:600">'+x[0]+'</div></div>';
   }).join('');
+  var container=document.getElementById('adlst');
+  container.innerHTML='';
+  ml.forEach(function(m){
+    var c={docente:'#1d4ed8',egresso:'#059669',discente:'#d97706'}[m.type]||'#555';
+    var row=document.createElement('div');
+    row.className='adrow';
+    var info=document.createElement('div'); info.className='adri';
+    var nm=document.createElement('strong'); nm.textContent=m.label||m.nome||'';
+    var sub=document.createElement('span'); sub.textContent=(m.area||m.type||'')+(m.ano?' · '+m.ano:'');
+    info.appendChild(nm); info.appendChild(sub);
+    var badge=document.createElement('span');
+    badge.style.cssText='background:#f1f5f9;color:'+c+';padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700';
+    badge.textContent=m.type||'';
+    var acts=document.createElement('div'); acts.className='adra';
+    var btn=document.createElement('button'); btn.className='bsm dan';
+    btn.style.cssText='font-size:11px;padding:2px 8px'; btn.textContent='Excluir';
+    btn.addEventListener('click',function(){delMbr(m.id||m._id,m.label||m.nome||'');});
+    acts.appendChild(btn);
+    row.appendChild(info); row.appendChild(badge); row.appendChild(acts);
+    container.appendChild(row);
+  });
 }
+
 function renderAdLinks(){
   if(!isAdm()) return;
-  var items=Object.entries(LINKS).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  var items=Object.entries(LINKS).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
   var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação',colab:'Colaboração'};
-  document.getElementById('adlinks').innerHTML=items.length?items.map(([k,lk])=>{
+  var lkCont=document.getElementById('adlinks');
+  lkCont.innerHTML='';
+  if(!items.length){lkCont.innerHTML='<div class="empt">Nenhum vínculo manual cadastrado.</div>';return;}
+  items.forEach(function(entry){
+    var k=entry[0], lk=entry[1];
     var a=MEMBERS[lk.a], b=MEMBERS[lk.b];
-    return'<div class="adrow"><div class="adri"><strong>'+(a?a.label:lk.a)+'</strong>'+
-      '<span>'+typeLabels[lk.type||'colab']+' → '+(b?b.label:lk.b)+(lk.weight?' · peso '+lk.weight:'')+'</span>'+
-      (lk.desc?'<span style="font-style:italic">'+lk.desc+'</span>':'')+
-      '</div><div class="adra"><button class="bsm dan" onclick="delLink(\''+k+'\')" style="font-size:11px;padding:2px 8px">Excluir</button></div></div>';
-  }).join(''):'<div class="empt">Nenhum vínculo manual cadastrado.</div>';
+    var row=document.createElement('div'); row.className='adrow';
+    var info=document.createElement('div'); info.className='adri';
+    var nm=document.createElement('strong'); nm.textContent=(a?a.label:lk.a)||'';
+    var sub=document.createElement('span');
+    sub.textContent=(typeLabels[lk.type||'colab']||'')+'  →  '+(b?b.label:lk.b)+(lk.weight?' · peso '+lk.weight:'');
+    info.appendChild(nm); info.appendChild(sub);
+    if(lk.desc){var desc=document.createElement('span');desc.style.fontStyle='italic';desc.textContent=lk.desc;info.appendChild(desc);}
+    var acts=document.createElement('div'); acts.className='adra';
+    var btn=document.createElement('button'); btn.className='bsm dan';
+    btn.style.cssText='font-size:11px;padding:2px 8px'; btn.textContent='Excluir';
+    btn.addEventListener('click',(function(key){return function(){delLink(key);};})(k));
+    acts.appendChild(btn);
+    row.appendChild(info); row.appendChild(acts);
+    lkCont.appendChild(row);
+  });
 }
+
 function renderAdAc(){
   if(!isAdm()) return;
   var items=Object.entries(ACOES).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
@@ -1090,16 +1130,26 @@ function searchGraph(q){
   var res=document.getElementById('search-results');
   if(!q||q.length<2){res.style.display='none';return;}
   var lq=q.toLowerCase();
-  var matches=Object.values(MEMBERS).filter(m=>(m.label||m.nome||'').toLowerCase().includes(lq)).slice(0,8);
+  var matches=Object.values(MEMBERS).filter(function(m){
+    return (m.label||m.nome||'').toLowerCase().includes(lq);
+  }).slice(0,8);
   if(!matches.length){res.style.display='none';return;}
   res.style.display='block';
-  var typeIcon={docente:'🔵',egresso:'🟢',discente:'🟡'};
-  res.innerHTML=matches.map(m=>'<div onclick="focusNode(''+m.id+'')" style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f1f5f9;font-size:12px" onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='#fff'">'+
-    '<span>'+typeIcon[m.type]+'</span>'+
-    '<div><div style="font-weight:700;color:#1a1a1a">'+(m.label||m.nome||'')+'</div>'+
-    '<div style="font-size:10px;color:#999">'+(m.type==='docente'?'Docente':m.type==='egresso'?'Egresso · '+(m.ano||''):('Discente · '+(m.ano||'')))+'</div></div>'+
-    '</div>').join('');
+  var icon={docente:'🔵',egresso:'🟢',discente:'🟡'};
+  res.innerHTML='';
+  matches.forEach(function(m){
+    var div=document.createElement('div');
+    div.style.cssText='padding:9px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;border-bottom:1px solid #f1f5f9;font-size:13px';
+    div.innerHTML='<span style="font-size:16px">'+(icon[m.type]||'⚪')+'</span>'+
+      '<div><div style="font-weight:700;color:#111">'+(m.label||m.nome||'')+'</div>'+
+      '<div style="font-size:10px;color:#999;margin-top:1px">'+(m.type==='docente'?'Docente':m.type==='egresso'?'Egresso · '+(m.ano||''):('Discente ativo · '+(m.ano||'')))+'</div></div>';
+    div.addEventListener('mouseover',function(){this.style.background='#f0f4ff';});
+    div.addEventListener('mouseout',function(){this.style.background='';});
+    div.addEventListener('click',function(){focusNode(m.id||m._id);});
+    res.appendChild(div);
+  });
 }
+
 
 function focusNode(nodeId){
   document.getElementById('search-results').style.display='none';
