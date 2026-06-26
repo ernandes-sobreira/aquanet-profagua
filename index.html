@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AquaNet · Rede ProfÁgua UNEMAT</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bl:#1a4f8a;--bll:#dbeafe;--blm:#1e40af;
+  --gr:#065f46;--grl:#d1fae5;
+  --am:#92400e;--aml:#fef3c7;--amm:#b45309;
+  --rd:#991b1b;--rdl:#fee2e2;
+  --bd:#e2e0db;--tx:#1a1a1a;--tx2:#555;--tx3:#999;
+  --bg:#f7f6f2;--wh:#fff;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+#topbar{background:var(--wh);border-bottom:1px solid var(--bd);padding:0 18px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:10px}
+#brand{display:flex;align-items:center;gap:9px;text-decoration:none}
+#bico{width:34px;height:34px;background:var(--bl);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#bico svg{width:19px;height:19px}
+#btxt h1{font-size:15px;font-weight:700;color:var(--bl);letter-spacing:-.2px}
+#btxt p{font-size:10px;color:var(--tx3)}
+#nav{display:flex;gap:2px}
+.ntab{padding:5px 12px;border-radius:15px;border:none;background:transparent;font-size:12px;cursor:pointer;color:var(--tx2);font-family:inherit;transition:background .15s}
+.ntab:hover{background:var(--bg)}
+.ntab.on{background:var(--bll);color:var(--blm);font-weight:600}
+#uarea{display:flex;align-items:center;gap:7px}
+#uphoto{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid var(--bd)}
+#uname{font-size:11px;color:var(--tx2);max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsm{padding:4px 11px;border-radius:7px;border:1px solid var(--bd);background:var(--wh);font-size:12px;cursor:pointer;font-family:inherit;color:var(--tx2);transition:background .15s}
+.bsm:hover{background:var(--bg)}
+.bsm.pri{background:var(--bl);color:#fff;border-color:var(--bl)}
+.bsm.pri:hover{background:var(--blm)}
+.bsm.dan{background:var(--rdl);color:var(--rd);border-color:#fca5a5}
+#hstats{background:var(--wh);border-bottom:1px solid var(--bd);padding:9px 18px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.hs{display:flex;align-items:center;gap:6px}
+.hsd{width:8px;height:8px;border-radius:50%}
+.hsv{font-size:16px;font-weight:700}
+.hsl{font-size:11px;color:var(--tx3)}
+.hss{width:1px;height:20px;background:var(--bd)}
+.pg{display:none;padding:14px}
+.pg.on{display:block}
+.sc{background:var(--wh);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:12px}
+.sch{padding:11px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sch h2{font-size:13px;font-weight:600}
+.scb{padding:14px 16px}
+#nbody{display:flex;height:470px}
+#gwrap{flex:1;position:relative;overflow:hidden;background:#fafaf8}
+#gsvg{width:100%;height:100%;cursor:grab}
+#gsvg:active{cursor:grabbing}
+.glink{stroke:#d0cec8;stroke-width:1.1;stroke-opacity:.45}
+.gnode{cursor:pointer}
+#spanel{width:240px;background:var(--wh);border-left:1px solid var(--bd);overflow-y:auto;flex-shrink:0;transition:width .2s,opacity .2s}
+#spanel.cls{width:0;overflow:hidden;opacity:0}
+#spin{padding:14px}
+.spav{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin:0 auto 9px;overflow:hidden}
+.spav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.spnm{text-align:center;font-size:13px;font-weight:700;margin-bottom:3px}
+.spbg{display:block;text-align:center;width:fit-content;margin:0 auto 10px;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600}
+.sphr{border:none;border-top:1px solid var(--bd);margin:8px 0}
+.spf{margin-bottom:8px}
+.spf label{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);display:block;margin-bottom:2px}
+.spf p,.spf a{font-size:11px;color:var(--tx2);line-height:1.5}
+.spf a{color:var(--bl);text-decoration:none}
+.chip{display:inline-block;background:#f0f4ff;color:var(--bl);border-radius:4px;font-size:10px;padding:1px 6px;margin:2px 2px 0 0}
+.spx{float:right;border:none;background:none;cursor:pointer;color:var(--tx3);font-size:15px;padding:2px 4px;border-radius:4px}
+.spx:hover{background:var(--bg);color:var(--tx)}
+#gtip{position:absolute;pointer-events:none;background:rgba(20,20,20,.82);color:#fff;border-radius:5px;padding:4px 9px;font-size:11px;white-space:nowrap;opacity:0;transition:opacity .15s;z-index:20}
+#ghint{position:absolute;bottom:8px;left:10px;font-size:10px;color:var(--tx3);pointer-events:none}
+#fgrp{display:flex;gap:4px;flex-wrap:wrap}
+.fb{padding:3px 10px;border-radius:14px;border:1px solid var(--bd);background:var(--wh);font-size:11px;cursor:pointer;color:var(--tx2);font-family:inherit;transition:all .15s}
+.fb:hover{background:var(--bg)}
+.fb.fa{background:#f0f0f0;color:#333;border-color:#bbb}
+.fb.fd{background:var(--bll);color:var(--blm);border-color:#93c5fd}
+.fb.fe{background:var(--grl);color:var(--gr);border-color:#6ee7b7}
+.fb.fc{background:var(--aml);color:var(--am);border-color:#fcd34d}
+#pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px;padding:14px}
+.pc{background:var(--wh);border:1px solid var(--bd);border-radius:11px;overflow:hidden;transition:transform .15s,box-shadow .15s;cursor:pointer}
+.pc:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.pcimg{width:100%;height:95px;object-fit:cover;background:var(--bll);display:flex;align-items:center;justify-content:center;font-size:30px}
+.pcb{padding:9px 11px 11px}
+.pctag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.pctit{font-size:12px;font-weight:700;margin-bottom:3px;color:var(--tx)}
+.pcdesc{font-size:11px;color:var(--tx2);line-height:1.5;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.pcft{display:flex;align-items:center;gap:5px}
+.pcav{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.pcav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pcau{font-size:10px;color:var(--tx3)}
+.pcyr{font-size:10px;color:var(--tx3);margin-left:auto}
+.empt{padding:36px;text-align:center;color:var(--tx3);font-size:13px}
+#movl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center}
+#movl.on{display:flex}
+#modal{background:var(--wh);border-radius:13px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;padding:20px;position:relative;margin:14px}
+#modal h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--bl)}
+.mcl{position:absolute;top:13px;right:14px;border:none;background:none;font-size:17px;cursor:pointer;color:var(--tx3)}
+.mcl:hover{color:var(--tx)}
+.mf label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:3px;margin-top:10px}
+.mf input,.mf textarea,.mf select{width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--bd);font-size:12px;font-family:inherit;outline:none;background:var(--bg)}
+.mf input:focus,.mf textarea:focus,.mf select:focus{border-color:#93c5fd;background:var(--wh)}
+.mf textarea{height:72px;resize:vertical}
+.mf .mr{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mac{display:flex;gap:7px;margin-top:14px;justify-content:flex-end}
+#vovl{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center}
+#vovl.on{display:flex}
+#vomod{background:var(--wh);border-radius:13px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;margin:14px;position:relative}
+#pfcont{max-width:540px;margin:0 auto}
+.pfavw{text-align:center;margin-bottom:18px}
+.pfavb{width:82px;height:82px;border-radius:50%;margin:0 auto 7px;overflow:hidden;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700}
+.pfavb img{width:100%;height:100%;object-fit:cover}
+.pfgr{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.adrow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd);gap:8px}
+.adrow:last-child{border-bottom:none}
+.adri{flex:1;min-width:0}
+.adri strong{font-size:12px;display:block}
+.adri span{font-size:10px;color:var(--tx3)}
+.adra{display:flex;gap:5px;flex-shrink:0}
+.bst{padding:2px 7px;border-radius:7px;font-size:10px;font-weight:600}
+.bstok{background:var(--grl);color:var(--gr)}
+.bsteg{background:var(--bll);color:var(--blm)}
+.bstpe{background:var(--aml);color:var(--am)}
+#splsh{display:none;position:fixed;inset:0;background:#fff;z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:18px}
+#splsh.on{display:flex}
+#splsh h2{font-size:20px;font-weight:700;color:var(--bl)}
+#splsh p{font-size:13px;color:var(--tx3);text-align:center;max-width:300px}
+.gbtn{display:flex;align-items:center;gap:9px;padding:11px 22px;border-radius:9px;border:1px solid var(--bd);background:var(--wh);font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.08);transition:box-shadow .15s}
+.gbtn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.gbtn svg{width:19px;height:19px}
+#toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:9px 16px;border-radius:9px;font-size:12px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.on{opacity:1}
+@media(max-width:580px){#nbody{flex-direction:column}#spanel{width:100%!important;height:190px;border-left:none;border-top:1px solid var(--bd)}.pfgr{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="splsh" class="on">
+  <div style="width:50px;height:50px;background:var(--bl);border-radius:11px;display:flex;align-items:center;justify-content:center">
+    <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+      <circle cx="5" cy="12" r="2.5" fill="#fff" opacity=".9"/>
+      <circle cx="19" cy="6" r="2.5" fill="#fff" opacity=".9"/>
+      <circle cx="19" cy="18" r="2.5" fill="#fff" opacity=".9"/>
+      <circle cx="12" cy="12" r="2.5" fill="#fff"/>
+      <line x1="7.4" y1="11.1" x2="10" y2="12" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+      <line x1="14" y1="12" x2="17" y2="7" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+      <line x1="14" y1="12" x2="17" y2="17" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+    </svg>
+  </div>
+  <h2>AquaNet</h2>
+  <p>Rede de Egressos ProfÁgua<br>UNEMAT Cáceres · Recursos Hídricos</p>
+  <button class="gbtn" onclick="doLogin()">
+    <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    Entrar com Google
+  </button>
+</div>
+
+<div id="topbar">
+  <a id="brand" href="#">
+    <div id="bico">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="5" cy="12" r="2.5" fill="#fff" opacity=".9"/>
+        <circle cx="19" cy="6" r="2.5" fill="#fff" opacity=".9"/>
+        <circle cx="19" cy="18" r="2.5" fill="#fff" opacity=".9"/>
+        <circle cx="12" cy="12" r="2.5" fill="#fff"/>
+        <line x1="7.4" y1="11.1" x2="10" y2="12" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+        <line x1="14" y1="12" x2="17" y2="7" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+        <line x1="14" y1="12" x2="17" y2="17" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+      </svg>
+    </div>
+    <div id="btxt"><h1>AquaNet</h1><p>Rede ProfÁgua · UNEMAT Cáceres</p></div>
+  </a>
+  <nav id="nav">
+    <button class="ntab on" onclick="goP('rede',this)">Rede</button>
+    <button class="ntab" onclick="goP('acoes',this)">Ações</button>
+    <button class="ntab" onclick="goP('perfil',this)">Meu Perfil</button>
+    <button class="ntab" id="btnadm" style="display:none" onclick="goP('admin',this)">Admin</button>
+  </nav>
+  <div id="uarea">
+    <div id="uinfo" style="display:none">
+      <img id="uphoto" src="" alt=""/>
+      <span id="uname"></span>
+    </div>
+    <button class="bsm" id="btnlog" onclick="doLogin()">Entrar com Google</button>
+    <button class="bsm dan" id="btnout" style="display:none" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<div id="hstats">
+  <div class="hs"><span class="hsd" style="background:#1e40af"></span><span class="hsv" id="std">—</span><span class="hsl">Docentes</span></div>
+  <div class="hss"></div>
+  <div class="hs"><span class="hsd" style="background:#065f46"></span><span class="hsv" id="seg">—</span><span class="hsl">Egressos</span></div>
+  <div class="hss"></div>
+  <div class="hs"><span class="hsd" style="background:#b45309"></span><span class="hsv" id="sco">—</span><span class="hsl">Concluídos</span></div>
+  <div class="hss"></div>
+  <div class="hs"><span class="hsd" style="background:#b45309" style="opacity:.6"></span><span class="hsv" id="sat">—</span><span class="hsl">Ativos</span></div>
+  <div class="hss"></div>
+  <div class="hs"><span class="hsd" style="background:#7c3aed"></span><span class="hsv" id="sac">—</span><span class="hsl">Ações</span></div>
+</div>
+
+<div class="pg on" id="pg-rede">
+  <div class="sc">
+    <div class="sch">
+      <h2>Grafo de Conexões ProfÁgua</h2>
+      <div id="fgrp">
+        <button class="fb fa" data-f="all" onclick="apF('all',this)">Todos</button>
+        <button class="fb" data-f="docente" onclick="apF('docente',this)">Docentes</button>
+        <button class="fb" data-f="egresso" onclick="apF('egresso',this)">Egressos/Concluídos</button>
+        <button class="fb" data-f="discente" onclick="apF('discente',this)">Ativos</button>
+      </div>
+    </div>
+    <div id="nbody">
+      <div id="gwrap">
+        <svg id="gsvg"></svg>
+        <div id="gtip"></div>
+        <div id="ghint">Arraste · Scroll para zoom · Clique nos nós</div>
+      </div>
+      <div id="spanel" class="cls">
+        <div id="spin"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pg" id="pg-acoes">
+  <div class="sc">
+    <div class="sch">
+      <h2>Ações e Produções</h2>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        <input id="srcac" type="text" placeholder="Buscar ações..." style="padding:5px 10px;border-radius:7px;border:1px solid var(--bd);font-size:12px;font-family:inherit;outline:none;width:170px" oninput="renderP(this.value)"/>
+        <button class="bsm pri" id="btnnova" style="display:none" onclick="openMac()">+ Nova ação</button>
+      </div>
+    </div>
+    <div id="pgrid"></div>
+  </div>
+</div>
+
+<div class="pg" id="pg-perfil">
+  <div id="pfcont">
+    <div class="sc">
+      <div class="sch"><h2>Meu Perfil</h2></div>
+      <div class="scb">
+        <div class="pfavw">
+          <div class="pfavb" id="pfavb"></div>
+          <p style="font-size:11px;color:var(--tx3);margin-top:3px">Foto de perfil</p>
+          <input type="file" id="pffile" accept="image/*" style="display:none" onchange="upFoto(this)"/>
+          <button class="bsm" style="margin-top:5px;font-size:11px" onclick="document.getElementById('pffile').click()">Trocar foto</button>
+        </div>
+        <div class="mf">
+          <div class="pfgr">
+            <div><label>Nome completo</label><input id="pfnm" placeholder="Seu nome"/></div>
+            <div><label>Cidade / UF</label><input id="pfcid" placeholder="Cáceres-MT"/></div>
+          </div>
+          <div class="pfgr">
+            <div><label>Tipo</label>
+              <select id="pftp">
+                <option value="docente">Docente</option>
+                <option value="egresso">Egresso / Concluído</option>
+                <option value="discente">Discente Ativo</option>
+              </select>
+            </div>
+            <div><label>Ano de ingresso / conclusão</label><input id="pfano" placeholder="2022"/></div>
+          </div>
+          <label>Área / Linha de pesquisa</label><input id="pfarea" placeholder="Gestão de Bacias, GEE..."/>
+          <label>Instituição atual</label><input id="pfinst" placeholder="UNEMAT, ANA, IBAMA..."/>
+          <label>Email de contato</label><input id="pfeml" type="email" placeholder="seu@email.com"/>
+          <label>Mini-bio (opcional)</label><textarea id="pfbio" placeholder="Pesquisador em recursos hídricos..."></textarea>
+          <div class="mac"><button class="bsm pri" onclick="savePerfil()">Salvar perfil</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pg" id="pg-admin">
+  <div class="sc">
+    <div class="sch"><h2>Admin · Membros</h2><span style="font-size:11px;color:var(--tx3)">Só administradores</span></div>
+    <div class="scb">
+      <div id="adst" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:14px"></div>
+      <div id="adlst"></div>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sch"><h2>Admin · Ações publicadas</h2></div>
+    <div class="scb"><div id="adac"></div></div>
+  </div>
+</div>
+
+<!-- Modal nova ação -->
+<div id="movl" onclick="if(event.target===this)clM()">
+  <div id="modal">
+    <button class="mcl" onclick="clM()">✕</button>
+    <h3>Nova Ação</h3>
+    <div class="mf">
+      <label>Título</label><input id="matit" placeholder="Nome da ação ou produção"/>
+      <label>Tipo</label>
+      <select id="matp">
+        <option>Dissertação</option><option>Projeto</option><option>Gestão</option>
+        <option>Cooperação</option><option>Monitoramento</option><option>Tecnologia</option>
+        <option>Pesquisa</option><option>Ensino</option><option>Extensão</option><option>Publicação</option>
+      </select>
+      <label>Descrição</label><textarea id="madesc" placeholder="Descreva a ação..."></textarea>
+      <div class="mr">
+        <div><label>Ano</label><input id="maano" placeholder="2024" maxlength="4"/></div>
+        <div><label>Emoji</label><input id="maem" placeholder="💧" maxlength="2"/></div>
+      </div>
+      <div class="mac">
+        <button class="bsm" onclick="clM()">Cancelar</button>
+        <button class="bsm pri" onclick="savAcao()">Publicar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal ver ação -->
+<div id="vovl" onclick="if(event.target===this)document.getElementById('vovl').classList.remove('on')">
+  <div id="vomod"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── FIREBASE CONFIG ─────────────────────────────────────────────────────────
+// ATENÇÃO: substitua pelos valores do SEU projeto Firebase para produção
+const FC = {
+  apiKey:            "AIzaSyCpmnySKsKSGevj1bsuuCSxadlxYPfEH7Q",
+  authDomain:        "aquanet-profagua.firebaseapp.com",
+  databaseURL:       "https://aquanet-profagua-default-rtdb.firebaseio.com",
+  projectId:         "aquanet-profagua",
+  storageBucket:     "aquanet-profagua.firebasestorage.app",
+  messagingSenderId: "1067769588045",
+  appId:             "1:1067769588045:web:bfb76eaa0b248eba3b2f04"
+};
+
+// UIDs de admin (mesmos do sistema de diárias)
+const ADMINS = [
+  'xnob5hHsrDdxdxKi3R2VPNwQtv23',
+  'y39GeOJgVQeyHQYsxrJcpbpvpo32',
+  'nGx5LBDrafa10Ej5gCze1un3jXN2'
+];
+
+// ─── DADOS REAIS (docentes + discentes da planilha junho 2026) ─────────────────
+const DOCENTES_SEED = [
+  {id:"doc-adley",    label:"Adley Bergson G. de Abreu",       initials:"AB", area:"Instrumentos da política de RH · Ferramentas de gestão",   linha:"A", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 023 - Poluição das Águas"},
+  {id:"doc-alexandre",label:"Alexandre Gonçalves Porto",        initials:"AG", area:"Ciência e Tecnologia de Sementes · Segurança hídrica",      linha:"D", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"—"},
+  {id:"doc-amintas",  label:"Amintas Nazareth Rossete",         initials:"AN", area:"Regulação e Governança de RH · Planejamento de bacias",     linha:"C", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 002 - Hidrologia e Qualidade; MPA 025 - Desastres"},
+  {id:"doc-anderson", label:"Anderson Marques do Amaral",       initials:"AM", area:"Ecologia e Gestão Ambiental · Segurança hídrica",           linha:"D", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"—"},
+  {id:"doc-claumir",  label:"Claumir Cesar Muniz",              initials:"CM", area:"Regulação e Governança · Segurança hídrica",                linha:"D", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 025 - Desastres naturais e riscos"},
+  {id:"doc-erico",    label:"Érico Fernando O. Martins",        initials:"EF", area:"Instrumentos da política · Metodologias de gestão",         linha:"B", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 007 - Geotecnologia aplicada"},
+  {id:"doc-ernandes", label:"Ernandes Sobreira O. Junior",      initials:"ES", area:"Biogeoquímica · GEE · Segurança hídrica",                   linha:"D", cat:"COLABORADOR",cidade:"Cáceres-MT", disciplinas:"PPGCA / CELBE / LIPAN"},
+  {id:"doc-fatima",   label:"Fátima Aparecida S. Iocca",        initials:"FA", area:"Instrumentos da política · Ferramentas de gestão",          linha:"A", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 002; MPA 005 - Seminário I; MPA 006 - Seminário II"},
+  {id:"doc-francisco",label:"Francisco Lledo dos Santos",       initials:"FL", area:"Instrumentos da política · Ferramentas de gestão",          linha:"A", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 011 - Hidrologia avançada"},
+  {id:"doc-rodrigo",  label:"Rodrigo Bruno Zanin",              initials:"RZ", area:"Instrumentos da política · Metodologias de gestão",         linha:"B", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 007 - Geotecnologia aplicada"},
+  {id:"doc-solange-a",label:"Solange A. Arrolho da Silva",      initials:"SA", area:"Regulação e Governança · Planejamento e gestão de RH",      linha:"C", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 004 - Instrumentos; MPA 012 - Gestão Participativa"},
+  {id:"doc-solange-k",label:"Solange Kimie Ikeda Castrillon",   initials:"SK", area:"Regulação e Governança · Segurança hídrica",                linha:"D", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 003 - Governança; MPA 014 - Gestão das Águas"},
+  {id:"doc-tadeu",    label:"Tadeu Miranda de Queiroz",         initials:"TM", area:"Instrumentos da política · Metodologias de gestão",         linha:"B", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 001 - Metodologia Científica; MPA 013 - Hidrometria"},
+  {id:"doc-wilkinson",label:"Wilkinson Lopes Lazaro",           initials:"WL", area:"Regulação e Governança · Planejamento e gestão de RH",      linha:"C", cat:"PERMANENTE", cidade:"Cáceres-MT", disciplinas:"MPA 027 - Qualidade de Água em rios e reservatórios"},
+];
+
+// Discentes ativos 2025 com orientadores reais
+const DISC_ATIVOS = [
+  {nome:"Ana Paula Batista de Araujo",          ano:"2025", orientador:"doc-amintas"},
+  {nome:"Daisy Mailla de Souza Ávila",          ano:"2025", orientador:"doc-alexandre"},
+  {nome:"Eduardo Gomes Prudencio",              ano:"2025", orientador:"doc-alexandre"},
+  {nome:"Giovanni Batista da Silva Santos",     ano:"2025", orientador:"doc-tadeu"},
+  {nome:"Leonardo Leite Fialho Junior",         ano:"2025", orientador:"doc-adley"},
+  {nome:"Maria Cristina de Arruda Martins",     ano:"2025", orientador:"doc-anderson"},
+  {nome:"Rhayelle Monique Angela Rodrigues",    ano:"2025", orientador:"doc-solange-a"},
+  {nome:"Ricardo Leite Dias",                   ano:"2025", orientador:"doc-erico"},
+  {nome:"Rui Higa Tunes",                       ano:"2025", orientador:"doc-rodrigo"},
+  {nome:"Tonivan Lenk Moraes",                  ano:"2025", orientador:"doc-wilkinson"},
+  {nome:"Willie Douglas Martes Ferreira",       ano:"2025", orientador:"doc-solange-k"},
+  {nome:"Eliédna Aparecida Rocha de Oliveira",  ano:"2024", orientador:"doc-tadeu"},
+  {nome:"Glauber Figueiredo Romero",            ano:"2024", orientador:"doc-wilkinson"},
+  {nome:"Henrique Pisa Perroni",                ano:"2024", orientador:"doc-amintas"},
+  {nome:"Lucelia Aparecida da Silva de Paula",  ano:"2024", orientador:"doc-alexandre"},
+  {nome:"Luciana Regina Egewarth Swiderski",    ano:"2024", orientador:"doc-solange-a"},
+  {nome:"Maria Silvina da Cruz Goncalves",      ano:"2024", orientador:"doc-fatima"},
+  {nome:"Rosalvo Duarte Rosa",                  ano:"2024", orientador:"doc-solange-a"},
+  {nome:"Silvia Alvina de Jesus Gomes",         ano:"2024", orientador:"doc-solange-k"},
+  {nome:"Elaine Regina Antoniassi de Mello",    ano:"2024", orientador:"doc-ernandes"},
+  {nome:"Andrei Falbot Mendes",                 ano:"2024", orientador:"doc-rodrigo"},
+  {nome:"Dayana Alvarenga de Souza",            ano:"2024", orientador:"doc-erico"},
+  {nome:"Danielle de Assis Carvalho",           ano:"2023", orientador:"doc-claumir"},
+  {nome:"Judson Cordeiro Pantaleao",            ano:"2025", orientador:"doc-ernandes"},
+];
+
+// Egressos concluídos (seleção representativa com orientadores)
+const DISC_EGRESSO = [
+  {nome:"Jackson Ferreira da Silva",            ano:"2021", orientador:"doc-solange-k"},
+  {nome:"Gercilene Meira Leite",                ano:"2023", orientador:"doc-solange-a"},
+  {nome:"Thais Cristina Couto Hurtado",         ano:"2023", orientador:"doc-francisco"},
+  {nome:"José Aparecido Macedo",                ano:"2023", orientador:"doc-solange-k"},
+  {nome:"Renato Silva Manata Junior",           ano:"2022", orientador:"doc-erico"},
+  {nome:"Mabyanne Mendonça Sá Arruda Martins",  ano:"2022", orientador:"doc-solange-a"},
+  {nome:"Sulyvam Jhonn de Albuquerque",         ano:"2022", orientador:"doc-wilkinson"},
+  {nome:"Adriano Luiz Pimenta",                 ano:"2022", orientador:"doc-solange-a"},
+  {nome:"Ethiane Agnoletto",                    ano:"2023", orientador:"doc-amintas"},
+  {nome:"Pamela Sangaleti de Souza",            ano:"2023", orientador:"doc-fatima"},
+  {nome:"Carlos Gabriel Lacerda Carvalho",      ano:"2021", orientador:"doc-francisco"},
+  {nome:"Carlos Marcelo Felix Guimarães",       ano:"2021", orientador:"doc-erico"},
+  {nome:"Elizabete Viana Barreto da Cunha",     ano:"2021", orientador:"doc-francisco"},
+  {nome:"Fabiana dos Santos Rocha",             ano:"2021", orientador:"doc-tadeu"},
+  {nome:"Flávia Beatriz Corrêa da Costa",       ano:"2021", orientador:"doc-claumir"},
+  {nome:"Francisney de Campos Galvão",          ano:"2021", orientador:"doc-adley"},
+  {nome:"Iara Oliveira Garcia",                 ano:"2021", orientador:"doc-solange-k"},
+  {nome:"Jonatas Garcia Hurtado",               ano:"2021", orientador:"doc-rodrigo"},
+  {nome:"Karine Marreiro Soares",               ano:"2021", orientador:"doc-adley"},
+  {nome:"Odenil José de Arruda",                ano:"2021", orientador:"doc-wilkinson"},
+  {nome:"Odenato Mendes Soares",                ano:"2021", orientador:"doc-rodrigo"},
+  {nome:"Patrícia Guralski Damasceno",          ano:"2021", orientador:"doc-wilkinson"},
+  {nome:"Vankei José de Siqueira",              ano:"2021", orientador:"doc-fatima"},
+  {nome:"Vivianne Mendonça Sá Arruda",          ano:"2021", orientador:"doc-solange-a"},
+  {nome:"Alahn Wellington de Morais",           ano:"2019", orientador:"doc-erico"},
+  {nome:"Allisom Cordeiro Bessa de Oliveira",   ano:"2019", orientador:"doc-claumir"},
+  {nome:"Bruna Gonçalves Aquino",               ano:"2018", orientador:"doc-amintas"},
+  {nome:"Bethânia de Carvalho",                 ano:"2018", orientador:"doc-fatima"},
+  {nome:"Ives Luca Leite",                      ano:"2018", orientador:"doc-solange-k"},
+  {nome:"Lorena Moreira Nicochelli Pascotto",   ano:"2018", orientador:"doc-solange-a"},
+  {nome:"Marcos Cesar Arruda da Silva",         ano:"2018", orientador:"doc-claumir"},
+  {nome:"Matheus Guilherme Ramin",              ano:"2018", orientador:"doc-rodrigo"},
+  {nome:"Mikaele Silva Kuriki",                 ano:"2018", orientador:"doc-francisco"},
+  {nome:"Vinícius Hipólito Lopes de Resende",   ano:"2018", orientador:"doc-fatima"},
+  {nome:"Wackson Júnior Teles de Jesus",        ano:"2018", orientador:"doc-solange-a"},
+  {nome:"Francisco Donizeti de Medeiros Junior",ano:"2019", orientador:"doc-ernandes"},
+  {nome:"Giselle Cristina da Costa R. Psendziuk",ano:"2019",orientador:"doc-amintas"},
+  {nome:"Jhonatan Matos de Souza",              ano:"2019", orientador:"doc-francisco"},
+  {nome:"Kerolin Elza Costa Gonçalves",         ano:"2019", orientador:"doc-claumir"},
+  {nome:"Leandro Nogueira da Silva",            ano:"2019", orientador:"doc-amintas"},
+  {nome:"Luiz Cláudio Almeida Martins",         ano:"2019", orientador:"doc-solange-a"},
+  {nome:"Oseias dos Santos",                    ano:"2019", orientador:"doc-rodrigo"},
+  {nome:"Rosiane Alexsandra dos Santos Costa",  ano:"2019", orientador:"doc-solange-a"},
+  {nome:"Willian Pereira da Silva",             ano:"2019", orientador:"doc-tadeu"},
+];
+
+// ─── FIREBASE INIT ────────────────────────────────────────────────────────────
+let DB, ST, USER=null, UPROF=null, MEMBERS={}, ACOES={};
+let gnds=null,glks=null,sim=null,afilter="all";
+
+try {
+  firebase.initializeApp(FC);
+  DB = firebase.database();
+} catch(e) {
+  console.warn("Firebase não inicializado. Substitua FC com suas credenciais.",e);
+}
+
+function isAdm(){return USER && ADMINS.includes(USER.uid);}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+if(DB) firebase.auth().onAuthStateChanged(u=>{
+  if(u){
+    USER=u;
+    document.getElementById('splsh').classList.remove('on');
+    document.getElementById('uinfo').style.display='flex';
+    document.getElementById('uphoto').src=u.photoURL||'';
+    document.getElementById('uname').textContent=u.displayName||u.email;
+    document.getElementById('btnlog').style.display='none';
+    document.getElementById('btnout').style.display='';
+    document.getElementById('btnnova').style.display='';
+    if(isAdm()) document.getElementById('btnadm').style.display='';
+    loadUP(); loadAll();
+  } else {
+    USER=null;
+    document.getElementById('splsh').classList.add('on');
+    document.getElementById('uinfo').style.display='none';
+    document.getElementById('btnlog').style.display='';
+    document.getElementById('btnout').style.display='none';
+    document.getElementById('btnnova').style.display='none';
+    document.getElementById('btnadm').style.display='none';
+  }
+});
+
+function doLogin(){
+  if(!DB){toast("Configure o Firebase primeiro.");return;}
+  var p=new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(p).catch(e=>toast('Erro: '+e.message));
+}
+function doLogout(){firebase.auth().signOut();}
+
+// ─── LOAD ─────────────────────────────────────────────────────────────────────
+function loadAll(){
+  // Semente docentes
+  DB.ref('aquanet/members').once('value').then(s=>{
+    var ex=s.val()||{};
+    var bt={};
+    DOCENTES_SEED.forEach(d=>{if(!ex[d.id]) bt[d.id]={...d,type:'docente',seeded:true};});
+    // Semente discentes ativos
+    DISC_ATIVOS.forEach((d,i)=>{
+      var id='disc-at-'+i;
+      if(!ex[id]) bt[id]={id,label:d.nome,nome:d.nome,initials:d.nome.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').substring(0,2).toUpperCase(),type:'discente',ano:d.ano,orientadorId:d.orientador,cidade:'MT',seeded:true};
+    });
+    // Semente egressos
+    DISC_EGRESSO.forEach((d,i)=>{
+      var id='disc-eg-'+i;
+      if(!ex[id]) bt[id]={id,label:d.nome,nome:d.nome,initials:d.nome.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').substring(0,2).toUpperCase(),type:'egresso',ano:d.ano,orientadorId:d.orientador,cidade:'MT',seeded:true};
+    });
+    if(Object.keys(bt).length) DB.ref('aquanet/members').update(bt);
+  });
+
+  DB.ref('aquanet/members').on('value',s=>{
+    MEMBERS=s.val()||{};
+    updStats(); buildGraph();
+  });
+  DB.ref('aquanet/acoes').on('value',s=>{
+    ACOES=s.val()||{};
+    renderP('');
+    updStats();
+    if(isAdm()) renderAdAc();
+  });
+}
+
+function loadUP(){
+  if(!USER||!DB) return;
+  DB.ref('aquanet/members/user-'+USER.uid).once('value').then(s=>{
+    UPROF=s.val();
+    if(UPROF) fillPF(UPROF);
+    else {document.getElementById('pfnm').value=USER.displayName||'';document.getElementById('pfeml').value=USER.email||'';}
+    updPFav();
+  });
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function updStats(){
+  var doc=0,eg=0,co=0,at=0;
+  Object.values(MEMBERS).forEach(m=>{
+    if(m.type==='docente') doc++;
+    else if(m.type==='egresso') eg++;
+    else if(m.type==='discente') at++;
+  });
+  // soma concluídos/egressos seed
+  co=eg;
+  document.getElementById('std').textContent=doc;
+  document.getElementById('seg').textContent=eg;
+  document.getElementById('sco').textContent=co;
+  document.getElementById('sat').textContent=at;
+  document.getElementById('sac').textContent=Object.keys(ACOES).length;
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function goP(id,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  if(id==='rede') setTimeout(()=>buildGraph(),40);
+  if(id==='admin'&&isAdm()){renderAd();renderAdAc();}
+}
+
+// ─── COLORS ───────────────────────────────────────────────────────────────────
+const COL={
+  docente:{fill:"#dbeafe",stroke:"#1e40af",text:"#1e40af"},
+  egresso:{fill:"#d1fae5",stroke:"#065f46",text:"#065f46"},
+  discente:{fill:"#fef3c7",stroke:"#b45309",text:"#92400e"},
+};
+const SZ={docente:20,egresso:14,discente:12};
+
+// ─── GRAPH ────────────────────────────────────────────────────────────────────
+function buildGraph(){
+  if(!document.getElementById('pg-rede').classList.contains('on')) return;
+  var el=document.getElementById('gsvg');
+  var W=el.parentElement.clientWidth||680;
+  var H=el.parentElement.clientHeight||470;
+  var sv=d3.select('#gsvg').attr('viewBox','0 0 '+W+' '+H);
+  sv.selectAll('*').remove();
+  var g=sv.append('g');
+  var z=d3.zoom().scaleExtent([.15,4]).on('zoom',e=>g.attr('transform',e.transform));
+  sv.call(z);
+
+  var mlist=Object.values(MEMBERS);
+  var nodes=mlist.map(d=>({...d,_id:d.id||d.label}));
+  var docIds=nodes.filter(n=>n.type==='docente').map(n=>n._id);
+
+  var links=[];
+  nodes.forEach(n=>{
+    if(n.type==='docente') return;
+    var target=n.orientadorId||docIds[Math.abs((n._id||'').charCodeAt(0)%docIds.length)];
+    if(target) links.push({source:n._id,target});
+  });
+  // algumas conexões entre egressos próximos
+  var others=nodes.filter(n=>n.type!=='docente');
+  for(var i=0;i<Math.min(8,others.length-1);i+=2){
+    if(others[i].orientadorId===others[i+1].orientadorId)
+      links.push({source:others[i]._id,target:others[i+1]._id});
+  }
+
+  if(sim) sim.stop();
+  sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d._id).distance(d=>{
+      var s=d.source.type||'',t=d.target.type||'';
+      return(s==='docente'||t==='docente')?150:80;
+    }).strength(.5))
+    .force('charge',d3.forceManyBody().strength(-220))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collision',d3.forceCollide().radius(d=>SZ[d.type||'discente']+16));
+
+  glks=g.append('g').selectAll('line').data(links).enter().append('line').attr('class','glink');
+  gnds=g.append('g').selectAll('g.gn').data(nodes).enter().append('g').attr('class','gnode')
+    .call(d3.drag()
+      .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
+      .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null}))
+    .on('click',(e,d)=>{e.stopPropagation();openSP(d)})
+    .on('mouseover',(e,d)=>{
+      var tip=document.getElementById('gtip');
+      tip.textContent=(d.label||d.nome||'?');
+      var r=document.getElementById('gwrap').getBoundingClientRect();
+      tip.style.left=(e.clientX-r.left+12)+'px';
+      tip.style.top=(e.clientY-r.top-10)+'px';
+      tip.style.opacity=1;
+    })
+    .on('mouseout',()=>{document.getElementById('gtip').style.opacity=0});
+
+  gnds.append('circle')
+    .attr('r',d=>SZ[d.type||'discente'])
+    .attr('fill',d=>(COL[d.type]||COL.discente).fill)
+    .attr('stroke',d=>(COL[d.type]||COL.discente).stroke)
+    .attr('stroke-width',1.8);
+
+  gnds.each(function(d){
+    var g2=d3.select(this);
+    var r=SZ[d.type||'discente'];
+    if(d.photoURL){
+      var dfs=sv.select('defs'); if(dfs.empty()) dfs=sv.append('defs');
+      var pid='cp-'+String(d._id).replace(/[^a-z0-9]/gi,'_');
+      dfs.append('clipPath').attr('id',pid).append('circle').attr('r',r);
+      g2.append('image').attr('href',d.photoURL).attr('x',-r).attr('y',-r).attr('width',r*2).attr('height',r*2).attr('clip-path','url(#'+pid+')');
+    } else {
+      var ini=(d.initials||(d.label||'?').split(' ').filter(w=>w.length>1).map(w=>w[0]).join('').substring(0,2)||'?').toUpperCase();
+      g2.append('text').attr('text-anchor','middle').attr('dominant-baseline','central')
+        .attr('fill',(COL[d.type]||COL.discente).stroke)
+        .style('font-size',(d.type==='docente'?'10':'8')+'px').style('font-weight','700')
+        .style('pointer-events','none').text(ini);
+    }
+    var fname=(d.label||d.nome||'').split(' ')[0];
+    g2.append('text').attr('text-anchor','middle').attr('dy',r+10)
+      .attr('fill',(COL[d.type]||COL.discente).text)
+      .style('font-size','9px').style('font-family',"'Segoe UI',sans-serif")
+      .style('pointer-events','none').text(fname);
+  });
+
+  sim.on('tick',()=>{
+    glks.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    gnds.attr('transform',d=>'translate('+d.x+','+d.y+')');
+  });
+  sv.on('click',()=>closeSP());
+  apF(afilter,null,true);
+}
+
+function apF(type,btn,silent){
+  afilter=type;
+  if(!silent){
+    document.querySelectorAll('.fb').forEach(b=>{
+      b.className='fb';
+      if(b.dataset.f===type){
+        if(type==='all') b.classList.add('fa');
+        else if(type==='docente') b.classList.add('fd');
+        else if(type==='egresso') b.classList.add('fe');
+        else b.classList.add('fc');
+      }
+    });
+  }
+  if(!gnds) return;
+  gnds.style('opacity',d=>type==='all'||d.type===type?1:.08);
+  glks.style('opacity',d=>{
+    if(type==='all') return .45;
+    return(d.source.type===type||d.target.type===type)?.6:.03;
+  });
+}
+
+function openSP(d){
+  var c=COL[d.type]||COL.discente;
+  var rl={docente:'Docente',egresso:'Egresso',discente:'Discente ativo'}[d.type]||d.type;
+  var av=d.photoURL?'<img src="'+d.photoURL+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':(d.initials||(d.label||'?').split(' ').filter(w=>w.length>1).map(w=>w[0]).join('').substring(0,2)||'?').toUpperCase();
+  var orient='';
+  if(d.orientadorId&&MEMBERS[d.orientadorId]) orient='<div class="spf"><label>Orientador</label><p>'+(MEMBERS[d.orientadorId].label||'')+'</p></div>';
+  document.getElementById('spin').innerHTML=
+    '<button class="spx" onclick="closeSP()">✕</button>'+
+    '<div class="spav" style="background:'+c.fill+';color:'+c.stroke+'">'+av+'</div>'+
+    '<div class="spnm">'+(d.label||d.nome||'')+'</div>'+
+    '<span class="spbg" style="background:'+c.fill+';color:'+c.text+'">'+rl+(d.ano?' · '+d.ano:'')+'</span>'+
+    '<hr class="sphr"/>'+
+    '<div class="spf"><label>Área</label><p>'+(d.area||'—')+'</p></div>'+
+    (d.disciplinas?'<div class="spf"><label>Disciplinas</label><p>'+d.disciplinas+'</p></div>':'')+
+    orient+
+    (d.cidade?'<div class="spf"><label>Cidade</label><p>'+d.cidade+'</p></div>':'')+
+    (d.inst?'<div class="spf"><label>Instituição</label><p>'+d.inst+'</p></div>':'')+
+    (d.email?'<div class="spf"><label>Contato</label><a href="mailto:'+d.email+'">'+d.email+'</a></div>':'')+
+    (d.bio?'<div class="spf"><label>Bio</label><p>'+d.bio+'</p></div>':'');
+  document.getElementById('spanel').classList.remove('cls');
+}
+function closeSP(){document.getElementById('spanel').classList.add('cls');}
+
+// ─── PADLET ───────────────────────────────────────────────────────────────────
+function cardColor(tp){
+  var m={
+    'Dissertação':{bg:'#dbeafe',tc:'#1e40af'},'Pesquisa':{bg:'#dbeafe',tc:'#1e40af'},
+    'Publicação':{bg:'#dbeafe',tc:'#1e40af'},'Projeto':{bg:'#d1fae5',tc:'#065f46'},
+    'Gestão':{bg:'#d1fae5',tc:'#065f46'},'Extensão':{bg:'#d1fae5',tc:'#065f46'},
+    'Monitoramento':{bg:'#d1fae5',tc:'#065f46'},'Tecnologia':{bg:'#fef3c7',tc:'#92400e'},
+    'Ensino':{bg:'#ede9fe',tc:'#5b21b6'},'Cooperação':{bg:'#ede9fe',tc:'#5b21b6'},
+  };
+  return m[tp]||{bg:'#f3f4f6',tc:'#374151'};
+}
+
+function renderP(q){
+  var grid=document.getElementById('pgrid');
+  var items=Object.entries(ACOES).map(([k,v])=>({...v,_k:k})).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  if(q){var lq=q.toLowerCase();items=items.filter(i=>(i.titulo||'').toLowerCase().includes(lq)||(i.desc||'').toLowerCase().includes(lq)||(i.tipo||'').toLowerCase().includes(lq)||(i.autorNome||'').toLowerCase().includes(lq));}
+  if(!items.length){grid.innerHTML='<div class="empt">Nenhuma ação encontrada.<br>Seja o primeiro a publicar!</div>';return;}
+  grid.innerHTML='';
+  items.forEach(it=>{
+    var c=cardColor(it.tipo);
+    var img=it.imgURL?'<img class="pcimg" src="'+it.imgURL+'" alt="capa"/>'
+      :'<div class="pcimg" style="background:'+c.bg+'">'+(it.emoji||'📌')+'</div>';
+    var av=it.autorFoto?'<div class="pcav"><img src="'+it.autorFoto+'"/></div>'
+      :'<div class="pcav" style="background:'+c.bg+';color:'+c.tc+'">'+((it.autorNome||'?').substring(0,2).toUpperCase())+'</div>';
+    var d=document.createElement('div');
+    d.className='pc';
+    d.innerHTML=img+'<div class="pcb"><div class="pctag" style="color:'+c.tc+'">'+it.tipo+'</div><div class="pctit">'+it.titulo+'</div><div class="pcdesc">'+(it.desc||'')+'</div><div class="pcft">'+av+'<span class="pcau">'+(it.autorNome||'')+'</span><span class="pcyr">'+(it.ano||'')+'</span></div></div>';
+    d.onclick=()=>verAcao(it);
+    grid.appendChild(d);
+  });
+}
+
+function verAcao(it){
+  var c=cardColor(it.tipo);
+  var del=(isAdm()||(USER&&USER.uid===it.autorUID))
+    ?'<button class="bsm dan" onclick="delAcao(\''+it._k+'\')">Excluir</button>':'';
+  var img=it.imgURL?'<img src="'+it.imgURL+'" style="width:100%;height:170px;object-fit:cover"/>'
+    :'<div style="height:70px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:44px">'+(it.emoji||'📌')+'</div>';
+  document.getElementById('vomod').innerHTML=img+
+    '<div style="padding:18px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:'+c.tc+';margin-bottom:5px">'+it.tipo+'</div>'+
+    '<div style="font-size:15px;font-weight:700;margin-bottom:7px">'+it.titulo+'</div>'+
+    '<div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px">'+(it.desc||'')+'</div>'+
+    '<div style="font-size:11px;color:var(--tx3)">Por <strong>'+(it.autorNome||'')+'</strong> · '+(it.ano||'')+'</div>'+
+    '<div style="display:flex;gap:7px;margin-top:14px;justify-content:flex-end">'+del+
+    '<button class="bsm pri" onclick="document.getElementById(\'vovl\').classList.remove(\'on\')">Fechar</button></div></div>';
+  document.getElementById('vovl').classList.add('on');
+}
+
+function openMac(){
+  ['matit','madesc','maano','maem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('movl').classList.add('on');
+}
+function clM(){document.getElementById('movl').classList.remove('on');}
+
+async function savAcao(){
+  if(!USER){toast('Faça login primeiro.');return;}
+  var titulo=document.getElementById('matit').value.trim();
+  if(!titulo){toast('Informe o título.');return;}
+  var tipo=document.getElementById('matp').value;
+  var desc=document.getElementById('madesc').value.trim();
+  var ano=document.getElementById('maano').value.trim()||new Date().getFullYear()+'';
+  var emoji=document.getElementById('maem').value.trim()||'📌';
+  var data={titulo,tipo,desc,ano,emoji,imgURL:'',autorUID:USER.uid,autorNome:USER.displayName||USER.email,autorFoto:USER.photoURL||'',ts:Date.now()};
+  DB.ref('aquanet/acoes').push(data).then(()=>{clM();toast('Ação publicada!');}).catch(e=>toast('Erro: '+e.message));
+}
+
+async function delAcao(key){
+  if(!confirm('Excluir esta ação?')) return;
+  await DB.ref('aquanet/acoes/'+key).remove();
+  document.getElementById('vovl').classList.remove('on');
+  toast('Ação excluída.');
+}
+
+// ─── PERFIL ───────────────────────────────────────────────────────────────────
+function fillPF(p){
+  document.getElementById('pfnm').value=p.label||p.nome||'';
+  document.getElementById('pfcid').value=p.cidade||'';
+  document.getElementById('pftp').value=p.type||'discente';
+  document.getElementById('pfano').value=p.ano||'';
+  document.getElementById('pfarea').value=p.area||'';
+  document.getElementById('pfinst').value=p.inst||'';
+  document.getElementById('pfeml').value=p.email||'';
+  document.getElementById('pfbio').value=p.bio||'';
+}
+function updPFav(){
+  var el=document.getElementById('pfavb');
+  var url=(UPROF&&UPROF.photoURL)||USER.photoURL||'';
+  el.innerHTML=url?'<img src="'+url+'"/>':((USER.displayName||'?').substring(0,2).toUpperCase());
+}
+async function upFoto(input){
+  toast('Upload de foto requer plano Blaze. Use a foto do Google.');
+}
+async function savePerfil(){
+  if(!USER){toast('Faça login.');return;}
+  var nm=document.getElementById('pfnm').value.trim()||USER.displayName;
+  var data={id:'user-'+USER.uid,label:nm,nome:nm,
+    initials:nm.split(' ').filter(w=>w.length>2).map(w=>w[0]).join('').substring(0,2).toUpperCase(),
+    type:document.getElementById('pftp').value,
+    ano:document.getElementById('pfano').value.trim(),
+    area:document.getElementById('pfarea').value.trim(),
+    inst:document.getElementById('pfinst').value.trim(),
+    email:document.getElementById('pfeml').value.trim(),
+    cidade:document.getElementById('pfcid').value.trim(),
+    bio:document.getElementById('pfbio').value.trim(),
+    photoURL:(UPROF&&UPROF.photoURL)||USER.photoURL||'',
+    uid:USER.uid,updatedAt:Date.now()};
+  await DB.ref('aquanet/members/user-'+USER.uid).set(data);
+  UPROF=data; toast('Perfil salvo!');
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
+function renderAd(){
+  if(!isAdm()) return;
+  var ml=Object.values(MEMBERS).sort((a,b)=>(a.type||'').localeCompare(b.type||''));
+  var doc=ml.filter(m=>m.type==='docente').length;
+  var eg=ml.filter(m=>m.type==='egresso').length;
+  var di=ml.filter(m=>m.type==='discente').length;
+  document.getElementById('adst').innerHTML=[
+    ['Docentes',doc,'#dbeafe','#1e40af'],['Egressos',eg,'#d1fae5','#065f46'],
+    ['Ativos',di,'#fef3c7','#b45309'],['Total',ml.length,'#f3f4f6','#374151']
+  ].map(([l,v,bg,tc])=>'<div style="background:'+bg+';border-radius:9px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:'+tc+'">'+v+'</div><div style="font-size:11px;color:'+tc+';opacity:.7">'+l+'</div></div>').join('');
+  document.getElementById('adlst').innerHTML=ml.map(m=>{
+    var c=COL[m.type]||COL.discente;
+    return '<div class="adrow"><div class="adri"><strong>'+(m.label||m.nome||'')+'</strong><span>'+(m.area||'')+(m.cidade?' · '+m.cidade:'')+'</span></div><span class="bst" style="background:'+c.fill+';color:'+c.text+'">'+(m.type||'')+(m.ano?' '+m.ano:'')+'</span><div class="adra"><button class="bsm dan" onclick="delMbr(\''+m.id+'\',\''+((m.label||m.nome||'')).replace(/'/g,"'")+'\')" style="font-size:11px;padding:2px 8px">Excluir</button></div></div>';
+  }).join('');
+}
+function renderAdAc(){
+  if(!isAdm()) return;
+  var items=Object.entries(ACOES).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  document.getElementById('adac').innerHTML=items.length?items.map(([k,v])=>'<div class="adrow"><div class="adri"><strong>'+v.titulo+'</strong><span>'+v.tipo+' · '+(v.autorNome||'')+(v.ano?' · '+v.ano:'')+'</span></div><div class="adra"><button class="bsm dan" onclick="delAcao(\''+k+'\')" style="font-size:11px;padding:2px 8px">Excluir</button></div></div>').join('')
+    :'<div class="empt">Nenhuma ação cadastrada.</div>';
+}
+async function delMbr(id,nome){
+  if(!confirm('Excluir membro "'+nome+'"?')) return;
+  await DB.ref('aquanet/members/'+id).remove();
+  toast('Excluído.'); renderAd();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'),2800);
+}
+
+// Globals
+window.goP=goP;window.apF=apF;window.closeSP=closeSP;window.clM=clM;
+window.openMac=openMac;window.savAcao=savAcao;window.delAcao=delAcao;
+window.verAcao=verAcao;window.savePerfil=savePerfil;window.upFoto=upFoto;
+window.doLogin=doLogin;window.doLogout=doLogout;window.delMbr=delMbr;
+window.renderP=renderP;
+</script>
+</body>
+</html>
