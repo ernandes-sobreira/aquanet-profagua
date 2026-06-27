@@ -1249,36 +1249,151 @@ function cardColor(tp){
 
 function renderP(q){
   var grid=document.getElementById('pgrid');
-  var items=Object.entries(ACOES).map(([k,v])=>({...v,_k:k})).sort((a,b)=>(b.ts||0)-(a.ts||0));
-  if(q){var lq=q.toLowerCase();items=items.filter(i=>(i.titulo||'').toLowerCase().includes(lq)||(i.desc||'').toLowerCase().includes(lq)||(i.tipo||'').toLowerCase().includes(lq)||(i.autorNome||'').toLowerCase().includes(lq));}
-  if(!items.length){grid.innerHTML='<div class="empt">Nenhuma ação ainda.<br><span style="font-size:12px">Seja o primeiro a publicar!</span></div>';return;}
+  var items=Object.entries(ACOES).map(function(e){return Object.assign({},e[1],{_k:e[0]});})
+    .sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  if(q){var lq=q.toLowerCase();items=items.filter(function(i){
+    return (i.titulo||'').toLowerCase().includes(lq)||(i.desc||'').toLowerCase().includes(lq)||
+           (i.tipo||'').toLowerCase().includes(lq)||(i.autorNome||'').toLowerCase().includes(lq);});}
+  if(!items.length){grid.innerHTML='<div class="empt">Nenhuma acao ainda.<br><span style="font-size:12px">Seja o primeiro a publicar!</span></div>';return;}
   grid.innerHTML='';
-  items.forEach(it=>{
+  items.forEach(function(it){
     var c=cardColor(it.tipo);
-    var img=it.imgURL?'<img class="pcimg" src="'+it.imgURL+'" alt="capa"/>'
-      :'<div class="pcimg" style="background:'+c.bg+'"><span style="font-size:40px">'+(it.emoji||'&#128204;')+'</span></div>';
-    var av=it.autorFoto?'<div class="pcav"><img src="'+it.autorFoto+'"/></div>'
-      :'<div class="pcav" style="background:'+c.bg+';color:'+c.tc+'">'+((it.autorNome||'?').substring(0,2).toUpperCase())+'</div>';
     var d=document.createElement('div');
     d.className='pc';
-    d.innerHTML=img+'<div class="pcb"><div class="pctag" style="color:'+c.tc+'">'+it.tipo+'</div><div class="pctit">'+it.titulo+'</div><div class="pcdesc">'+(it.desc||'')+'</div><div class="pcft">'+av+'<span class="pcau">'+(it.autorNome||'')+'</span><span class="pcyr">'+(it.ano||'')+'</span></div></div>';
-    d.onclick=()=>verAcao(it);
+    // Photo or emoji header
+    var hdr=document.createElement('div');
+    if(it.imgURL){
+      hdr.className='pcimg';
+      var img=document.createElement('img');
+      img.src=it.imgURL;img.style.cssText='width:100%;height:100%;object-fit:cover';
+      hdr.appendChild(img);
+    } else {
+      hdr.className='pcimg';
+      hdr.style.background=c.bg;
+      var em=document.createElement('span');em.style.fontSize='40px';em.textContent=it.emoji||'*';
+      hdr.appendChild(em);
+    }
+    d.appendChild(hdr);
+    // Body
+    var bdy=document.createElement('div');bdy.className='pcb';
+    var tag=document.createElement('div');tag.className='pctag';tag.style.color=c.tc;tag.textContent=it.tipo;
+    var tit=document.createElement('div');tit.className='pctit';tit.textContent=it.titulo;
+    var desc=document.createElement('div');desc.className='pcdesc';desc.textContent=it.desc||'';
+    var ft=document.createElement('div');ft.className='pcft';
+    var av=document.createElement('div');
+    if(it.autorFoto){av.className='pcav';var ai=document.createElement('img');ai.src=it.autorFoto;av.appendChild(ai);}
+    else{av.className='pcav';av.style.background=c.bg;av.style.color=c.tc;av.textContent=(it.autorNome||'?').substring(0,2).toUpperCase();}
+    var au=document.createElement('span');au.className='pcau';au.textContent=it.autorNome||'';
+    var yr=document.createElement('span');yr.className='pcyr';yr.textContent=it.ano||'';
+    ft.appendChild(av);ft.appendChild(au);ft.appendChild(yr);
+    bdy.appendChild(tag);bdy.appendChild(tit);bdy.appendChild(desc);bdy.appendChild(ft);
+    d.appendChild(bdy);
+    d.addEventListener('click',function(){verAcao(it);});
     grid.appendChild(d);
   });
 }
+
+
 function verAcao(it){
   var c=cardColor(it.tipo);
-  var del=(isAdm()||(USER&&USER.uid===it.autorUID))?'<button class="bsm dan" onclick="delAcao(\''+it._k+'\')">Excluir</button>':'';
-  var img=it.imgURL?'<img src="'+it.imgURL+'" style="width:100%;height:200px;object-fit:cover"/>'
-    :'<div style="height:90px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:54px">'+(it.emoji||'&#128204;')+'</div>';
-  document.getElementById('vomod').innerHTML=img+
-    '<div style="padding:22px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:'+c.tc+';margin-bottom:6px">'+it.tipo+'</div>'+
-    '<div style="font-size:18px;font-weight:800;margin-bottom:8px;color:#111">'+it.titulo+'</div>'+
-    '<div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:16px">'+(it.desc||'')+'</div>'+
-    '<div style="font-size:12px;color:#999;margin-bottom:16px">Por <strong style="color:#333">'+(it.autorNome||'')+'</strong> · '+(it.ano||'')+'</div>'+
-    '<div style="display:flex;gap:8px;justify-content:flex-end">'+del+'<button class="bsm" onclick="document.getElementById(\'vovl\').classList.remove(\'on\')">Fechar</button></div></div>';
+  var canEdit2=USER&&(USER.uid===it.autorUID||isAdm());
+  var vomod=document.getElementById('vomod');
+  // Clear and build with DOM
+  vomod.innerHTML='';
+
+  // X close button
+  var xbtn=document.createElement('button');
+  xbtn.style.cssText='position:absolute;top:10px;right:12px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:10;line-height:1';
+  xbtn.innerHTML='&#10005;';
+  xbtn.addEventListener('click',function(){document.getElementById('vovl').style.display='none';});
+  vomod.style.position='relative';
+
+  // Photo or emoji header
+  var hdr=document.createElement('div');
+  if(it.imgURL){
+    var hdrImg=document.createElement('img');
+    hdrImg.src=it.imgURL;
+    hdrImg.style.cssText='width:100%;height:200px;object-fit:cover;display:block';
+    hdr.appendChild(hdrImg);
+  } else {
+    hdr.style.cssText='height:90px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:54px';
+    hdr.textContent=it.emoji||'*';
+  }
+  vomod.appendChild(xbtn);
+  vomod.appendChild(hdr);
+
+  // Content
+  var cnt=document.createElement('div');
+  cnt.style.cssText='padding:20px';
+  var tipo=document.createElement('div');
+  tipo.style.cssText='font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:'+c.tc+';margin-bottom:6px';
+  tipo.textContent=it.tipo;
+  var tit=document.createElement('div');
+  tit.style.cssText='font-size:18px;font-weight:800;margin-bottom:8px;color:#111';
+  tit.textContent=it.titulo;
+  var desc=document.createElement('div');
+  desc.style.cssText='font-size:13px;color:#555;line-height:1.7;margin-bottom:14px';
+  desc.textContent=it.desc||'';
+  var meta=document.createElement('div');
+  meta.style.cssText='font-size:12px;color:#999;margin-bottom:16px';
+  meta.innerHTML='Por <strong style="color:#333">'+(it.autorNome||'')+'</strong> &middot; '+(it.ano||'');
+  cnt.appendChild(tipo);cnt.appendChild(tit);cnt.appendChild(desc);cnt.appendChild(meta);
+
+  // Actions
+  var acts=document.createElement('div');
+  acts.style.cssText='display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap';
+  var closebtn=document.createElement('button');
+  closebtn.className='bsm';closebtn.textContent='Fechar';
+  closebtn.addEventListener('click',function(){document.getElementById('vovl').style.display='none';});
+  acts.appendChild(closebtn);
+
+  if(canEdit2){
+    var editbtn=document.createElement('button');
+    editbtn.className='bsm';
+    editbtn.style.cssText='background:#e0e7ff;color:#3730a3;border-color:#c7d2fe';
+    editbtn.textContent='&#9999;&#65039; Editar';
+    editbtn.addEventListener('click',function(){
+      document.getElementById('vovl').style.display='none';
+      abrirEditAcao(it);
+    });
+    acts.appendChild(editbtn);
+
+    var delbtn=document.createElement('button');
+    delbtn.className='bsm dan';delbtn.textContent='Excluir';
+    delbtn.addEventListener('click',function(){
+      if(!confirm('Excluir esta acao?')) return;
+      DB.ref('aquanet/acoes/'+it._k).remove().then(function(){
+        document.getElementById('vovl').style.display='none';
+        toast('Excluida!');
+      }).catch(function(e){toast('Erro: '+e.message);});
+    });
+    acts.appendChild(delbtn);
+  }
+  cnt.appendChild(acts);
+  vomod.appendChild(cnt);
   document.getElementById('vovl').style.display='flex';
 }
+
+// Edit acao - open modal pre-filled
+function abrirEditAcao(it){
+  document.getElementById('matit').value=it.titulo||'';
+  var sel=document.getElementById('matp');
+  if(sel) sel.value=it.tipo||'';
+  document.getElementById('madesc').value=it.desc||'';
+  document.getElementById('maano').value=it.ano||'';
+  document.getElementById('maem').value=it.emoji||'';
+  _acaoFotoB64=it.imgURL||'';
+  var prev=document.getElementById('acao-foto-prev');
+  var img=document.getElementById('acao-foto-img');
+  var hint=document.getElementById('acao-foto-hint');
+  if(it.imgURL&&img){img.src=it.imgURL;if(prev)prev.style.display='';}
+  if(hint) hint.textContent=it.imgURL?'Foto atual. Clique para trocar.':'Clique para adicionar foto de capa.';
+  _editAcaoKey=it._k;
+  document.getElementById('movl').style.display='flex';
+}
+window.abrirEditAcao=abrirEditAcao;
+
+
 function openMac(){
   ['matit','madesc','maano','maem'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   _acaoFotoB64='';
@@ -1292,15 +1407,15 @@ function openMac(){
 }
 function clM(){
   document.getElementById('movl').style.display='none';
-  _acaoFotoB64='';
+  _acaoFotoB64='';_editAcaoKey=null;
   var prev=document.getElementById('acao-foto-prev');
   if(prev) prev.style.display='none';
   var hint=document.getElementById('acao-foto-hint');
   if(hint) hint.textContent='Clique para adicionar foto de capa';
-  var inp=document.getElementById('maimg');
-  if(inp) inp.value='';
+  var inp=document.getElementById('maimg');if(inp)inp.value='';
+  ['matit','madesc','maano','maem'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
 }
-var _acaoFotoB64='';
+var _acaoFotoB64='';var _editAcaoKey=null;
 
 function prevAcaoFoto(input){
   var file=input.files[0];
@@ -1332,8 +1447,14 @@ async function savAcao(){
     emoji:document.getElementById('maem').value.trim()||'*',
     imgURL,
     autorUID:USER.uid,autorNome:USER.displayName||USER.email,autorFoto:USER.photoURL||'',ts:Date.now()};
-  await DB.ref('aquanet/acoes').push(data);
-  clM(); toast('Acao publicada!');
+  if(_editAcaoKey){
+    await DB.ref('aquanet/acoes/'+_editAcaoKey).update(data);
+    _editAcaoKey=null;
+    clM(); toast('Acao atualizada!');
+  } else {
+    await DB.ref('aquanet/acoes').push(data);
+    clM(); toast('Acao publicada!');
+  }
 }
 async function delAcao(key){
   if(!confirm('Excluir esta ação?')) return;
