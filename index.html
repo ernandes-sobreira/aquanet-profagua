@@ -344,42 +344,255 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <!-- PAGE ADMIN -->
 <div class="pg pg-pad" id="pg-admin">
-  <div class="sc">
-    <div class="sch"><h2>Painel Admin · Membros</h2><span style="font-size:11px;color:var(--tx3)">Só administradores</span></div>
-    <div class="scb">
-      <div id="adst" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px"></div>
-      <div id="adlst"></div>
+
+  <!-- ADMIN TABS -->
+  <div style="display:flex;gap:0;background:var(--wh);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px">
+    <button class="adtab on" onclick="adTab('mbr',this)" style="flex:1;padding:10px;border:none;background:var(--bll);color:var(--blm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border-right:1.5px solid var(--bd);transition:all .15s">👥 Membros</button>
+    <button class="adtab" onclick="adTab('add',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">➕ Adicionar</button>
+    <button class="adtab" onclick="adTab('lnk',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">🔗 Vínculos</button>
+    <button class="adtab" onclick="adTab('acs',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);transition:all .15s">📌 Ações</button>
+  </div>
+
+  <!-- TAB: MEMBROS -->
+  <div id="adt-mbr">
+    <div class="sc">
+      <div class="sch">
+        <h2>Membros da Rede</h2>
+        <div style="display:flex;gap:7px;align-items:center">
+          <input id="ad-srch" type="text" placeholder="Buscar..." oninput="filtAdMbr(this.value)" style="padding:5px 10px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit;outline:none;width:150px"/>
+          <select id="ad-ftp" onchange="filtAdMbr(document.getElementById('ad-srch').value)" style="padding:5px 9px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit">
+            <option value="">Todos</option>
+            <option value="docente">Docentes</option>
+            <option value="egresso">Egressos</option>
+            <option value="discente">Ativos</option>
+          </select>
+          <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl);font-size:11px" onclick="adTab('add',document.querySelectorAll('.adtab')[1])">+ Novo</button>
+        </div>
+      </div>
+      <div id="adst" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;padding:14px 18px;border-bottom:1.5px solid var(--bd)"></div>
+      <div id="adlst" style="padding:4px 0"></div>
     </div>
   </div>
-  <div class="sc">
-    <div class="sch"><h2>Admin · Vínculos cadastrados</h2>
-      <button class="bsm pri" style="font-size:11px;background:var(--bl);color:#fff;border-color:var(--bl)" onclick="openEdLink()">+ Novo vínculo</button>
+
+  <!-- TAB: ADICIONAR/EDITAR MEMBRO -->
+  <div id="adt-add" style="display:none">
+    <div class="sc">
+      <div class="sch"><h2 id="addmbr-title">➕ Novo Membro</h2>
+        <button class="bsm" onclick="cancelAddMbr()" style="font-size:11px">Cancelar</button>
+      </div>
+      <div class="scb">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Nome completo *</label>
+            <input id="add-nm" placeholder="Nome completo do membro" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb;outline:none"/></div>
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Tipo *</label>
+            <select id="add-tp" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb">
+              <option value="docente">Docente</option>
+              <option value="egresso">Egresso / Concluído</option>
+              <option value="discente">Discente Ativo</option>
+            </select></div>
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Ano ingresso/conclusão</label>
+            <input id="add-ano" placeholder="2024" maxlength="4" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb;outline:none"/></div>
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Cidade / UF</label>
+            <input id="add-cid" placeholder="Cáceres-MT" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb;outline:none"/></div>
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Área / Linha de pesquisa</label>
+            <input id="add-area" placeholder="Gestão de RH, Qualidade da Água..." style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb;outline:none"/></div>
+          <div><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Orientador (para discentes)</label>
+            <select id="add-ori" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb">
+              <option value="">Nenhum</option>
+            </select></div>
+          <div style="grid-column:1/-1"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-bottom:4px">Email</label>
+            <input id="add-eml" type="email" placeholder="email@dominio.com" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;background:#f9fafb;outline:none"/></div>
+        </div>
+        <input type="hidden" id="add-editkey"/>
+        <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+          <button class="bsm" onclick="cancelAddMbr()">Cancelar</button>
+          <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="salvarMbr()">💾 Salvar Membro</button>
+        </div>
+      </div>
     </div>
-    <div class="scb"><div id="adlinks"></div></div>
   </div>
-  <div class="sc">
-    <div class="sch"><h2>Admin · Ações publicadas</h2></div>
-    <div class="scb"><div id="adac"></div></div>
+
+  <!-- TAB: VÍNCULOS -->
+  <div id="adt-lnk" style="display:none">
+    <div class="sc">
+      <div class="sch">
+        <h2>🔗 Vínculos Cadastrados</h2>
+        <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl);font-size:11px" onclick="openEdLink()">+ Novo Vínculo</button>
+      </div>
+      <div id="adlinks" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- TAB: AÇÕES -->
+  <div id="adt-acs" style="display:none">
+    <div class="sc">
+      <div class="sch"><h2>📌 Ações Publicadas</h2></div>
+      <div id="adac" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL EDITAR MEMBRO -->
+<div id="edit-mbr-ovl" onclick="if(event.target===this)fecharEditMbr()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;padding:22px;margin:14px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:15px;font-weight:800">✏️ Editar Membro</h3>
+      <button onclick="fecharEditMbr()" style="border:none;background:none;cursor:pointer;font-size:18px;color:#94a3b8">✕</button>
+    </div>
+    <input type="hidden" id="edit-mbr-id"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="mf" style="grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Nome completo</label>
+        <input id="edit-nm" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div class="mf"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Tipo</label>
+        <select id="edit-tp" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none">
+          <option value="docente">Docente</option><option value="egresso">Egresso</option><option value="discente">Discente</option>
+        </select></div>
+      <div class="mf"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Ano</label>
+        <input id="edit-ano" maxlength="4" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div class="mf" style="grid-column:1/-1"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Área / Linha de pesquisa</label>
+        <input id="edit-area" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div class="mf"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Cidade</label>
+        <input id="edit-cid" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none"/></div>
+      <div class="mf"><label style="font-size:11px;font-weight:700;color:var(--tx2);display:block;margin-bottom:4px">Orientador ID</label>
+        <select id="edit-ori" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid var(--bd);font-size:13px;font-family:inherit;outline:none">
+          <option value="">— Nenhum —</option>
+        </select></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button onclick="fecharEditMbr()" style="padding:7px 16px;border-radius:8px;border:1.5px solid var(--bd);background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>
+      <button onclick="salvarEdicaoMembro()" style="padding:7px 16px;border-radius:8px;border:1.5px solid var(--bl);background:var(--bl);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Salvar alterações</button>
+    </div>
   </div>
 </div>
 
-<!-- MODAL NOVA AÇÃO -->
-<div id="movl" onclick="if(event.target===this)clM()">
-  <div class="modal-box">
+
+<!-- MODAL EDITAR VÍNCULO -->
+<div id="edvl" style="position:fixed;inset:0;background:rgba(10,20,50,.55);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)" onclick="if(event.target===this)clEd()">
+  <div class="modal-box" style="max-width:480px">
+    <button class="mcl" onclick="clEd()">✕</button>
+    <h3 id="ed-title">🔗 Novo Vínculo</h3>
+    <div class="mf">
+      <label>Pessoa A</label>
+      <select id="ed-a"><option value="">Selecione...</option></select>
+      <label>Tipo de Vínculo</label>
+      <select id="ed-type">
+        <option value="orient">Orientação Principal</option>
+        <option value="coorient">Coorientação</option>
+        <option value="banca">Participação em Banca</option>
+        <option value="acao">Ação / Projeto Conjunto</option>
+        <option value="colab">Colaboração / Parceria</option>
+        <option value="disciplina">Disciplina Ministrada</option>
+      </select>
+      <label>Pessoa B</label>
+      <select id="ed-b"><option value="">Selecione...</option></select>
+      <label>Peso do Vínculo (1 = fraco · 5 = forte)</label>
+      <input id="ed-weight" type="range" min="1" max="5" value="2"
+        oninput="document.getElementById('ed-wval').textContent=this.value"
+        style="width:100%;margin:4px 0"/>
+      <div style="text-align:center;font-size:13px;font-weight:700;color:var(--bl)">Peso: <span id="ed-wval">2</span></div>
+      <label>Descrição / Contexto (opcional)</label>
+      <textarea id="ed-desc" placeholder="Ex: Orientação da dissertação sobre qualidade da água..."></textarea>
+      <div class="mac">
+        <button class="bsm" onclick="clEd()">Cancelar</button>
+        <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savLink()">Salvar Vínculo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ADICIONAR MEMBRO ── -->
+<div id="addmbrvl" style="position:fixed;inset:0;background:rgba(10,20,50,.55);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)" onclick="if(event.target===this)clAddMbr()">
+  <div class="modal-box" style="max-width:480px">
+    <button class="mcl" onclick="clAddMbr()">✕</button>
+    <h3 id="addmbr-title">➕ Adicionar Membro</h3>
+    <div class="mf">
+      <div class="mr">
+        <div><label>Nome completo</label><input id="mbr-nm" placeholder="Nome completo"/></div>
+        <div><label>Tipo</label>
+          <select id="mbr-tp">
+            <option value="docente">Docente</option>
+            <option value="egresso">Egresso / Concluído</option>
+            <option value="discente">Discente Ativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="mr">
+        <div><label>Ano ingresso / conclusão</label><input id="mbr-ano" placeholder="2024"/></div>
+        <div><label>Cidade / UF</label><input id="mbr-cid" placeholder="Cáceres-MT"/></div>
+      </div>
+      <label>Área / Linha de pesquisa</label><input id="mbr-area" placeholder="Gestão de Recursos Hídricos..."/>
+      <label>Disciplinas (se docente)</label><input id="mbr-disc" placeholder="MPA 001, MPA 007..."/>
+      <label>Email de contato</label><input id="mbr-email" type="email" placeholder="nome@email.com"/>
+      <div class="mac">
+        <button class="bsm" onclick="clAddMbr()">Cancelar</button>
+        <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savMbr()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL NOVA AÇÃO ── -->
+<div id="movl" style="position:fixed;inset:0;background:rgba(10,20,50,.55);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)" onclick="if(event.target===this)clM()">
+  <div class="modal-box" style="max-width:520px">
     <button class="mcl" onclick="clM()">✕</button>
     <h3>📌 Nova Ação</h3>
     <div class="mf">
       <label>Título</label><input id="matit" placeholder="Nome da ação ou produção"/>
-      <label>Tipo</label>
+      <label>Tipo de Atividade</label>
       <select id="matp">
-        <option>Dissertação</option><option>Projeto</option><option>Gestão</option>
-        <option>Cooperação</option><option>Monitoramento</option><option>Tecnologia</option>
-        <option>Pesquisa</option><option>Ensino</option><option>Extensão</option><option>Publicação</option>
+        <optgroup label="PTTs e Produtos Técnicos">
+          <option>PTT — Relatório Técnico Conclusivo</option>
+          <option>PTT — Protocolo de Monitoramento</option>
+          <option>PTT — Procedimento Operacional Padrão (POP)</option>
+          <option>PTT — Manual ou Guia Técnico</option>
+          <option>PTT — Material Didático / Educativo</option>
+          <option>PTT — Plataforma / Sistema Digital</option>
+          <option>PTT — Aplicativo Móvel ou Web</option>
+          <option>PTT — Banco de Dados / Dataset</option>
+          <option>PTT — Mapa Temático / Geodados</option>
+          <option>PTT — Kit ou Instrumento de Diagnóstico</option>
+          <option>PTT — Modelo Conceitual / Computacional</option>
+          <option>PTT — Projeto Técnico / Plano de Gestão</option>
+          <option>PTT — Artigo Científico Aplicado</option>
+          <option>PTT — Norma / Instrução Técnica</option>
+          <option>PTT — Jogo Educativo / Gamificação</option>
+          <option>PTT — Vídeo / Podcast / Multimídia</option>
+          <option>PTT — Tecnologia Social / Apropriada</option>
+          <option>PTT — Modelo de Governança / Gestão</option>
+          <option>PTT — Instrumento de Política Pública</option>
+          <option>PTT — Arranjo Institucional / Rede Colaborativa</option>
+          <option>PTT — Metodologia Aplicada / Processo Inovador</option>
+        </optgroup>
+        <optgroup label="Processos do Programa">
+          <option>Defesa de Dissertação</option>
+          <option>Qualificação de Projeto</option>
+          <option>Banca de Avaliação</option>
+          <option>Credenciamento / Recredenciamento Docente</option>
+          <option>Depósito de PTT em Repositório</option>
+          <option>Parceria Institucional / Convênio / MOU</option>
+          <option>Acompanhamento de Egresso</option>
+          <option>Autoavaliação do Programa (CPA/NDA)</option>
+          <option>Coleta CAPES / Sucupira</option>
+        </optgroup>
+        <optgroup label="Atividades Acadêmicas e de Extensão">
+          <option>Projeto de Pesquisa</option>
+          <option>Projeto de Extensão</option>
+          <option>Publicação / Artigo Científico</option>
+          <option>Apresentação em Evento Científico</option>
+          <option>Capacitação / Oficina / Curso</option>
+          <option>Visita Técnica / Trabalho de Campo</option>
+          <option>Serviço à Sociedade / Ação Comunitária</option>
+          <option>Produção Bibliográfica (Livro / Capítulo)</option>
+          <option>Divulgação Científica / Instagram / Mídia</option>
+          <option>Premiação / Destaque Institucional</option>
+        </optgroup>
       </select>
-      <label>Descrição</label><textarea id="madesc" placeholder="Descreva a ação, seus objetivos e impactos..."></textarea>
+      <label>Descrição</label>
+      <textarea id="madesc" placeholder="Descreva a ação, objetivos, resultados e impactos..."></textarea>
       <div class="mr">
-        <div><label>Ano</label><input id="maano" placeholder="2024" maxlength="4"/></div>
-        <div><label>Emoji representativo</label><input id="maem" placeholder="💧" maxlength="2"/></div>
+        <div><label>Ano</label><input id="maano" placeholder="2025" maxlength="4"/></div>
+        <div><label>Emoji</label><input id="maem" placeholder="💧" maxlength="2"/></div>
       </div>
       <div class="mac">
         <button class="bsm" onclick="clM()">Cancelar</button>
@@ -389,43 +602,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
 </div>
 
-<!-- MODAL VER AÇÃO -->
-<div id="vovl" onclick="if(event.target===this)this.classList.remove('on')">
+<!-- ── MODAL VER AÇÃO ── -->
+<div id="vovl" style="position:fixed;inset:0;background:rgba(10,20,50,.55);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)" onclick="if(event.target===this)this.classList.remove('on')">
   <div class="modal-box" id="vomod" style="max-width:500px;padding:0;overflow:hidden"></div>
 </div>
-
-<!-- MODAL EDITAR VÍNCULO -->
-<div id="edvl" onclick="if(event.target===this)clEd()">
-  <div class="modal-box">
-    <button class="mcl" onclick="clEd()">✕</button>
-    <h3 id="ed-title">🔗 Novo Vínculo</h3>
-    <div class="mf">
-      <label>Pessoa A</label>
-      <select id="ed-a"><option value="">Selecione...</option></select>
-      <label>Tipo de vínculo</label>
-      <select id="ed-type">
-        <option value="orient">Orientação principal</option>
-        <option value="coorient">Coorientação</option>
-        <option value="banca">Participação em banca</option>
-        <option value="acao">Ação conjunta / projeto</option>
-        <option value="colab">Colaboração / parceria</option>
-      </select>
-      <label>Pessoa B</label>
-      <select id="ed-b"><option value="">Selecione...</option></select>
-      <label>Peso do vínculo (1=fraco · 5=forte)</label>
-      <input id="ed-weight" type="range" min="1" max="5" value="2" oninput="document.getElementById('ed-wval').textContent=this.value"/>
-      <div style="text-align:center;font-size:14px;font-weight:700;color:var(--blm);margin-top:4px">Peso: <span id="ed-wval">2</span></div>
-      <label>Descrição / contexto (opcional)</label>
-      <textarea id="ed-desc" placeholder="Ex: Orientação da dissertação sobre qualidade da água..."></textarea>
-      <div class="mac">
-        <button class="bsm" onclick="clEd()">Cancelar</button>
-        <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savLink()">Salvar vínculo</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
 
 <script>
 // ─── FIREBASE ─────────────────────────────────────────────────────────────────
@@ -621,7 +801,7 @@ function goP(id,btn){
   document.getElementById('pg-'+id).classList.add('on');
   if(btn) btn.classList.add('on');
   if(id==='rede') setTimeout(()=>buildGraph(),60);
-  if(id==='admin'&&isAdm()){renderAd();renderAdAc();renderAdLinks();}
+  if(id==='admin'&&isAdm()){renderAd();renderAdAc();renderAdLinks();adTab('mbr',document.querySelectorAll('.adtab')[0]);}
 }
 
 // ─── GRAPH ────────────────────────────────────────────────────────────────────
@@ -955,13 +1135,13 @@ function openEdLink(){
   document.getElementById('ed-weight').value=2;
   document.getElementById('ed-wval').textContent=2;
   document.getElementById('ed-desc').value='';
-  document.getElementById('edvl').classList.add('on');
+  document.getElementById('edvl').style.display='flex';
 }
 function openEdLinkFor(nodeId){
   openEdLink();
   document.getElementById('ed-a').value=nodeId;
 }
-function clEd(){document.getElementById('edvl').classList.remove('on');}
+function clEd(){document.getElementById('edvl').style.display='none';}
 async function savLink(){
   var a=document.getElementById('ed-a').value;
   var b=document.getElementById('ed-b').value;
@@ -991,8 +1171,36 @@ async function savLink(){
 
 // ─── PADLET ───────────────────────────────────────────────────────────────────
 function cardColor(tp){
-  return{Dissertação:{bg:'#dbeafe',tc:'#1e40af'},Pesquisa:{bg:'#dbeafe',tc:'#1e40af'},Publicação:{bg:'#dbeafe',tc:'#1e40af'},Projeto:{bg:'#d1fae5',tc:'#065f46'},Gestão:{bg:'#d1fae5',tc:'#065f46'},Extensão:{bg:'#d1fae5',tc:'#065f46'},Monitoramento:{bg:'#d1fae5',tc:'#065f46'},Tecnologia:{bg:'#fef3c7',tc:'#92400e'},Ensino:{bg:'#ede9fe',tc:'#5b21b6'},Cooperação:{bg:'#ede9fe',tc:'#5b21b6'}}[tp]||{bg:'#f3f4f6',tc:'#374151'};
+  if(!tp) return {bg:'#f3f4f6',tc:'#374151'};
+  var t=tp.toLowerCase();
+  // PTTs e produtos técnicos
+  if(t.includes('ptt')||t.includes('produto')||t.includes('protocolo')||t.includes('manual')||
+     t.includes('plataforma')||t.includes('sistema')||t.includes('mapa')||t.includes('tecnologia')||
+     t.includes('instrumento')||t.includes('governança')||t.includes('metodologia')||
+     t.includes('arranjo')||t.includes('modelo')||t.includes('pop')||t.includes('banco')||
+     t.includes('app')||t.includes('aplicativo'))
+    return {bg:'#dbeafe',tc:'#1e40af'};
+  // Acadêmico
+  if(t.includes('dissertação')||t.includes('tcc')||t.includes('defesa')||t.includes('banca')||
+     t.includes('publicação')||t.includes('artigo')||t.includes('evento')||
+     t.includes('credenciamento')||t.includes('depósito')||t.includes('relatório apcn')||
+     t.includes('coleta capes')||t.includes('pesquisa'))
+    return {bg:'#ede9fe',tc:'#5b21b6'};
+  // Extensão e parcerias
+  if(t.includes('extensão')||t.includes('parceria')||t.includes('visita')||
+     t.includes('capacitação')||t.includes('oficina')||t.includes('ação')||
+     t.includes('serviço')||t.includes('egressos')||t.includes('acordo')||
+     t.includes('cooperação')||t.includes('convênio'))
+    return {bg:'#d1fae5',tc:'#065f46'};
+  // Gestão e comunicação  
+  if(t.includes('gestão')||t.includes('autoavaliação')||t.includes('cpa')||
+     t.includes('monitoramento')||t.includes('divulgação')||t.includes('instagram')||
+     t.includes('premiação')||t.includes('material')||t.includes('jogo')||
+     t.includes('vídeo')||t.includes('multimídia'))
+    return {bg:'#fef3c7',tc:'#92400e'};
+  return {bg:'#f3f4f6',tc:'#374151'};
 }
+
 function renderP(q){
   var grid=document.getElementById('pgrid');
   var items=Object.entries(ACOES).map(([k,v])=>({...v,_k:k})).sort((a,b)=>(b.ts||0)-(a.ts||0));
@@ -1023,10 +1231,14 @@ function verAcao(it){
     '<div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:16px">'+(it.desc||'')+'</div>'+
     '<div style="font-size:12px;color:#999;margin-bottom:16px">Por <strong style="color:#333">'+(it.autorNome||'')+'</strong> · '+(it.ano||'')+'</div>'+
     '<div style="display:flex;gap:8px;justify-content:flex-end">'+del+'<button class="bsm" onclick="document.getElementById(\'vovl\').classList.remove(\'on\')">Fechar</button></div></div>';
-  document.getElementById('vovl').classList.add('on');
+  document.getElementById('vovl').style.display='flex';
 }
-function openMac(){['matit','madesc','maano','maem'].forEach(id=>document.getElementById(id).value='');document.getElementById('movl').classList.add('on');}
-function clM(){document.getElementById('movl').classList.remove('on');}
+function openMac(){
+  ['matit','madesc','maano','maem'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var sel=document.getElementById('matp');if(sel)sel.selectedIndex=0;
+  document.getElementById('movl').style.display='flex';
+}
+function clM(){document.getElementById('movl').style.display='none';}
 async function savAcao(){
   if(!USER){toast('Faça login primeiro.');return;}
   var titulo=document.getElementById('matit').value.trim();
@@ -1041,7 +1253,7 @@ async function savAcao(){
 async function delAcao(key){
   if(!confirm('Excluir esta ação?')) return;
   await DB.ref('aquanet/acoes/'+key).remove();
-  document.getElementById('vovl').classList.remove('on');
+  document.getElementById('vovl').style.display='none';
   toast('Ação excluída.');
 }
 
@@ -1100,63 +1312,86 @@ async function savePerfil(){
 // ─── ADMIN ────────────────────────────────────────────────────────────────────
 function renderAd(){
   if(!isAdm()) return;
-  var ml=Object.values(MEMBERS).sort((a,b)=>(a.label||'').localeCompare(b.label||''));
-  var doc=ml.filter(m=>m.type==='docente').length;
-  var eg=ml.filter(m=>m.type==='egresso').length;
-  var di=ml.filter(m=>m.type==='discente').length;
-  document.getElementById('adst').innerHTML=[
+  var ml=Object.values(MEMBERS).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  var doc=ml.filter(function(m){return m.type==='docente';}).length;
+  var eg=ml.filter(function(m){return m.type==='egresso';}).length;
+  var di=ml.filter(function(m){return m.type==='discente';}).length;
+  var adstEl=document.getElementById('adst');
+  if(adstEl) adstEl.innerHTML=[
     ['Docentes',doc,'#dbeafe','#1d4ed8'],['Egressos',eg,'#d1fae5','#065f46'],
     ['Ativos',di,'#fef3c7','#b45309'],['Total',ml.length,'#f3f4f6','#374151']
-  ].map(function(x){
-    return '<div style="background:'+x[2]+';border-radius:12px;padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:'+x[3]+'">'+x[1]+'</div><div style="font-size:11px;color:'+x[3]+';opacity:.7;font-weight:600">'+x[0]+'</div></div>';
-  }).join('');
+  ].map(function(x){return '<div style="background:'+x[2]+';border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:800;color:'+x[3]+'">'+x[1]+'</div><div style="font-size:10px;color:'+x[3]+';opacity:.7;font-weight:600">'+x[0]+'</div></div>';}).join('')+
+  '<div style="display:flex;align-items:center;justify-content:center;background:var(--bl);border-radius:12px;padding:12px;cursor:pointer" onclick="openAddMbr()"><div style="color:#fff;font-size:13px;font-weight:700">+ Novo Membro</div></div>';
+
+  var filtered=ml.filter(function(m){
+    var tpOk=!adFilterTp||m.type===adFilterTp;
+    var qOk=!adFilterQ||(m.label||m.nome||'').toLowerCase().includes(adFilterQ.toLowerCase());
+    return tpOk&&qOk;
+  });
   var container=document.getElementById('adlst');
+  if(!container) return;
   container.innerHTML='';
-  ml.forEach(function(m){
+  if(!filtered.length){container.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--tx3)">Nenhum membro encontrado.</div>';return;}
+  filtered.forEach(function(m){
     var c={docente:'#1d4ed8',egresso:'#059669',discente:'#d97706'}[m.type]||'#555';
-    var row=document.createElement('div');
-    row.className='adrow';
-    var info=document.createElement('div'); info.className='adri';
-    var nm=document.createElement('strong'); nm.textContent=m.label||m.nome||'';
-    var sub=document.createElement('span'); sub.textContent=(m.area||m.type||'')+(m.ano?' · '+m.ano:'');
-    info.appendChild(nm); info.appendChild(sub);
+    var bg={docente:'#dbeafe',egresso:'#d1fae5',discente:'#fef3c7'}[m.type]||'#f3f4f6';
+    var mid=m.id||m._id||'';
+    var row=document.createElement('div');row.className='adrow';
+    var info=document.createElement('div');info.className='adri';
+    var nm=document.createElement('strong');nm.textContent=m.label||m.nome||'';
+    var sub=document.createElement('span');sub.textContent=(m.area||m.type||'')+(m.ano?' · '+m.ano:'')+(m.cidade&&m.cidade!=='MT'?' · '+m.cidade:'');
+    info.appendChild(nm);info.appendChild(sub);
     var badge=document.createElement('span');
-    badge.style.cssText='background:#f1f5f9;color:'+c+';padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700';
-    badge.textContent=m.type||'';
-    var acts=document.createElement('div'); acts.className='adra';
-    var btn=document.createElement('button'); btn.className='bsm dan';
-    btn.style.cssText='font-size:11px;padding:2px 8px'; btn.textContent='Excluir';
-    btn.addEventListener('click',function(){delMbr(m.id||m._id,m.label||m.nome||'');});
-    acts.appendChild(btn);
-    row.appendChild(info); row.appendChild(badge); row.appendChild(acts);
+    badge.style.cssText='background:'+bg+';color:'+c+';padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700;flex-shrink:0';
+    badge.textContent={docente:'Docente',egresso:'Egresso',discente:'Discente'}[m.type]||m.type;
+    var acts=document.createElement('div');acts.className='adra';
+    var eb=document.createElement('button');eb.className='bsm';eb.style.cssText='font-size:11px;padding:2px 8px';eb.textContent='✏️';
+    eb.title='Editar';
+    eb.addEventListener('click',(function(id){return function(){editMbr(id);};})(mid));
+    var db=document.createElement('button');db.className='bsm dan';db.style.cssText='font-size:11px;padding:2px 8px';db.textContent='✕';
+    db.title='Excluir';
+    db.addEventListener('click',(function(id,nm2){return function(){delMbr(id,nm2);};})(mid,m.label||m.nome||''));
+    acts.appendChild(eb);acts.appendChild(db);
+    row.appendChild(info);row.appendChild(badge);row.appendChild(acts);
     container.appendChild(row);
   });
 }
-
 function renderAdLinks(){
-  if(!isAdm()) return;
   var items=Object.entries(LINKS).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
-  var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação',colab:'Colaboração'};
-  var lkCont=document.getElementById('adlinks');
-  lkCont.innerHTML='';
-  if(!items.length){lkCont.innerHTML='<div class="empt">Nenhum vínculo manual cadastrado.</div>';return;}
+  var tl={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
+  var tc={orient:'#dbeafe',coorient:'#ede9fe',banca:'#d1fae5',acao:'#fef3c7',colab:'#cffafe',disciplina:'#fce7f3'};
+  var tt={orient:'#1e40af',coorient:'#5b21b6',banca:'#065f46',acao:'#92400e',colab:'#0e7490',disciplina:'#9d174d'};
+  var el=document.getElementById('adlinks');if(!el)return;
+  el.innerHTML='';
+  if(!items.length){el.innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">Nenhum vínculo cadastrado.</div>';return;}
   items.forEach(function(entry){
-    var k=entry[0], lk=entry[1];
-    var a=MEMBERS[lk.a], b=MEMBERS[lk.b];
-    var row=document.createElement('div'); row.className='adrow';
-    var info=document.createElement('div'); info.className='adri';
-    var nm=document.createElement('strong'); nm.textContent=(a?a.label:lk.a)||'';
-    var sub=document.createElement('span');
-    sub.textContent=(typeLabels[lk.type||'colab']||'')+'  →  '+(b?b.label:lk.b)+(lk.weight?' · peso '+lk.weight:'');
-    info.appendChild(nm); info.appendChild(sub);
-    if(lk.desc){var desc=document.createElement('span');desc.style.fontStyle='italic';desc.textContent=lk.desc;info.appendChild(desc);}
-    var acts=document.createElement('div'); acts.className='adra';
-    var btn=document.createElement('button'); btn.className='bsm dan';
-    btn.style.cssText='font-size:11px;padding:2px 8px'; btn.textContent='Excluir';
-    btn.addEventListener('click',(function(key){return function(){delLink(key);};})(k));
-    acts.appendChild(btn);
-    row.appendChild(info); row.appendChild(acts);
-    lkCont.appendChild(row);
+    var k=entry[0],lk=entry[1];
+    var aNm=lk.aNome||(MEMBERS[lk.a]?MEMBERS[lk.a].label:'')||lk.a||'?';
+    var bNm=lk.bNome||(MEMBERS[lk.b]?MEMBERS[lk.b].label:'')||lk.b||'?';
+    var tp=lk.type||'colab';
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f1f5f9;flex-wrap:wrap';
+    var badge=document.createElement('span');
+    badge.style.cssText='font-size:9px;font-weight:800;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;background:'+(tc[tp]||'#f3f4f6')+';color:'+(tt[tp]||'#374151');
+    badge.textContent=tl[tp]||tp;
+    var info=document.createElement('div');info.style.cssText='flex:1;min-width:120px';
+    var nm=document.createElement('div');nm.style.cssText='font-size:12px;font-weight:700;color:#0f172a';
+    nm.textContent=aNm+' ↔ '+bNm;
+    var sub=document.createElement('div');sub.style.cssText='font-size:10px;color:#94a3b8;margin-top:1px';
+    sub.textContent='Peso: '+(lk.weight||1)+(lk.desc?' · '+lk.desc:'');
+    info.appendChild(nm);info.appendChild(sub);
+    var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
+    var eb=document.createElement('button');
+    eb.style.cssText='padding:4px 9px;border-radius:6px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:10px;font-weight:700;cursor:pointer;color:#334155;font-family:inherit';
+    eb.textContent='✏️ Editar';
+    eb.addEventListener('click',(function(key){return function(){openEditLink(key);};})(k));
+    var db=document.createElement('button');
+    db.style.cssText='padding:4px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:10px;font-weight:700;cursor:pointer;color:#991b1b;font-family:inherit';
+    db.textContent='🗑️';
+    db.addEventListener('click',(function(key){return function(){if(confirm('Excluir este vínculo?'))delLink(key);};})(k));
+    acts.appendChild(eb);acts.appendChild(db);
+    row.appendChild(badge);row.appendChild(info);row.appendChild(acts);
+    el.appendChild(row);
   });
 }
 
@@ -1253,13 +1488,357 @@ document.addEventListener('click',function(e){
 });
 
 // ─── EXPOSE ────────────────────────────────────────────────────────────────────
+// ─── ADMIN TABS ───────────────────────────────────────────────────────────────
+function adTab(id,btn){
+  ['mbr','add','lnk','acs'].forEach(function(t){
+    var el=document.getElementById('adt-'+t);
+    if(el) el.style.display=t===id?'':'none';
+  });
+  document.querySelectorAll('.adtab').forEach(function(b){
+    b.classList.remove('on');
+    b.style.background='transparent';b.style.color='var(--tx2)';
+  });
+  if(btn){btn.classList.add('on');btn.style.background='var(--bll)';btn.style.color='var(--blm)';}
+  if(id==='mbr') renderAd();
+  if(id==='lnk') renderAdLinks();
+  if(id==='acs') renderAdAc();
+  if(id==='add') populateAddOriSelect();
+}
+window.adTab=adTab;
+
+// ─── POPULATE ORIENTADOR SELECT ──────────────────────────────────────────────
+function populateAddOriSelect(){
+  var sel=document.getElementById('add-ori');
+  if(!sel) return;
+  var docs=Object.values(MEMBERS).filter(function(m){return m.type==='docente';}).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  sel.innerHTML='<option value="">Nenhum</option>'+docs.map(function(d){return '<option value="'+d.id+'">'+d.label+'</option>';}).join('');
+}
+
+// ─── ADD / EDIT MEMBER ───────────────────────────────────────────────────────
+function openAddMbr(){adTab('add',document.querySelectorAll('.adtab')[1]);}
+function cancelAddMbr(){
+  ['add-nm','add-ano','add-cid','add-area','add-eml','add-editkey'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('add-tp').selectedIndex=0;
+  document.getElementById('add-ori').value='';
+  document.getElementById('addmbr-title').textContent='➕ Novo Membro';
+  adTab('mbr',document.querySelectorAll('.adtab')[0]);
+}
+function editMbr(id){
+  var m=MEMBERS[id];if(!m)return;
+  populateAddOriSelect();
+  document.getElementById('add-nm').value=m.label||m.nome||'';
+  document.getElementById('add-tp').value=m.type||'discente';
+  document.getElementById('add-ano').value=m.ano||'';
+  document.getElementById('add-cid').value=m.cidade||'';
+  document.getElementById('add-area').value=m.area||'';
+  document.getElementById('add-eml').value=m.email||'';
+  document.getElementById('add-ori').value=m.orientadorId||'';
+  document.getElementById('add-editkey').value=id;
+  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  adTab('add',document.querySelectorAll('.adtab')[1]);
+}
+async function salvarMbr(){
+  var nm=document.getElementById('add-nm').value.trim();
+  if(!nm){toast('Informe o nome.');return;}
+  var tp=document.getElementById('add-tp').value;
+  var editKey=document.getElementById('add-editkey').value;
+  var oriId=document.getElementById('add-ori').value;
+  var oriMbr=oriId?MEMBERS[oriId]:null;
+  var id=editKey||(tp+'-'+nm.toLowerCase().replace(/[^a-z]/g,'-').replace(/-+/g,'-').substring(0,20)+'-'+Date.now().toString().slice(-4));
+  var data={
+    id,label:nm,nome:nm,type:tp,
+    initials:nm.split(' ').filter(function(w){return w.length>2;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase(),
+    ano:document.getElementById('add-ano').value.trim(),
+    cidade:document.getElementById('add-cid').value.trim()||'Cáceres-MT',
+    area:document.getElementById('add-area').value.trim(),
+    email:document.getElementById('add-eml').value.trim(),
+    orientadorId:oriId||'',
+    orientadorNome:oriMbr?oriMbr.label||'':'',
+    seeded:false,updatedAt:Date.now()
+  };
+  if(editKey) data={...MEMBERS[editKey],...data};
+  await DB.ref('aquanet/members/'+id).set(data);
+  toast(editKey?'Membro atualizado!':'Membro adicionado!');
+  cancelAddMbr();
+}
+window.openAddMbr=openAddMbr;window.cancelAddMbr=cancelAddMbr;window.editMbr=editMbr;window.salvarMbr=salvarMbr;
+
+// ─── FILTER ADMIN MEMBERS ─────────────────────────────────────────────────────
+var adFilterQ='',adFilterTp='';
+function filtAdMbr(q){adFilterQ=q;adFilterTp=document.getElementById('ad-ftp').value;renderAd();}
+window.filtAdMbr=filtAdMbr;
+
+// ─── EDIT LINK ────────────────────────────────────────────────────────────────
+function editLink(key){
+  var lk=LINKS[key];if(!lk)return;
+  editLinkKey=key;
+  populateEdSelects();
+  setTimeout(function(){
+    document.getElementById('ed-a').value=lk.a||'';
+    document.getElementById('ed-b').value=lk.b||'';
+    document.getElementById('ed-type').value=lk.type||'orient';
+    document.getElementById('ed-weight').value=lk.weight||2;
+    document.getElementById('ed-wval').textContent=lk.weight||2;
+    document.getElementById('ed-desc').value=lk.desc||'';
+    document.getElementById('ed-title').textContent='✏️ Editar Vínculo';
+    document.getElementById('edvl').style.display='flex';
+  },100);
+}
+window.editLink=editLink;
+
+// ─── ADD MEMBER ──────────────────────────────────────────────────────────────
+var editMbrKey=null;
+function openAddMbr(){
+  editMbrKey=null;
+  document.getElementById('addmbr-title').textContent='➕ Adicionar Membro';
+  ['mbr-nm','mbr-ano','mbr-cid','mbr-area','mbr-disc','mbr-email'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('mbr-tp').selectedIndex=1;
+  document.getElementById('addmbrvl').style.display='flex';
+}
+function openEditMbr(key){
+  var m=MEMBERS[key];if(!m)return;
+  editMbrKey=key;
+  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  document.getElementById('mbr-nm').value=m.label||m.nome||'';
+  document.getElementById('mbr-tp').value=m.type||'egresso';
+  document.getElementById('mbr-ano').value=m.ano||'';
+  document.getElementById('mbr-cid').value=m.cidade||'';
+  document.getElementById('mbr-area').value=m.area||'';
+  document.getElementById('mbr-disc').value=m.disciplinas||'';
+  document.getElementById('mbr-email').value=m.email||'';
+  document.getElementById('addmbrvl').style.display='flex';
+}
+function clAddMbr(){document.getElementById('addmbrvl').style.display='none';editMbrKey=null;}
+async function savMbr(){
+  var nm=document.getElementById('mbr-nm').value.trim();
+  if(!nm){toast('Informe o nome.');return;}
+  var tp=document.getElementById('mbr-tp').value;
+  var initials=nm.split(' ').filter(function(w){return w.length>2;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var data={label:nm,nome:nm,initials,type:tp,
+    ano:document.getElementById('mbr-ano').value.trim(),
+    cidade:document.getElementById('mbr-cid').value.trim()||'Cáceres-MT',
+    area:document.getElementById('mbr-area').value.trim(),
+    disciplinas:document.getElementById('mbr-disc').value.trim(),
+    email:document.getElementById('mbr-email').value.trim(),
+    seeded:false,updatedAt:Date.now()};
+  var key=editMbrKey||(tp+'-custom-'+Date.now());
+  data.id=key;
+  await DB.ref('aquanet/members/'+key).set(data);
+  toast(editMbrKey?'Membro atualizado!':'Membro adicionado!');
+  clAddMbr();renderAd();
+}
+window.openAddMbr=openAddMbr;window.openEditMbr=openEditMbr;window.clAddMbr=clAddMbr;window.savMbr=savMbr;
+
+// ─── EDIT LINK ────────────────────────────────────────────────────────────────
+function openEditLink(key){
+  var lk=LINKS[key];if(!lk)return;
+  editLinkKey=key;
+  document.getElementById('ed-title').textContent='✏️ Editar Vínculo';
+  populateEdSelects();
+  setTimeout(function(){
+    document.getElementById('ed-a').value=lk.a||'';
+    document.getElementById('ed-b').value=lk.b||'';
+    document.getElementById('ed-type').value=lk.type||'orient';
+    document.getElementById('ed-weight').value=lk.weight||2;
+    document.getElementById('ed-wval').textContent=lk.weight||2;
+    document.getElementById('ed-desc').value=lk.desc||'';
+  },50);
+  document.getElementById('edvl').style.display='flex';
+}
+window.openEditLink=openEditLink;
+
 // Expose globals
+
+// ─── ADMIN TABS ──────────────────────────────────────────────────────────────
+function adTab(id,btn){
+  ['mbr','add','lnk','acs'].forEach(function(t){
+    var el=document.getElementById('adt-'+t);
+    if(el) el.style.display=t===id?'':'none';
+  });
+  document.querySelectorAll('.adtab').forEach(function(b){
+    b.style.background='transparent';b.style.color='var(--tx2)';
+  });
+  if(btn){btn.style.background='var(--bll)';btn.style.color='var(--blm)';}
+  if(id==='lnk') renderAdLinks();
+  if(id==='acs') renderAdAc();
+  if(id==='mbr') renderAd();
+}
+window.adTab=adTab;
+
+// Populate orientador selects in admin add form
+function populateOriSelects(){
+  var docentes=Object.values(MEMBERS).filter(function(m){return m.type==='docente';}).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  var opts='<option value="">Nenhum</option>'+docentes.map(function(d){return '<option value="'+d.id+'">'+d.label+'</option>';}).join('');
+  var el=document.getElementById('add-ori');
+  if(el) el.innerHTML=opts;
+}
+
+// ─── ADICIONAR/EDITAR MEMBRO ─────────────────────────────────────────────────
+var editingMbrKey=null;
+
+function salvarMbr(){
+  if(!isAdm()){toast('Só administradores podem fazer isso.');return;}
+  var nm=document.getElementById('add-nm').value.trim();
+  var tp=document.getElementById('add-tp').value;
+  var ano=document.getElementById('add-ano').value.trim();
+  var cid=document.getElementById('add-cid').value.trim();
+  var area=document.getElementById('add-area').value.trim();
+  var ori=document.getElementById('add-ori').value;
+  var eml=document.getElementById('add-eml').value.trim();
+  if(!nm){toast('Informe o nome.');return;}
+  var ini=nm.split(' ').filter(function(w){return w.length>2;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase()||nm.substring(0,2).toUpperCase();
+  var key=editingMbrKey||(tp+'-'+nm.toLowerCase().replace(/[^a-z]/g,'-').replace(/-+/g,'-').substring(0,20)+'-'+Date.now().toString(36));
+  var data={id:key,label:nm,nome:nm,initials:ini,type:tp,ano:ano,cidade:cid||'Cáceres-MT',area:area,email:eml,orientadorId:ori,seeded:false,updatedAt:Date.now()};
+  DB.ref('aquanet/members/'+key).set(data).then(function(){
+    toast(editingMbrKey?'Membro atualizado!':'Membro adicionado!');
+    editingMbrKey=null;
+    cancelAddMbr();
+    renderAd();
+    populateEdSelects();
+    populateOriSelects();
+  }).catch(function(e){toast('Erro: '+e.message);});
+}
+
+function editMbr(key){
+  var m=MEMBERS[key];
+  if(!m) return;
+  editingMbrKey=key;
+  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  document.getElementById('add-nm').value=m.label||m.nome||'';
+  document.getElementById('add-tp').value=m.type||'discente';
+  document.getElementById('add-ano').value=m.ano||'';
+  document.getElementById('add-cid').value=m.cidade||'';
+  document.getElementById('add-area').value=m.area||'';
+  document.getElementById('add-eml').value=m.email||'';
+  populateOriSelects();
+  setTimeout(function(){
+    var ori=document.getElementById('add-ori');
+    if(ori) ori.value=m.orientadorId||'';
+  },100);
+  adTab('add',document.querySelectorAll('.adtab')[1]);
+}
+
+function cancelAddMbr(){
+  editingMbrKey=null;
+  document.getElementById('addmbr-title').textContent='➕ Novo Membro';
+  ['add-nm','add-ano','add-cid','add-area','add-eml'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var tp=document.getElementById('add-tp');if(tp)tp.selectedIndex=0;
+  var ori=document.getElementById('add-ori');if(ori)ori.selectedIndex=0;
+}
+
+function filtAdMbr(q){
+  var ft=document.getElementById('ad-ftp')?document.getElementById('ad-ftp').value:'';
+  renderAd(q,ft);
+}
+
+window.salvarMbr=salvarMbr;window.editMbr=editMbr;window.cancelAddMbr=cancelAddMbr;window.filtAdMbr=filtAdMbr;
+
+// ─── RENDERIZAR ADMIN MELHORADO ───────────────────────────────────────────────
+function renderAd(q,ft){
+  if(!isAdm()) return;
+  q=q||'';ft=ft||'';
+  var ml=Object.values(MEMBERS).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  if(q){var lq=q.toLowerCase();ml=ml.filter(function(m){return (m.label||m.nome||'').toLowerCase().includes(lq);});}
+  if(ft) ml=ml.filter(function(m){return m.type===ft;});
+  var doc=ml.filter(function(m){return m.type==='docente';}).length;
+  var eg=ml.filter(function(m){return m.type==='egresso';}).length;
+  var di=ml.filter(function(m){return m.type==='discente';}).length;
+  var st=document.getElementById('adst');
+  if(st) st.innerHTML=[['Docentes',doc,'#dbeafe','#1d4ed8'],['Egressos',eg,'#d1fae5','#065f46'],['Ativos',di,'#fef3c7','#b45309'],['Total',Object.values(MEMBERS).length,'#f3f4f6','#374151']].map(function(x){return '<div style="background:'+x[2]+';border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:800;color:'+x[3]+'">'+x[1]+'</div><div style="font-size:10px;color:'+x[3]+';opacity:.7;font-weight:600">'+x[0]+'</div></div>';}).join('');
+  var container=document.getElementById('adlst');
+  if(!container) return;
+  container.innerHTML='';
+  if(!ml.length){container.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px">Nenhum membro encontrado</div>';return;}
+  ml.forEach(function(m){
+    var c={docente:'#1d4ed8',egresso:'#059669',discente:'#d97706'}[m.type]||'#555';
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--bd)';
+    var av=document.createElement('div');
+    av.style.cssText='width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,'+c+','+c+'aa);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0';
+    av.textContent=(m.initials||'??').substring(0,2);
+    var info=document.createElement('div');info.style.flex='1';info.style.minWidth='0';
+    var nm=document.createElement('strong');nm.style.cssText='font-size:12.5px;display:block';nm.textContent=m.label||m.nome||'';
+    var sub=document.createElement('span');sub.style.cssText='font-size:10px;color:var(--tx3)';
+    sub.textContent=(m.type||'')+(m.ano?' · '+m.ano:'')+(m.area?' · '+m.area.substring(0,30):'');
+    info.appendChild(nm);info.appendChild(sub);
+    var badge=document.createElement('span');
+    badge.style.cssText='background:#f1f5f9;color:'+c+';padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;flex-shrink:0';
+    badge.textContent=m.type||'';
+    var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
+    var editbtn=document.createElement('button');
+    editbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--tx2)';
+    editbtn.textContent='✏️';editbtn.title='Editar';
+    editbtn.addEventListener('click',function(){editMbr(m.id||m._id);});
+    var delbtn=document.createElement('button');
+    delbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:11px;font-weight:600;cursor:pointer;color:#991b1b';
+    delbtn.textContent='🗑️';delbtn.title='Excluir';
+    delbtn.addEventListener('click',function(){delMbr(m.id||m._id,m.label||m.nome||'');});
+    acts.appendChild(editbtn);acts.appendChild(delbtn);
+    row.appendChild(av);row.appendChild(info);row.appendChild(badge);row.appendChild(acts);
+    container.appendChild(row);
+  });
+}
+
+// ─── RENDER ADMIN LINKS (com editar e excluir) ────────────────────────────────
+function renderAdLinks(){
+  if(!isAdm()) return;
+  var items=Object.entries(LINKS).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
+  var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
+  var lkCont=document.getElementById('adlinks');
+  if(!lkCont) return;
+  lkCont.innerHTML='';
+  if(!items.length){lkCont.innerHTML='<div style="padding:24px;text-align:center;color:var(--tx3);font-size:13px">Nenhum vínculo cadastrado</div>';return;}
+  items.forEach(function(entry){
+    var k=entry[0],lk=entry[1];
+    var a=MEMBERS[lk.a],b=MEMBERS[lk.b];
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:1px solid var(--bd)';
+    var info=document.createElement('div');info.style.flex='1';info.style.minWidth='0';
+    var nm=document.createElement('strong');nm.style.cssText='font-size:12px;display:block;margin-bottom:2px';
+    nm.textContent=(a?a.label:lk.aNome||lk.a||'?')+' ↔ '+(b?b.label:lk.bNome||lk.b||'?');
+    var sub=document.createElement('span');sub.style.cssText='font-size:10.5px;color:var(--tx3)';
+    sub.textContent=(typeLabels[lk.type||'colab']||lk.type)+(lk.weight?' · peso '+lk.weight:'')+(lk.desc?' · '+lk.desc.substring(0,40):'');
+    info.appendChild(nm);info.appendChild(sub);
+    var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
+    var editbtn=document.createElement('button');
+    editbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:11px;cursor:pointer;color:var(--tx2)';
+    editbtn.textContent='✏️';editbtn.title='Editar vínculo';
+    editbtn.addEventListener('click',function(){editLink(k,lk);});
+    var delbtn=document.createElement('button');
+    delbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:11px;cursor:pointer;color:#991b1b';
+    delbtn.textContent='🗑️';delbtn.title='Excluir';
+    delbtn.addEventListener('click',function(){delLink(k);});
+    acts.appendChild(editbtn);acts.appendChild(delbtn);
+    row.appendChild(info);row.appendChild(acts);
+    lkCont.appendChild(row);
+  });
+}
+
+// ─── EDITAR VÍNCULO ──────────────────────────────────────────────────────────
+function editLink(k,lk){
+  editLinkKey=k;
+  populateEdSelects();
+  setTimeout(function(){
+    document.getElementById('ed-a').value=lk.a||'';
+    document.getElementById('ed-b').value=lk.b||'';
+    document.getElementById('ed-type').value=lk.type||'orient';
+    document.getElementById('ed-weight').value=lk.weight||2;
+    document.getElementById('ed-wval').textContent=lk.weight||2;
+    document.getElementById('ed-desc').value=lk.desc||'';
+  },100);
+  document.getElementById('edvl').classList.add('on');
+}
+window.editLink=editLink;
+
 window.goP=goP;window.apF=apF;window.recentrar=recentrar;window.searchGraph=searchGraph;
 window.closeSP=closeSP;window.resetHighlight=resetHighlight;
 window.clM=clM;window.openMac=openMac;window.savAcao=savAcao;window.delAcao=delAcao;window.verAcao=verAcao;
 window.savePerfil=savePerfil;window.doLogin=doLogin;window.doLogout=doLogout;
 window.openEdLink=openEdLink;window.openEdLinkFor=openEdLinkFor;window.clEd=clEd;window.savLink=savLink;
 window.delMbr=delMbr;window.delLink=delLink;window.renderP=renderP;
+
 </script>
 </body>
 </html>
