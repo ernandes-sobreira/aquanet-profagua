@@ -216,10 +216,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <div id="btxt"><h1>AquaNet</h1><p>Rede ProfÁgua · UNEMAT Cáceres</p></div>
   </a>
   <nav id="nav">
-    <button class="ntab on" onclick="goP('rede',this)">Rede</button>
-    <button class="ntab" onclick="goP('acoes',this)">Ações</button>
-    <button class="ntab" onclick="goP('perfil',this)">Meu Perfil</button>
-    <button class="ntab" id="btnadm" style="display:none" onclick="goP('admin',this)">Admin</button>
+    <button class="ntab on" onclick="goP('rede',this)">🕸 Rede</button>
+    <button class="ntab" onclick="goP('acoes',this)">📌 Ações</button>
+    <button class="ntab" onclick="goP('relatorio',this)">📊 Relatório</button>
+    <button class="ntab" onclick="goP('perfil',this)">👤 Perfil</button>
+    <button class="ntab" id="btnadm" style="display:none" onclick="goP('admin',this)">⚙️ Admin</button>
   </nav>
   <div id="uarea">
     <div id="uinfo" style="display:none;align-items:center;gap:8px">
@@ -253,6 +254,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       <button class="fb" data-f="docente" onclick="apF('docente',this)">Docentes</button>
       <button class="fb" data-f="egresso" onclick="apF('egresso',this)">Egressos</button>
       <button class="fb" data-f="discente" onclick="apF('discente',this)">Ativos</button>
+      <select id="f-doc-sel" onchange="apFDoc(this.value)"
+        style="padding:4px 10px;border-radius:14px;border:1.5px solid var(--bd);font-size:11px;font-family:inherit;background:var(--wh);color:var(--tx2);cursor:pointer;max-width:180px">
+        <option value="">🔍 Rede de um docente...</option>
+      </select>
     </div>
     <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
       <div style="position:relative">
@@ -343,6 +348,40 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 
 <!-- PAGE ADMIN -->
+<!-- PAGE RELATÓRIO -->
+<div class="pg pg-pad" id="pg-relatorio">
+  <div class="sc">
+    <div class="sch">
+      <h2>📊 Relatório da Rede ProfÁgua</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="rpt-doc" onchange="gerarRelatorio()" style="padding:5px 9px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit;outline:none">
+          <option value="">Todos os docentes</option>
+        </select>
+        <select id="rpt-ano" onchange="gerarRelatorio()" style="padding:5px 9px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit;outline:none">
+          <option value="">Todos os anos</option>
+          <option>2026</option><option>2025</option><option>2024</option>
+          <option>2023</option><option>2022</option><option>2021</option>
+          <option>2020</option><option>2019</option><option>2018</option>
+        </select>
+        <select id="rpt-tp" onchange="gerarRelatorio()" style="padding:5px 9px;border-radius:7px;border:1.5px solid var(--bd);font-size:12px;font-family:inherit;outline:none">
+          <option value="">Todos os tipos</option>
+          <option value="docente">Docentes</option>
+          <option value="egresso">Egressos</option>
+          <option value="discente">Ativos</option>
+        </select>
+        <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl);font-size:11px" onclick="exportarRelatorio()">⬇️ Exportar CSV</button>
+        <button class="bsm" style="font-size:11px" onclick="window.print()">🖨️ Imprimir</button>
+      </div>
+    </div>
+
+    <!-- Resumo Executivo -->
+    <div id="rpt-sumario" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--bd)"></div>
+
+    <!-- Cards por docente -->
+    <div id="rpt-corpo" style="padding:4px 0"></div>
+  </div>
+</div>
+
 <div class="pg pg-pad" id="pg-admin">
 
   <!-- ADMIN TABS -->
@@ -873,19 +912,20 @@ function buildGraph(){
   sim=d3.forceSimulation(nodes)
     .force('link',d3.forceLink(links).id(d=>d._id)
       .distance(d=>{
-        if(d.source.type==='docente'||d.target.type==='docente') return 48;
-        return 32;
+        var ltype=d.ltype||'orient';
+        if(d.source.type==='docente'||d.target.type==='docente') return ltype==='peer'?80:110;
+        return ltype==='peer'?60:80;
       }).strength(d=>{
-        if(d.source.type==='docente'||d.target.type==='docente') return 1.0;
-        return .7;
+        if(d.source.type==='docente'||d.target.type==='docente') return .7;
+        return .4;
       }))
-    .force('charge',d3.forceManyBody().strength(d=>d.type==='docente'?-180:-60).distanceMax(200))
-    .force('center',d3.forceCenter(W/2,H/2).strength(.4))
-    .force('x',d3.forceX(W/2).strength(.06))
-    .force('y',d3.forceY(H/2).strength(.06))
-    .force('collision',d3.forceCollide().radius(d=>SZN[d.type||'discente']+8).strength(.9))
-    .alphaDecay(.02)
-    .velocityDecay(.45);
+    .force('charge',d3.forceManyBody().strength(d=>d.type==='docente'?-380:-140).distanceMax(500))
+    .force('center',d3.forceCenter(W/2,H/2).strength(.18))
+    .force('x',d3.forceX(W/2).strength(.04))
+    .force('y',d3.forceY(H/2).strength(.04))
+    .force('collision',d3.forceCollide().radius(d=>SZN[d.type||'discente']+20).strength(.95))
+    .alphaDecay(.012)
+    .velocityDecay(.38);
 
   // Links
   glks=gGrp.append('g').selectAll('line').data(links).enter().append('line')
@@ -1831,6 +1871,245 @@ function editLink(k,lk){
   document.getElementById('edvl').classList.add('on');
 }
 window.editLink=editLink;
+
+
+// ─── FILTRO POR DOCENTE ───────────────────────────────────────────────────────
+var afilterDoc = '';
+
+function apFDoc(docId){
+  afilterDoc = docId;
+  // Reset type filter visual
+  if(docId){
+    document.querySelectorAll('.fb').forEach(function(b){b.className='fb';});
+    afilter='all';
+  }
+  if(!gnds||!glks) return;
+  if(!docId){
+    apF('all',null,true);
+    return;
+  }
+  // Highlight the docente and all their connections
+  var connected=new Set([docId]);
+  glks.each(function(lk){
+    var sId=lk.source._id||lk.source.id||lk.source;
+    var tId=lk.target._id||lk.target.id||lk.target;
+    if(sId===docId) connected.add(tId);
+    if(tId===docId) connected.add(sId);
+  });
+  gnds.style('opacity',function(d){return connected.has(d._id||d.id)?1:.06;});
+  glks.style('opacity',function(lk){
+    var sId=lk.source._id||lk.source.id||lk.source;
+    var tId=lk.target._id||lk.target.id||lk.target;
+    return(sId===docId||tId===docId)?.85:.03;
+  });
+}
+window.apFDoc=apFDoc;
+
+function populateDocSelect(){
+  var docs=Object.values(MEMBERS).filter(function(m){return m.type==='docente';})
+    .sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  var opts=docs.map(function(d){
+    var id=d.id||d._id||'';
+    return '<option value="'+id+'">'+d.label+'</option>';
+  }).join('');
+  // Filtro no grafo
+  var sel=document.getElementById('f-doc-sel');
+  if(sel) sel.innerHTML='<option value="">🔍 Rede de um docente...</option>'+opts;
+  // Filtro no relatório
+  var rsel=document.getElementById('rpt-doc');
+  if(rsel) rsel.innerHTML='<option value="">Todos os docentes</option>'+
+    docs.map(function(d){return '<option value="'+d.label+'">'+d.label+'</option>';}).join('');
+  // Filtro no admin
+  var asel=document.getElementById('rpt-doc');
+}
+
+// ─── RELATÓRIO COMPLETO ──────────────────────────────────────────────────────
+function gerarRelatorio(){
+  var fDoc=(document.getElementById('rpt-doc')||{}).value||'';
+  var fAno=(document.getElementById('rpt-ano')||{}).value||'';
+  var fTp=(document.getElementById('rpt-tp')||{}).value||'';
+
+  var members=Object.values(MEMBERS);
+  var links=Object.values(LINKS);
+
+  // Apply filters
+  var filtered=members.filter(function(m){
+    if(fTp && m.type!==fTp) return false;
+    if(fDoc && m.label!==fDoc && m.orientadorId!==Object.keys(MEMBERS).find(function(k){return MEMBERS[k].label===fDoc;})) return false;
+    if(fAno && m.ano!==fAno) return false;
+    return true;
+  });
+
+  var docentes=members.filter(function(m){return m.type==='docente' && (!fDoc||m.label===fDoc);});
+  var egressos=members.filter(function(m){return m.type==='egresso' && (!fAno||m.ano===fAno);});
+  var ativos=members.filter(function(m){return m.type==='discente' && (!fAno||m.ano===fAno);});
+  var acoes=Object.values(ACOES);
+
+  // Sumário
+  var sum=document.getElementById('rpt-sumario');
+  if(sum){
+    var linhaCounts={};
+    docentes.forEach(function(d){
+      var l=d.linha||d.area||'—';
+      linhaCounts[l]=(linhaCounts[l]||0)+1;
+    });
+    sum.innerHTML=[
+      ['Docentes',docentes.length,'#dbeafe','#1d4ed8'],
+      ['Egressos',egressos.length,'#d1fae5','#065f46'],
+      ['Discentes Ativos',ativos.length,'#fef3c7','#b45309'],
+      ['Total Membros',members.length,'#f3f4f6','#374151'],
+      ['Vínculos',links.length,'#ede9fe','#5b21b6'],
+      ['Ações/Produções',acoes.length,'#e0f2fe','#0369a1'],
+    ].map(function(x){
+      return '<div style="background:'+x[2]+';border-radius:9px;padding:11px 13px;text-align:center">'+
+        '<div style="font-size:20px;font-weight:800;color:'+x[3]+'">'+x[1]+'</div>'+
+        '<div style="font-size:10px;color:'+x[3]+';opacity:.75;font-weight:600;margin-top:2px">'+x[0]+'</div></div>';
+    }).join('');
+  }
+
+  // Cards por docente
+  var corpo=document.getElementById('rpt-corpo');
+  if(!corpo) return;
+  corpo.innerHTML='';
+
+  var docsToShow=fDoc?docentes.filter(function(d){return d.label===fDoc;}):docentes;
+  if(!docsToShow.length){
+    corpo.innerHTML='<div style="padding:36px;text-align:center;color:#94a3b8;font-size:13px">Nenhum docente encontrado com os filtros selecionados.</div>';
+    return;
+  }
+
+  docsToShow.forEach(function(doc){
+    var docId=doc.id||doc._id;
+    // Find orientandos
+    var orientandos=Object.values(MEMBERS).filter(function(m){
+      return m.orientadorId===docId && (m.type==='discente'||m.type==='egresso');
+    });
+    var ativos2=orientandos.filter(function(m){return m.type==='discente';});
+    var egressos2=orientandos.filter(function(m){return m.type==='egresso';});
+    // Apply ano filter
+    if(fAno){
+      ativos2=ativos2.filter(function(m){return m.ano===fAno;});
+      egressos2=egressos2.filter(function(m){return m.ano===fAno;});
+      orientandos=orientandos.filter(function(m){return m.ano===fAno;});
+    }
+    // Find links involving this docente
+    var docLinks=links.filter(function(lk){
+      return lk.a===docId||lk.b===docId||lk.aNome===doc.label||lk.bNome===doc.label;
+    });
+    var typeCount={};
+    docLinks.forEach(function(lk){typeCount[lk.type]=(typeCount[lk.type]||0)+1;});
+
+    var card=document.createElement('div');
+    card.style.cssText='margin:0 0 1px 0;border-bottom:1.5px solid var(--bd)';
+
+    // Header
+    var hd=document.createElement('div');
+    hd.style.cssText='background:linear-gradient(135deg,#0f2d5e,#1a4f8a);color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+    hd.innerHTML='<div>'+
+      '<div style="font-size:14px;font-weight:800;margin-bottom:2px">'+doc.label+
+        '<span style="font-size:10px;font-weight:500;opacity:.6;margin-left:8px">'+doc.cat+'</span></div>'+
+      '<div style="font-size:10.5px;opacity:.7">'+doc.area+'</div>'+
+      (doc.disciplinas&&doc.disciplinas!=='—'?'<div style="font-size:9.5px;opacity:.55;margin-top:2px">📚 '+doc.disciplinas+'</div>':'')+
+    '</div>'+
+    '<div style="display:flex;gap:14px;text-align:center;flex-shrink:0">'+
+      '<div><div style="font-size:17px;font-weight:800">'+orientandos.length+'</div><div style="font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.4px">Orient.</div></div>'+
+      '<div><div style="font-size:17px;font-weight:800">'+ativos2.length+'</div><div style="font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.4px">Ativos</div></div>'+
+      '<div><div style="font-size:17px;font-weight:800">'+egressos2.length+'</div><div style="font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.4px">Egres.</div></div>'+
+      '<div><div style="font-size:17px;font-weight:800">'+docLinks.length+'</div><div style="font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.4px">Vínculos</div></div>'+
+    '</div>';
+
+    var body=document.createElement('div');
+    body.style.cssText='padding:14px 20px;display:none';
+    hd.addEventListener('click',function(){
+      body.style.display=body.style.display==='none'?'block':'none';
+    });
+
+    // Disciplinas section
+    if(doc.disciplinas && doc.disciplinas!=='—'){
+      var dSec=document.createElement('div');
+      dSec.style.cssText='margin-bottom:12px;padding:9px 12px;background:#f0f4ff;border-radius:8px;font-size:11.5px';
+      dSec.innerHTML='<strong style="color:var(--bl)">📚 Disciplinas ministradas:</strong> '+doc.disciplinas;
+      body.appendChild(dSec);
+    }
+
+    if(orientandos.length){
+      var oSec=document.createElement('div');
+      oSec.style.marginBottom='12px';
+      oSec.innerHTML='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:7px">Orientandos ('+orientandos.length+')</div>';
+      var grid=document.createElement('div');
+      grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px';
+      orientandos.forEach(function(o){
+        var itm=document.createElement('div');
+        var isAtivo=o.type==='discente';
+        itm.style.cssText='display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;background:'+(isAtivo?'#fef3c7':'#d1fae5')+';border:1px solid '+(isAtivo?'#fde68a':'#6ee7b7');
+        itm.innerHTML='<span style="font-size:9px;font-weight:700;color:'+(isAtivo?'#b45309':'#065f46')+';padding:1px 5px;border-radius:4px;background:'+(isAtivo?'rgba(180,83,9,.15)':'rgba(6,95,70,.15)')+'">'+
+          (isAtivo?'Ativo':'Egresso')+'</span>'+
+          '<span style="font-size:11.5px;font-weight:600;color:#1a1a1a;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+o.label+'</span>'+
+          '<span style="font-size:10px;color:#64748b;flex-shrink:0">'+o.ano+'</span>';
+        grid.appendChild(itm);
+      });
+      oSec.appendChild(grid);
+      body.appendChild(oSec);
+    }
+
+    if(docLinks.length){
+      var lSec=document.createElement('div');
+      lSec.style.marginBottom='10px';
+      lSec.innerHTML='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:7px">Vínculos ('+docLinks.length+')</div>';
+      var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
+      var typeColors={orient:'#dbeafe:#1e40af',coorient:'#ede9fe:#5b21b6',banca:'#d1fae5:#065f46',acao:'#fef3c7:#b45309',colab:'#e0f2fe:#0369a1',disciplina:'#fce7f3:#9d174d'};
+      docLinks.forEach(function(lk){
+        var other=lk.aNome===doc.label?lk.bNome:lk.aNome;
+        var tc=(typeColors[lk.type]||'#f3f4f6:#374151').split(':');
+        var itm=document.createElement('div');
+        itm.style.cssText='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:11.5px';
+        itm.innerHTML='<span style="font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:'+tc[0]+';color:'+tc[1]+';white-space:nowrap">'+
+          (typeLabels[lk.type]||lk.type)+'</span>'+
+          '<span style="font-weight:600;color:#1a1a1a;flex:1">'+other+'</span>'+
+          (lk.weight?'<div style="display:flex;gap:2px">'+[1,2,3,4,5].map(function(n){return '<div style="width:7px;height:7px;border-radius:2px;background:'+(n<=lk.weight?'#1e40af':'#e2e8f0')+'"></div>';}).join('')+'</div>':'')+
+          (lk.desc?'<span style="color:#94a3b8;font-size:10px">'+lk.desc+'</span>':'');
+        lSec.appendChild(itm);
+      });
+      body.appendChild(lSec);
+    }
+
+    if(!orientandos.length && !docLinks.length){
+      body.innerHTML='<div style="color:#94a3b8;font-size:12px;padding:8px 0">Nenhum orientando ou vínculo cadastrado para este docente ainda.</div>';
+    }
+
+    card.appendChild(hd);card.appendChild(body);
+    corpo.appendChild(card);
+  });
+}
+window.gerarRelatorio=gerarRelatorio;
+
+function exportarRelatorio(){
+  var members=Object.values(MEMBERS);
+  var links=Object.values(LINKS);
+  var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
+  // Members sheet
+  var rows=[['Nome','Tipo','Ano','Área','Cidade','Orientador','Email']];
+  members.forEach(function(m){
+    var ori=m.orientadorId&&MEMBERS[m.orientadorId]?MEMBERS[m.orientadorId].label:'';
+    rows.push([m.label||m.nome||'',m.type||'',m.ano||'',m.area||'',m.cidade||'',ori,m.email||'']);
+  });
+  // Links sheet appended
+  rows.push(['','','','','','','']);
+  rows.push(['VÍNCULOS','','','','','','']);
+  rows.push(['Pessoa A','Pessoa B','Tipo','Peso','Descrição','','']);
+  links.forEach(function(lk){
+    rows.push([lk.aNome||lk.a||'',lk.bNome||lk.b||'',typeLabels[lk.type]||lk.type,lk.weight||'',lk.desc||'','','']);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('
+');
+  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;
+  a.download='relatorio_aquanet_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  toast('CSV exportado!');
+}
+window.exportarRelatorio=exportarRelatorio;
 
 window.goP=goP;window.apF=apF;window.recentrar=recentrar;window.searchGraph=searchGraph;
 window.closeSP=closeSP;window.resetHighlight=resetHighlight;
