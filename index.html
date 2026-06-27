@@ -385,11 +385,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="pg pg-pad" id="pg-admin">
 
   <!-- ADMIN TABS -->
-  <div style="display:flex;gap:0;background:var(--wh);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px">
-    <button class="adtab on" onclick="adTab('mbr',this)" style="flex:1;padding:10px;border:none;background:var(--bll);color:var(--blm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border-right:1.5px solid var(--bd);transition:all .15s">👥 Membros</button>
-    <button class="adtab" onclick="adTab('add',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">➕ Adicionar</button>
-    <button class="adtab" onclick="adTab('lnk',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">🔗 Vínculos</button>
-    <button class="adtab" onclick="adTab('acs',this)" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);transition:all .15s">📌 Ações</button>
+  <div id="adtab-bar" style="display:flex;gap:0;background:var(--wh);border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px">
+    <button class="adtab on" data-tab="mbr" style="flex:1;padding:10px;border:none;background:var(--bll);color:var(--blm);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border-right:1.5px solid var(--bd);transition:all .15s">👥 Membros</button>
+    <button class="adtab" data-tab="add" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">➕ Adicionar</button>
+    <button class="adtab" data-tab="lnk" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);border-right:1.5px solid var(--bd);transition:all .15s">🔗 Vínculos</button>
+    <button class="adtab" data-tab="acs" style="flex:1;padding:10px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--tx2);transition:all .15s">📌 Ações</button>
   </div>
 
   <!-- TAB: MEMBROS -->
@@ -405,7 +405,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
             <option value="egresso">Egressos</option>
             <option value="discente">Ativos</option>
           </select>
-          <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl);font-size:11px" onclick="adTab('add',document.querySelectorAll('.adtab')[1])">+ Novo</button>
+          <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl);font-size:11px" id="btn-add-mbr">+ Novo</button>
         </div>
       </div>
       <div id="adst" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;padding:14px 18px;border-bottom:1.5px solid var(--bd)"></div>
@@ -1168,7 +1168,7 @@ function populateEdSelects(){
 }
 function openEdLink(){
   editLinkKey=null;
-  document.getElementById('ed-title').textContent='🔗 Novo Vínculo';
+  document.getElementById('ed-title').textContent='&#128279; Novo Vínculo';
   document.getElementById('ed-a').value='';
   document.getElementById('ed-b').value='';
   document.getElementById('ed-type').value='orient';
@@ -1250,7 +1250,7 @@ function renderP(q){
   items.forEach(it=>{
     var c=cardColor(it.tipo);
     var img=it.imgURL?'<img class="pcimg" src="'+it.imgURL+'" alt="capa"/>'
-      :'<div class="pcimg" style="background:'+c.bg+'"><span style="font-size:40px">'+(it.emoji||'📌')+'</span></div>';
+      :'<div class="pcimg" style="background:'+c.bg+'"><span style="font-size:40px">'+(it.emoji||'&#128204;')+'</span></div>';
     var av=it.autorFoto?'<div class="pcav"><img src="'+it.autorFoto+'"/></div>'
       :'<div class="pcav" style="background:'+c.bg+';color:'+c.tc+'">'+((it.autorNome||'?').substring(0,2).toUpperCase())+'</div>';
     var d=document.createElement('div');
@@ -1264,7 +1264,7 @@ function verAcao(it){
   var c=cardColor(it.tipo);
   var del=(isAdm()||(USER&&USER.uid===it.autorUID))?'<button class="bsm dan" onclick="delAcao(\''+it._k+'\')">Excluir</button>':'';
   var img=it.imgURL?'<img src="'+it.imgURL+'" style="width:100%;height:200px;object-fit:cover"/>'
-    :'<div style="height:90px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:54px">'+(it.emoji||'📌')+'</div>';
+    :'<div style="height:90px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;font-size:54px">'+(it.emoji||'&#128204;')+'</div>';
   document.getElementById('vomod').innerHTML=img+
     '<div style="padding:22px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:'+c.tc+';margin-bottom:6px">'+it.tipo+'</div>'+
     '<div style="font-size:18px;font-weight:800;margin-bottom:8px;color:#111">'+it.titulo+'</div>'+
@@ -1285,7 +1285,7 @@ async function savAcao(){
   if(!titulo){toast('Informe o título.');return;}
   var data={titulo,tipo:document.getElementById('matp').value,desc:document.getElementById('madesc').value.trim(),
     ano:document.getElementById('maano').value.trim()||new Date().getFullYear()+'',
-    emoji:document.getElementById('maem').value.trim()||'📌',imgURL:'',
+    emoji:document.getElementById('maem').value.trim()||'&#128204;',imgURL:'',
     autorUID:USER.uid,autorNome:USER.displayName||USER.email,autorFoto:USER.photoURL||'',ts:Date.now()};
   await DB.ref('aquanet/acoes').push(data);
   clM(); toast('Ação publicada!');
@@ -1385,7 +1385,7 @@ function renderAd(){
     badge.style.cssText='background:'+bg+';color:'+c+';padding:2px 8px;border-radius:7px;font-size:10px;font-weight:700;flex-shrink:0';
     badge.textContent={docente:'Docente',egresso:'Egresso',discente:'Discente'}[m.type]||m.type;
     var acts=document.createElement('div');acts.className='adra';
-    var eb=document.createElement('button');eb.className='bsm';eb.style.cssText='font-size:11px;padding:2px 8px';eb.textContent='✏️';
+    var eb=document.createElement('button');eb.className='bsm';eb.style.cssText='font-size:11px;padding:2px 8px';eb.textContent='&#9999;️';
     eb.title='Editar';
     eb.addEventListener('click',(function(id){return function(){editMbr(id);};})(mid));
     var db=document.createElement('button');db.className='bsm dan';db.style.cssText='font-size:11px;padding:2px 8px';db.textContent='✕';
@@ -1423,11 +1423,11 @@ function renderAdLinks(){
     var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
     var eb=document.createElement('button');
     eb.style.cssText='padding:4px 9px;border-radius:6px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:10px;font-weight:700;cursor:pointer;color:#334155;font-family:inherit';
-    eb.textContent='✏️ Editar';
+    eb.textContent='&#9999;️ Editar';
     eb.addEventListener('click',(function(key){return function(){openEditLink(key);};})(k));
     var db=document.createElement('button');
     db.style.cssText='padding:4px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:10px;font-weight:700;cursor:pointer;color:#991b1b;font-family:inherit';
-    db.textContent='🗑️';
+    db.textContent='&#128465;️';
     db.addEventListener('click',(function(key){return function(){if(confirm('Excluir este vínculo?'))delLink(key);};})(k));
     acts.appendChild(eb);acts.appendChild(db);
     row.appendChild(badge);row.appendChild(info);row.appendChild(acts);
@@ -1465,7 +1465,7 @@ function checkDuplicate(){
   } else {
     al.style.display='block';
     al.style.background='#d1fae5';al.style.borderColor='#6ee7b7';al.style.color='#065f46';
-    al.innerHTML='✅ Nenhum nó duplicado encontrado. Será criado um nó novo para você.';
+    al.innerHTML='&#9989; Nenhum nó duplicado encontrado. Será criado um nó novo para você.';
   }
 }
 
@@ -1482,7 +1482,7 @@ function searchGraph(q){
   }).slice(0,8);
   if(!matches.length){res.style.display='none';return;}
   res.style.display='block';
-  var icon={docente:'🔵',egresso:'🟢',discente:'🟡'};
+  var icon={docente:'(D)',egresso:'(E)',discente:'(A)'};
   res.innerHTML='';
   matches.forEach(function(m){
     var div=document.createElement('div');
@@ -1546,6 +1546,14 @@ function adTab(id,btn){
 }
 window.adTab=adTab;
 
+// Wire admin tabs via data attributes
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.getElementById('adtab-bar');
+  if(bar){bar.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){adTab(this.getAttribute('data-tab'),this);});});}
+  var b2=document.getElementById('btn-add-mbr');
+  if(b2){b2.addEventListener('click',function(){adTab('add',document.querySelectorAll('.adtab')[1]);});}
+});
+
 // ─── POPULATE ORIENTADOR SELECT ──────────────────────────────────────────────
 function populateAddOriSelect(){
   var sel=document.getElementById('add-ori');
@@ -1560,7 +1568,7 @@ function cancelAddMbr(){
   ['add-nm','add-ano','add-cid','add-area','add-eml','add-editkey'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('add-tp').selectedIndex=0;
   document.getElementById('add-ori').value='';
-  document.getElementById('addmbr-title').textContent='➕ Novo Membro';
+  document.getElementById('addmbr-title').textContent='&#10133; Novo Membro';
   adTab('mbr',document.querySelectorAll('.adtab')[0]);
 }
 function editMbr(id){
@@ -1574,7 +1582,7 @@ function editMbr(id){
   document.getElementById('add-eml').value=m.email||'';
   document.getElementById('add-ori').value=m.orientadorId||'';
   document.getElementById('add-editkey').value=id;
-  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  document.getElementById('addmbr-title').textContent='&#9999;️ Editar Membro';
   adTab('add',document.querySelectorAll('.adtab')[1]);
 }
 async function salvarMbr(){
@@ -1620,7 +1628,7 @@ function editLink(key){
     document.getElementById('ed-weight').value=lk.weight||2;
     document.getElementById('ed-wval').textContent=lk.weight||2;
     document.getElementById('ed-desc').value=lk.desc||'';
-    document.getElementById('ed-title').textContent='✏️ Editar Vínculo';
+    document.getElementById('ed-title').textContent='&#9999;️ Editar Vínculo';
     document.getElementById('edvl').style.display='flex';
   },100);
 }
@@ -1630,7 +1638,7 @@ window.editLink=editLink;
 var editMbrKey=null;
 function openAddMbr(){
   editMbrKey=null;
-  document.getElementById('addmbr-title').textContent='➕ Adicionar Membro';
+  document.getElementById('addmbr-title').textContent='&#10133; Adicionar Membro';
   ['mbr-nm','mbr-ano','mbr-cid','mbr-area','mbr-disc','mbr-email'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('mbr-tp').selectedIndex=1;
   document.getElementById('addmbrvl').style.display='flex';
@@ -1638,7 +1646,7 @@ function openAddMbr(){
 function openEditMbr(key){
   var m=MEMBERS[key];if(!m)return;
   editMbrKey=key;
-  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  document.getElementById('addmbr-title').textContent='&#9999;️ Editar Membro';
   document.getElementById('mbr-nm').value=m.label||m.nome||'';
   document.getElementById('mbr-tp').value=m.type||'egresso';
   document.getElementById('mbr-ano').value=m.ano||'';
@@ -1673,7 +1681,7 @@ window.openAddMbr=openAddMbr;window.openEditMbr=openEditMbr;window.clAddMbr=clAd
 function openEditLink(key){
   var lk=LINKS[key];if(!lk)return;
   editLinkKey=key;
-  document.getElementById('ed-title').textContent='✏️ Editar Vínculo';
+  document.getElementById('ed-title').textContent='&#9999;️ Editar Vínculo';
   populateEdSelects();
   setTimeout(function(){
     document.getElementById('ed-a').value=lk.a||'';
@@ -1704,6 +1712,14 @@ function adTab(id,btn){
   if(id==='mbr') renderAd();
 }
 window.adTab=adTab;
+
+// Wire admin tabs via data attributes
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.getElementById('adtab-bar');
+  if(bar){bar.querySelectorAll('[data-tab]').forEach(function(b){b.addEventListener('click',function(){adTab(this.getAttribute('data-tab'),this);});});}
+  var b2=document.getElementById('btn-add-mbr');
+  if(b2){b2.addEventListener('click',function(){adTab('add',document.querySelectorAll('.adtab')[1]);});}
+});
 
 // Populate orientador selects in admin add form
 function populateOriSelects(){
@@ -1743,7 +1759,7 @@ function editMbr(key){
   var m=MEMBERS[key];
   if(!m) return;
   editingMbrKey=key;
-  document.getElementById('addmbr-title').textContent='✏️ Editar Membro';
+  document.getElementById('addmbr-title').textContent='&#9999;️ Editar Membro';
   document.getElementById('add-nm').value=m.label||m.nome||'';
   document.getElementById('add-tp').value=m.type||'discente';
   document.getElementById('add-ano').value=m.ano||'';
@@ -1760,7 +1776,7 @@ function editMbr(key){
 
 function cancelAddMbr(){
   editingMbrKey=null;
-  document.getElementById('addmbr-title').textContent='➕ Novo Membro';
+  document.getElementById('addmbr-title').textContent='&#10133; Novo Membro';
   ['add-nm','add-ano','add-cid','add-area','add-eml'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.value='';
   });
@@ -1809,11 +1825,11 @@ function renderAd(q,ft){
     var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
     var editbtn=document.createElement('button');
     editbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:var(--tx2)';
-    editbtn.textContent='✏️';editbtn.title='Editar';
+    editbtn.textContent='&#9999;️';editbtn.title='Editar';
     editbtn.addEventListener('click',function(){editMbr(m.id||m._id);});
     var delbtn=document.createElement('button');
     delbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:11px;font-weight:600;cursor:pointer;color:#991b1b';
-    delbtn.textContent='🗑️';delbtn.title='Excluir';
+    delbtn.textContent='&#128465;️';delbtn.title='Excluir';
     delbtn.addEventListener('click',function(){delMbr(m.id||m._id,m.label||m.nome||'');});
     acts.appendChild(editbtn);acts.appendChild(delbtn);
     row.appendChild(av);row.appendChild(info);row.appendChild(badge);row.appendChild(acts);
@@ -1844,11 +1860,11 @@ function renderAdLinks(){
     var acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0';
     var editbtn=document.createElement('button');
     editbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid var(--bd);background:#fff;font-size:11px;cursor:pointer;color:var(--tx2)';
-    editbtn.textContent='✏️';editbtn.title='Editar vínculo';
+    editbtn.textContent='&#9999;️';editbtn.title='Editar vínculo';
     editbtn.addEventListener('click',function(){editLink(k,lk);});
     var delbtn=document.createElement('button');
     delbtn.style.cssText='padding:3px 9px;border-radius:6px;border:1.5px solid #fca5a5;background:#fee2e2;font-size:11px;cursor:pointer;color:#991b1b';
-    delbtn.textContent='🗑️';delbtn.title='Excluir';
+    delbtn.textContent='&#128465;️';delbtn.title='Excluir';
     delbtn.addEventListener('click',function(){delLink(k);});
     acts.appendChild(editbtn);acts.appendChild(delbtn);
     row.appendChild(info);row.appendChild(acts);
@@ -1914,7 +1930,7 @@ function populateDocSelect(){
   }).join('');
   // Filtro no grafo
   var sel=document.getElementById('f-doc-sel');
-  if(sel) sel.innerHTML='<option value="">🔍 Rede de um docente...</option>'+opts;
+  if(sel) sel.innerHTML='<option value="">&#128269; Rede de um docente...</option>'+opts;
   // Filtro no relatório
   var rsel=document.getElementById('rpt-doc');
   if(rsel) rsel.innerHTML='<option value="">Todos os docentes</option>'+
@@ -2009,7 +2025,7 @@ function gerarRelatorio(){
       '<div style="font-size:14px;font-weight:800;margin-bottom:2px">'+doc.label+
         '<span style="font-size:10px;font-weight:500;opacity:.6;margin-left:8px">'+doc.cat+'</span></div>'+
       '<div style="font-size:10.5px;opacity:.7">'+doc.area+'</div>'+
-      (doc.disciplinas&&doc.disciplinas!=='—'?'<div style="font-size:9.5px;opacity:.55;margin-top:2px">📚 '+doc.disciplinas+'</div>':'')+
+      (doc.disciplinas&&doc.disciplinas!=='—'?'<div style="font-size:9.5px;opacity:.55;margin-top:2px">&#128218; '+doc.disciplinas+'</div>':'')+
     '</div>'+
     '<div style="display:flex;gap:14px;text-align:center;flex-shrink:0">'+
       '<div><div style="font-size:17px;font-weight:800">'+orientandos.length+'</div><div style="font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.4px">Orient.</div></div>'+
@@ -2028,7 +2044,7 @@ function gerarRelatorio(){
     if(doc.disciplinas && doc.disciplinas!=='—'){
       var dSec=document.createElement('div');
       dSec.style.cssText='margin-bottom:12px;padding:9px 12px;background:#f0f4ff;border-radius:8px;font-size:11.5px';
-      dSec.innerHTML='<strong style="color:var(--bl)">📚 Disciplinas ministradas:</strong> '+doc.disciplinas;
+      dSec.innerHTML='<strong style="color:var(--bl)">&#128218; Disciplinas ministradas:</strong> '+doc.disciplinas;
       body.appendChild(dSec);
     }
 
@@ -2087,26 +2103,26 @@ function exportarRelatorio(){
   var members=Object.values(MEMBERS);
   var links=Object.values(LINKS);
   var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
-  // Members sheet
   var rows=[['Nome','Tipo','Ano','Área','Cidade','Orientador','Email']];
-  members.forEach(function(m){
+  members.sort(function(a,b){return (a.label||'').localeCompare(b.label||'');}).forEach(function(m){
     var ori=m.orientadorId&&MEMBERS[m.orientadorId]?MEMBERS[m.orientadorId].label:'';
     rows.push([m.label||m.nome||'',m.type||'',m.ano||'',m.area||'',m.cidade||'',ori,m.email||'']);
   });
-  // Links sheet appended
   rows.push(['','','','','','','']);
   rows.push(['VÍNCULOS','','','','','','']);
   rows.push(['Pessoa A','Pessoa B','Tipo','Peso','Descrição','','']);
   links.forEach(function(lk){
     rows.push([lk.aNome||lk.a||'',lk.bNome||lk.b||'',typeLabels[lk.type]||lk.type,lk.weight||'',lk.desc||'','','']);
   });
-  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('
-');
-  var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  var NL=String.fromCharCode(10);
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join(NL);
+  var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;
+  var a=document.createElement('a');
+  a.href=url;
   a.download='relatorio_aquanet_'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click();URL.revokeObjectURL(url);
+  a.click();
+  URL.revokeObjectURL(url);
   toast('CSV exportado!');
 }
 window.exportarRelatorio=exportarRelatorio;
