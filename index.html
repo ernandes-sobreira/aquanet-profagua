@@ -573,11 +573,22 @@ function doLogout(){firebase.auth().signOut();}
 
 // ─── LOAD ─────────────────────────────────────────────────────────────────────
 function loadAll(){
-  DB.ref('aquanet/members').once('value').then(s=>{
-    var ex=s.val()||{}, bt={};
-    DOCENTES_SEED.forEach(d=>{if(!ex[d.id]) bt[d.id]={...d,type:'docente',seeded:true};});
-    DISC_SEED.forEach(d=>{if(!ex[d.id]) bt[d.id]={...d,seeded:true,cidade:'MT'};});
-    if(Object.keys(bt).length) DB.ref('aquanet/members').update(bt);
+  // Seed control: only run once per version to avoid duplicates
+  DB.ref('aquanet/seedVersion').once('value').then(s=>{
+    if(s.val()==='v5') return; // already seeded this version
+    DB.ref('aquanet/members').once('value').then(snap=>{
+      var ex=snap.val()||{}, bt={};
+      // Remove old-format seed nodes (disc-at-*, disc-eg-* from previous versions)
+      var toRemove={};
+      Object.keys(ex).forEach(k=>{
+        if(k.startsWith('disc-at-')||k.startsWith('disc-eg-')) toRemove[k]=null;
+      });
+      if(Object.keys(toRemove).length) DB.ref('aquanet/members').update(toRemove);
+      DOCENTES_SEED.forEach(d=>{if(!ex[d.id]||ex[d.id].seeded) bt[d.id]={...d,type:'docente',seeded:true};});
+      DISC_SEED.forEach(d=>{if(!ex[d.id]||ex[d.id].seeded) bt[d.id]={...d,seeded:true,cidade:'Cáceres-MT'};});
+      if(Object.keys(bt).length) DB.ref('aquanet/members').update(bt);
+      DB.ref('aquanet/seedVersion').set('v5');
+    });
   });
   DB.ref('aquanet/members').on('value',s=>{MEMBERS=s.val()||{};updStats();buildGraph();populateEdSelects();});
   DB.ref('aquanet/acoes').on('value',s=>{ACOES=s.val()||{};renderP('');updStats();if(isAdm())renderAdAc();});
