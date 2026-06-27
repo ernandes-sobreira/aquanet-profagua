@@ -633,7 +633,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <div><label>Ano</label><input id="maano" placeholder="2025" maxlength="4"/></div>
         <div><label>Emoji</label><input id="maem" placeholder="💧" maxlength="2"/></div>
       </div>
-      <div class="mac">
+      <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx2);display:block;margin-top:10px;margin-bottom:5px">Foto de capa (opcional)</label>
+      <div style="border:2px dashed var(--bd);border-radius:9px;padding:14px;text-align:center;background:#f9fafb;position:relative;cursor:pointer">
+        <input type="file" id="maimg" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="prevAcaoFoto(this)"/>
+        <div id="acao-foto-prev" style="display:none;margin-bottom:6px"><img id="acao-foto-img" style="max-height:110px;border-radius:7px;max-width:100%;object-fit:cover"/></div>
+        <div id="acao-foto-hint" style="font-size:12px;color:#94a3b8">Clique para adicionar foto de capa</div>
+      </div>
+      <div class="mac" style="margin-top:12px">
         <button class="bsm" onclick="clM()">Cancelar</button>
         <button class="bsm pri" style="background:var(--bl);color:#fff;border-color:var(--bl)" onclick="savAcao()">Publicar</button>
       </div>
@@ -809,7 +815,7 @@ function loadAll(){
       DB.ref('aquanet/seedVersion').set('v5');
     });
   });
-  DB.ref('aquanet/members').on('value',s=>{MEMBERS=s.val()||{};updStats();buildGraph();populateEdSelects();});
+  DB.ref('aquanet/members').on('value',s=>{MEMBERS=s.val()||{};updStats();buildGraph();populateEdSelects();populateDocSelect();populateOriSelects();});
   DB.ref('aquanet/acoes').on('value',s=>{ACOES=s.val()||{};renderP('');updStats();if(isAdm())renderAdAc();});
   DB.ref('aquanet/links').on('value',s=>{LINKS=s.val()||{};buildGraph();updStats();if(isAdm())renderAdLinks();});
 }
@@ -1275,20 +1281,59 @@ function verAcao(it){
 }
 function openMac(){
   ['matit','madesc','maano','maem'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  var sel=document.getElementById('matp');if(sel)sel.selectedIndex=0;
+  _acaoFotoB64='';
+  var prev=document.getElementById('acao-foto-prev');
+  if(prev) prev.style.display='none';
+  var hint=document.getElementById('acao-foto-hint');
+  if(hint) hint.textContent='Clique para adicionar foto de capa';
+  var inp=document.getElementById('maimg');
+  if(inp) inp.value='';
   document.getElementById('movl').style.display='flex';
 }
-function clM(){document.getElementById('movl').style.display='none';}
+function clM(){
+  document.getElementById('movl').style.display='none';
+  _acaoFotoB64='';
+  var prev=document.getElementById('acao-foto-prev');
+  if(prev) prev.style.display='none';
+  var hint=document.getElementById('acao-foto-hint');
+  if(hint) hint.textContent='Clique para adicionar foto de capa';
+  var inp=document.getElementById('maimg');
+  if(inp) inp.value='';
+}
+var _acaoFotoB64='';
+
+function prevAcaoFoto(input){
+  var file=input.files[0];
+  if(!file) return;
+  if(file.size>3*1024*1024){toast('Foto muito grande (max 3MB).');input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _acaoFotoB64=e.target.result;
+    var img=document.getElementById('acao-foto-img');
+    var prev=document.getElementById('acao-foto-prev');
+    var hint=document.getElementById('acao-foto-hint');
+    if(img) img.src=_acaoFotoB64;
+    if(prev) prev.style.display='';
+    if(hint) hint.textContent='Foto selecionada. Clique para trocar.';
+  };
+  reader.readAsDataURL(file);
+}
+window.prevAcaoFoto=prevAcaoFoto;
+
 async function savAcao(){
-  if(!USER){toast('Faça login primeiro.');return;}
+  if(!USER){toast('Faca login primeiro.');return;}
   var titulo=document.getElementById('matit').value.trim();
-  if(!titulo){toast('Informe o título.');return;}
-  var data={titulo,tipo:document.getElementById('matp').value,desc:document.getElementById('madesc').value.trim(),
+  if(!titulo){toast('Informe o titulo.');return;}
+  var imgURL=_acaoFotoB64?_acaoFotoB64.substring(0,150000):'';
+  var data={titulo,
+    tipo:document.getElementById('matp').value,
+    desc:document.getElementById('madesc').value.trim(),
     ano:document.getElementById('maano').value.trim()||new Date().getFullYear()+'',
-    emoji:document.getElementById('maem').value.trim()||'&#128204;',imgURL:'',
+    emoji:document.getElementById('maem').value.trim()||'*',
+    imgURL,
     autorUID:USER.uid,autorNome:USER.displayName||USER.email,autorFoto:USER.photoURL||'',ts:Date.now()};
   await DB.ref('aquanet/acoes').push(data);
-  clM(); toast('Ação publicada!');
+  clM(); toast('Acao publicada!');
 }
 async function delAcao(key){
   if(!confirm('Excluir esta ação?')) return;
