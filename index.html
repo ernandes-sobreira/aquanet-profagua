@@ -846,47 +846,88 @@ function recentrar(){
 
 // ─── SIDE PANEL ───────────────────────────────────────────────────────────────
 function openSP(d){
-  var c={docente:{fill:'#dbeafe',stroke:'#1d4ed8',text:'#1e40af'},egresso:{fill:'#d1fae5',stroke:'#065f46',text:'#065f46'},discente:{fill:'#fef3c7',stroke:'#b45309',text:'#92400e'}}[d.type]||{fill:'#f3f4f6',stroke:'#374151',text:'#374151'};
+  var typeColors={
+    docente:{fill:'#dbeafe',stroke:'#1d4ed8',text:'#1e40af',g1:'#93c5fd',g2:'#1d4ed8'},
+    egresso:{fill:'#d1fae5',stroke:'#065f46',text:'#065f46',g1:'#6ee7b7',g2:'#059669'},
+    discente:{fill:'#fef3c7',stroke:'#b45309',text:'#92400e',g1:'#fcd34d',g2:'#d97706'}
+  };
+  var c=typeColors[d.type]||typeColors.discente;
   var rl={docente:'Docente',egresso:'Egresso',discente:'Discente ativo'}[d.type]||d.type;
-  var av=d.photoURL?'<img src="'+d.photoURL+'"/>':'<span style="color:#fff;font-size:22px;font-weight:900">'+(d.initials||'??').substring(0,2)+'</span>';
-  var orient='';
-  if(d.orientadorId&&MEMBERS[d.orientadorId]) orient='<div class="spf"><label>Orientador</label><p>'+(MEMBERS[d.orientadorId].label||'')+'</p></div>';
 
-  // count links
-  var myLinks=Object.values(LINKS).filter(lk=>lk.a===d._id||lk.b===d._id);
-  var linksHtml='';
-  if(myLinks.length){
-    var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração'};
-    linksHtml='<div class="spf"><label>Vínculos cadastrados</label><p>'+
-      myLinks.map(lk=>{
-        var other=lk.a===d._id?MEMBERS[lk.b]:MEMBERS[lk.a];
-        var w=lk.weight||1;
-        return '<span class="link-badge">'+typeLabels[lk.type||'colab']+' · '+(other?other.label.split(' ')[0]:'?')+' <span style="opacity:.6">(×'+w+')</span></span>';
-      }).join('')+'</p></div>';
+  var container=document.getElementById('spin');
+  container.innerHTML='';
+
+  // Close button
+  var xbtn=document.createElement('button');
+  xbtn.className='spx';xbtn.innerHTML='✕';
+  xbtn.addEventListener('click',function(){closeSP();resetHighlight();});
+  container.appendChild(xbtn);
+
+  // Avatar
+  var avDiv=document.createElement('div');
+  avDiv.className='spav';
+  avDiv.style.background='linear-gradient(135deg,'+c.g1+','+c.g2+')';
+  if(d.photoURL){
+    var img=document.createElement('img');img.src=d.photoURL;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
+    avDiv.appendChild(img);
+  } else {
+    avDiv.style.color='#fff';avDiv.style.fontSize='22px';avDiv.style.fontWeight='900';
+    avDiv.textContent=(d.initials||'??').substring(0,2).toUpperCase();
+  }
+  container.appendChild(avDiv);
+
+  // Name
+  var nm=document.createElement('div');nm.className='spnm';nm.textContent=d.label||d.nome||'';container.appendChild(nm);
+
+  // Badge
+  var bg=document.createElement('span');bg.className='spbg';
+  bg.style.background=c.fill;bg.style.color=c.text;
+  bg.textContent=rl+(d.ano?' · '+d.ano:'');container.appendChild(bg);
+
+  var hr=document.createElement('hr');hr.className='sphr';container.appendChild(hr);
+
+  function addField(label,value,isLink){
+    if(!value) return;
+    var f=document.createElement('div');f.className='spf';
+    var lbl=document.createElement('label');lbl.textContent=label;f.appendChild(lbl);
+    if(isLink){var a=document.createElement('a');a.href='mailto:'+value;a.textContent=value;a.className='spf a';f.appendChild(a);}
+    else{var p=document.createElement('p');p.textContent=value;f.appendChild(p);}
+    container.appendChild(f);
   }
 
-  document.getElementById('spin').innerHTML=
-    '<button class="spx" onclick="closeSP();resetHighlight()">✕</button>'+
-    '<div class="spav" style="background:linear-gradient(135deg,'+GRAD[d.type||'discente'][0]+','+GRAD[d.type||'discente'][1]+')">'+av+'</div>'+
-    '<div class="spnm">'+(d.label||d.nome||'')+'</div>'+
-    '<span class="spbg" style="background:'+c.fill+';color:'+c.text+'">'+rl+(d.ano?' · '+d.ano:'')+'</span>'+
-    '<hr class="sphr"/>'+
-    '<div class="spf"><label>Área</label><p>'+(d.area||'—')+'</p></div>'+
-    (d.disciplinas&&d.disciplinas!=='—'?'<div class="spf"><label>Disciplinas</label><p>'+d.disciplinas+'</p></div>':'')+
-    orient+
-    (d.cidade&&d.cidade!=='MT'?'<div class="spf"><label>Cidade</label><p>'+d.cidade+'</p></div>':'')+
-    (d.inst?'<div class="spf"><label>Instituição</label><p>'+d.inst+'</p></div>':'')+
-    (d.email?'<div class="spf"><label>Contato</label><a href="mailto:'+d.email+'">'+d.email+'</a></div>':'')+
-    (d.bio?'<div class="spf"><label>Bio</label><p>'+d.bio+'</p></div>':'')+
-    linksHtml+
-    '');
+  addField('Área',d.area||'—');
+  if(d.disciplinas&&d.disciplinas!=='—') addField('Disciplinas',d.disciplinas);
+  if(d.orientadorId&&MEMBERS[d.orientadorId]) addField('Orientador',MEMBERS[d.orientadorId].label||'');
+  if(d.cidade&&d.cidade!=='MT') addField('Cidade',d.cidade);
+  if(d.inst) addField('Instituição',d.inst);
+  if(d.email) addField('Contato',d.email,true);
+  if(d.bio) addField('Bio',d.bio);
+
+  // Links
+  var myLinks=Object.values(LINKS).filter(function(lk){return lk.a===d._id||lk.b===d._id||lk.a===d.id||lk.b===d.id;});
+  if(myLinks.length){
+    var lkDiv=document.createElement('div');lkDiv.className='spf';
+    var lkLbl=document.createElement('label');lkLbl.textContent='Vínculos cadastrados';lkDiv.appendChild(lkLbl);
+    var lkP=document.createElement('p');
+    var typeLabels={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
+    myLinks.forEach(function(lk){
+      var nodeId=d._id||d.id;
+      var otherId=lk.a===nodeId?lk.b:lk.a;
+      var other=MEMBERS[otherId];
+      var span=document.createElement('span');span.className='link-badge';
+      span.textContent=(typeLabels[lk.type||'colab']||lk.type)+' · '+(other?(other.label||'').split(' ')[0]:lk.aNome||'?')+(lk.weight?' ×'+lk.weight:'');
+      lkP.appendChild(span);
+    });
+    lkDiv.appendChild(lkP);container.appendChild(lkDiv);
+  }
+
   if(canEdit()){
     var editBtn=document.createElement('button');
-    editBtn.className='sp-edit-btn';
-    editBtn.textContent='+ Adicionar vínculo com este membro';
-    editBtn.addEventListener('click',function(){openEdLinkFor(d._id);});
-    document.getElementById('spin').appendChild(editBtn);
+    editBtn.className='sp-edit-btn';editBtn.textContent='+ Adicionar vínculo com este membro';
+    editBtn.addEventListener('click',function(){openEdLinkFor(d._id||d.id);});
+    container.appendChild(editBtn);
   }
+
   document.getElementById('spanel').classList.add('open');
 }
 function closeSP(){document.getElementById('spanel').classList.remove('open');}
