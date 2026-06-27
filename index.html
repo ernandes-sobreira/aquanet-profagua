@@ -550,9 +550,9 @@ firebase.auth().onAuthStateChanged(u=>{
     document.getElementById('btnlog').style.display='none';
     document.getElementById('btnout').style.display='';
     document.getElementById('btnnova').style.display='';
+    document.getElementById('btn-add-link').style.display='';
     if(isAdm()){
       document.getElementById('btnadm').style.display='';
-      document.getElementById('btn-add-link').style.display='';
     }
     loadUP(); loadAll();
   } else {
@@ -879,7 +879,14 @@ function openSP(d){
     (d.email?'<div class="spf"><label>Contato</label><a href="mailto:'+d.email+'">'+d.email+'</a></div>':'')+
     (d.bio?'<div class="spf"><label>Bio</label><p>'+d.bio+'</p></div>':'')+
     linksHtml+
-    (canEdit()?'<button class="sp-edit-btn" onclick="openEdLinkFor(\''+d._id+'\')">+ Adicionar vínculo com este membro</button>':'');
+    '');
+  if(canEdit()){
+    var editBtn=document.createElement('button');
+    editBtn.className='sp-edit-btn';
+    editBtn.textContent='+ Adicionar vínculo com este membro';
+    editBtn.addEventListener('click',function(){openEdLinkFor(d._id);});
+    document.getElementById('spin').appendChild(editBtn);
+  }
   document.getElementById('spanel').classList.add('open');
 }
 function closeSP(){document.getElementById('spanel').classList.remove('open');}
@@ -887,10 +894,15 @@ function closeSP(){document.getElementById('spanel').classList.remove('open');}
 // ─── LINK EDITOR ──────────────────────────────────────────────────────────────
 var editLinkKey=null;
 function populateEdSelects(){
-  var opts=Object.values(MEMBERS).sort((a,b)=>(a.label||'').localeCompare(b.label||'')).map(m=>'<option value="'+m._id+'">'+m.label+'</option>').join('');
-  ['ed-a','ed-b'].forEach(id=>{
+  var sorted=Object.values(MEMBERS).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  var opts=sorted.map(function(m){
+    var mid=m.id||m._id||'';
+    var lbl=(m.label||m.nome||'')+(m.type==='docente'?' (Docente)':m.type==='egresso'?' (Egresso '+m.ano+')':' (Discente '+m.ano+')');
+    return '<option value="'+mid+'">'+lbl+'</option>';
+  }).join('');
+  ['ed-a','ed-b'].forEach(function(id){
     var el=document.getElementById(id);
-    if(el) el.innerHTML='<option value="">Selecione...</option>'+opts;
+    if(el) el.innerHTML='<option value="">Selecione a pessoa...</option>'+opts;
   });
 }
 function openEdLink(){
@@ -917,15 +929,23 @@ async function savLink(){
   var desc=document.getElementById('ed-desc').value.trim();
   if(!a||!b){toast('Selecione as duas pessoas.');return;}
   if(a===b){toast('Escolha pessoas diferentes.');return;}
-  var data={a,b,type:tp,weight:w,desc,createdBy:USER?USER.uid:'',ts:Date.now()};
-  if(editLinkKey){
-    await DB.ref('aquanet/links/'+editLinkKey).update(data);
-    toast('Vínculo atualizado!');
-  } else {
-    await DB.ref('aquanet/links').push(data);
-    toast('Vínculo adicionado!');
-  }
-  clEd();
+  // Validate both members exist
+  if(!MEMBERS[a]){toast('Membro A não encontrado. Recarregue a página.');return;}
+  if(!MEMBERS[b]){toast('Membro B não encontrado. Recarregue a página.');return;}
+  var data={a,b,type:tp,weight:w,desc,
+    aNome:MEMBERS[a].label||MEMBERS[a].nome||'',
+    bNome:MEMBERS[b].label||MEMBERS[b].nome||'',
+    createdBy:USER?USER.uid:'',ts:Date.now()};
+  try {
+    if(editLinkKey){
+      await DB.ref('aquanet/links/'+editLinkKey).update(data);
+      toast('Vínculo atualizado!');
+    } else {
+      await DB.ref('aquanet/links').push(data);
+      toast('Vínculo adicionado! O grafo será atualizado em breve.');
+    }
+    clEd();
+  } catch(err){toast('Erro ao salvar: '+err.message);}
 }
 
 // ─── PADLET ───────────────────────────────────────────────────────────────────

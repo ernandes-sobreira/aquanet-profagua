@@ -3,703 +3,667 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>SiGEv · Sistema de Gestão de Evidências — ProfÁgua UNEMAT</title>
+<title>SiGEv · Gestão de Evidências ProfÁgua UNEMAT</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <style>
-/* ─── DESIGN TOKENS ──────────────────────────────────────────────────────── */
 :root{
-  --ink:#0f1f38;--ink2:#3a5270;--ink3:#7a90a8;
-  --sea:#0e7490;--seal:#e0f2fe;--seam:#0891b2;
-  --navy:#0f2d5e;--navym:#1a4f8a;--navyl:#dbeafe;
-  --amber:#b45309;--amberl:#fef3c7;--amberm:#d97706;
-  --emerald:#065f46;--emeraldl:#d1fae5;
-  --rose:#991b1b;--rosel:#fee2e2;
-  --slate:#f0f4f8;--slateb:#e2e8f0;--slated:#94a3b8;
-  --white:#ffffff;--card:#ffffff;
-  --r:12px;--r2:8px;--r3:6px;
-  --sh:0 1px 3px rgba(15,31,56,.08),0 4px 16px rgba(15,31,56,.06);
-  --sh2:0 4px 24px rgba(15,31,56,.14);
+  --navy:#0c2340;--navym:#0f2d5e;--navyl:#dbeafe;
+  --sea:#0077a8;--seal:#e0f2fe;--seam:#0369a1;
+  --teal:#0e7490;--teall:#cffafe;
+  --green:#065f46;--greenl:#d1fae5;
+  --amber:#92400e;--amberl:#fef3c7;--amberm:#b45309;
+  --rose:#881337;--rosel:#ffe4e6;--rosem:#be123c;
+  --violet:#4c1d95;--violetl:#ede9fe;
+  --slate:#f1f5f9;--slateb:#e2e8f0;--slated:#94a3b8;--slatek:#64748b;
+  --ink:#0f172a;--ink2:#334155;--ink3:#64748b;
+  --white:#fff;--r:10px;--r2:7px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.05);
+  --sh2:0 8px 32px rgba(0,0,0,.14);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--slate);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.6}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--slate);color:var(--ink);min-height:100vh;font-size:14px}
 
-/* ─── TOPBAR ──────────────────────────────────────────────────────────────── */
-#topbar{background:linear-gradient(135deg,var(--navy) 0%,var(--navym) 60%,var(--sea) 100%);height:54px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:300;gap:12px;box-shadow:0 2px 16px rgba(15,45,94,.4)}
-#brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
-.brand-icon{width:36px;height:36px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.brand-text h1{font-size:14px;font-weight:800;color:#fff;letter-spacing:-.3px;line-height:1}
-.brand-text p{font-size:9.5px;color:rgba(255,255,255,.6);font-weight:500;letter-spacing:.3px;text-transform:uppercase}
-#mainnav{display:flex;gap:1px;margin-left:16px}
-.ntab{padding:6px 13px;border-radius:16px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.65);font-family:inherit;transition:all .18s;letter-spacing:.1px;white-space:nowrap}
-.ntab:hover{background:rgba(255,255,255,.12);color:#fff}
-.ntab.on{background:rgba(255,255,255,.2);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.3)}
-#topright{display:flex;align-items:center;gap:8px;margin-left:auto}
-#uph{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.4);object-fit:cover}
-#unm{font-size:11px;color:rgba(255,255,255,.8);font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tbtn{padding:5px 12px;border-radius:7px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#fff;transition:all .15s}
-.tbtn:hover{background:rgba(255,255,255,.2)}
-.tbtn.acc{background:#fff;color:var(--navy);border-color:#fff}
-.tbtn.acc:hover{background:#e8f0fe}
-.tbtn.out{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+/* TOPBAR */
+#tb{background:linear-gradient(135deg,var(--navy),var(--navym) 65%,var(--sea));height:52px;display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:300;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+#br{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.bico{width:34px;height:34px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.bh1{font-size:14px;font-weight:800;color:#fff;letter-spacing:-.2px;line-height:1}
+.bh2{font-size:9px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+#mnav{display:flex;gap:1px;margin-left:12px;overflow-x:auto;scrollbar-width:none}
+.nt{padding:5px 12px;border-radius:14px;border:none;background:transparent;font-size:11.5px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.65);font-family:inherit;transition:all .16s;white-space:nowrap}
+.nt:hover{background:rgba(255,255,255,.12);color:#fff}
+.nt.on{background:rgba(255,255,255,.2);color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.3)}
+#uarea{display:flex;align-items:center;gap:7px;margin-left:auto;flex-shrink:0}
+#uph{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.4);object-fit:cover}
+#unm{font-size:11px;color:rgba(255,255,255,.8);font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xb{padding:4px 11px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#fff;transition:all .14s}
+.xb:hover{background:rgba(255,255,255,.2)}
+.xb.acc{background:#fff;color:var(--navym)}
+.xb.out{background:rgba(239,68,68,.15);color:#fca5a5}
 
-/* ─── SUBNAV ──────────────────────────────────────────────────────────────── */
-#subnav{background:var(--white);border-bottom:1.5px solid var(--slateb);padding:0 20px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
-.stab{padding:10px 16px;border-bottom:2.5px solid transparent;border-top:none;border-left:none;border-right:none;background:none;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink3);font-family:inherit;white-space:nowrap;transition:all .15s;letter-spacing:.1px}
-.stab:hover{color:var(--sea);background:var(--seal)}
-.stab.on{color:var(--sea);border-bottom-color:var(--sea);background:transparent}
+/* STAT BAR */
+#sb{background:var(--white);border-bottom:1.5px solid var(--slateb);padding:10px 18px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.si{display:flex;align-items:center;gap:7px;padding:0 16px;border-right:1.5px solid var(--slateb);flex-shrink:0}
+.si:first-child{padding-left:0}
+.si:last-child{border-right:none}
+.siv{font-size:20px;font-weight:800;color:var(--ink)}
+.sil{font-size:9.5px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:1px}
+.sid{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
-.pg{display:none;padding:20px;max-width:1120px;margin:0 auto}
+/* PAGES */
+.pg{display:none;padding:18px;max-width:1140px;margin:0 auto;padding-bottom:60px}
 .pg.on{display:block}
-.pgfull{display:none;height:calc(100vh - 54px - 43px)}
-.pgfull.on{display:flex}
 
-/* ─── CARD ────────────────────────────────────────────────────────────────── */
-.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1.5px solid var(--slateb);margin-bottom:16px}
-.ch{padding:14px 20px;border-bottom:1.5px solid var(--slateb);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ch h2{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px}
-.cb{padding:18px 20px}
+/* CARD */
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);border:1.5px solid var(--slateb);margin-bottom:14px}
+.ch{padding:12px 18px;border-bottom:1.5px solid var(--slateb);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ch h2{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px}
+.cb{padding:16px 18px}
 
-/* ─── STAT ROW ────────────────────────────────────────────────────────────── */
-#statr{background:var(--white);border-bottom:1.5px solid var(--slateb);padding:12px 20px;display:flex;gap:0;align-items:stretch;overflow-x:auto}
-.st{display:flex;align-items:center;gap:8px;padding:0 18px;border-right:1.5px solid var(--slateb);flex-shrink:0}
-.st:last-child{border-right:none}
-.st:first-child{padding-left:0}
-.stv{font-size:22px;font-weight:800;color:var(--ink);line-height:1}
-.stl{font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-.std{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.g13{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+@media(max-width:700px){.g2,.g3,.g4,.g13{grid-template-columns:1fr}}
 
-/* ─── FORM ────────────────────────────────────────────────────────────────── */
-.fg{display:grid;gap:12px;margin-bottom:14px}
-.fg1{grid-template-columns:1fr}
-.fg2{grid-template-columns:1fr 1fr}
-.fg3{grid-template-columns:1fr 1fr 1fr}
-.fg4{grid-template-columns:1fr 1fr 1fr 1fr}
-@media(max-width:680px){.fg2,.fg3,.fg4{grid-template-columns:1fr}}
-.fl{display:flex;flex-direction:column;gap:5px}
-.fl label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--sea)}
-.fl label .req{color:var(--rose);margin-left:2px}
-.fl input,.fl select,.fl textarea{font-size:13px;color:var(--ink);border:1.5px solid var(--slateb);border-radius:var(--r2);padding:8px 11px;background:var(--slate);outline:none;width:100%;font-family:inherit;transition:border-color .15s,box-shadow .15s}
-.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--sea);background:#fff;box-shadow:0 0 0 3px rgba(14,116,144,.12)}
-.fl textarea{resize:vertical;min-height:76px}
-.fl input[readonly]{opacity:.6;cursor:not-allowed}
-.frow{display:flex;gap:10px;align-items:flex-end}
+/* FORM */
+.fl{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+.fl label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal)}
+.fl label .rq{color:var(--rosem)}
+.fl input,.fl select,.fl textarea{font-size:13px;color:var(--ink);border:1.5px solid var(--slateb);border-radius:var(--r2);padding:8px 10px;background:var(--slate);outline:none;width:100%;font-family:inherit;transition:border-color .14s}
+.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(14,116,144,.1)}
+.fl textarea{resize:vertical;min-height:74px}
+.frow{display:flex;gap:9px;align-items:flex-end}
+.fsec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3);padding:12px 0 7px;border-top:1.5px solid var(--slateb);margin-top:4px}
+.fsec:first-child{border-top:none;padding-top:0}
 
-/* ─── EVIDENCE PILLS ─────────────────────────────────────────────────────── */
-.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;margin:14px 0}
-.ev-card{border:2px solid var(--slateb);border-radius:var(--r2);padding:10px 12px;cursor:pointer;transition:all .18s;position:relative;user-select:none}
-.ev-card:hover{border-color:var(--sea);background:var(--seal)}
-.ev-card.sel{border-color:var(--sea);background:var(--seal);box-shadow:0 0 0 3px rgba(14,116,144,.15)}
-.ev-card.sel .ev-icon{background:var(--sea);color:#fff}
-.ev-card.req-E{border-left:4px solid var(--rose)}
-.ev-card.req-R{border-left:4px solid var(--amber)}
-.ev-card.req-O{border-left:4px solid var(--slated)}
-.ev-icon{width:32px;height:32px;border-radius:7px;background:var(--slate);display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:6px;transition:all .18s}
-.ev-sig{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--sea)}
-.ev-name{font-size:11px;font-weight:700;color:var(--ink);margin-top:1px;line-height:1.3}
-.ev-req{position:absolute;top:8px;right:8px;font-size:8px;font-weight:800;padding:1px 5px;border-radius:4px}
-.ev-req.E{background:var(--rosel);color:var(--rose)}
-.ev-req.R{background:var(--amberl);color:var(--amber)}
-.ev-req.O{background:var(--slateb);color:var(--slated)}
-
-/* ─── UPLOAD ZONE ────────────────────────────────────────────────────────── */
-.up-zone{border:2px dashed var(--slateb);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .18s;background:var(--slate);position:relative}
-.up-zone:hover,.up-zone.drag{border-color:var(--sea);background:var(--seal)}
-.up-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.up-ico{font-size:32px;margin-bottom:8px}
-.up-txt{font-size:13px;font-weight:600;color:var(--ink2)}
-.up-sub{font-size:11px;color:var(--ink3);margin-top:3px}
-.up-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
-.up-item{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r3);padding:5px 10px;font-size:11px;font-weight:600}
-.up-item img{width:28px;height:28px;object-fit:cover;border-radius:4px}
-.up-rm{border:none;background:none;cursor:pointer;color:var(--rose);font-size:15px;padding:0 2px;line-height:1}
-
-/* ─── STATUS BADGES ──────────────────────────────────────────────────────── */
-.badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px}
-.badge.pend{background:var(--amberl);color:var(--amber)}
-.badge.apro{background:var(--emeraldl);color:var(--emerald)}
-.badge.rev{background:var(--rosel);color:var(--rose)}
-.badge.raso{background:var(--navyl);color:var(--navy)}
-
-/* ─── LIST CARDS ─────────────────────────────────────────────────────────── */
-.ev-row{background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:box-shadow .15s;cursor:pointer}
-.ev-row:hover{box-shadow:var(--sh)}
-.ev-row-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.ev-row-body{flex:1;min-width:0}
-.ev-row-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ev-row-meta{font-size:11px;color:var(--ink3);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.ev-row-meta span{display:flex;align-items:center;gap:3px}
-.ev-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
-.ev-count{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
-.evc{width:20px;height:20px;border-radius:5px;background:var(--seal);color:var(--sea);font-size:7.5px;font-weight:800;display:flex;align-items:center;justify-content:center;border:1px solid rgba(14,116,144,.2)}
-.evc.filled{background:var(--sea);color:#fff;border-color:var(--sea)}
-
-/* ─── PROGRESS BAR ──────────────────────────────────────────────────────── */
-.prog{height:6px;background:var(--slateb);border-radius:3px;overflow:hidden;margin-top:4px}
-.prog-fill{height:100%;border-radius:3px;transition:width .4s ease;background:linear-gradient(90deg,var(--sea),var(--seam))}
-
-/* ─── MODAL ──────────────────────────────────────────────────────────────── */
-.ovl{position:fixed;inset:0;background:rgba(10,20,45,.6);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)}
-.ovl.on{display:flex}
-.modal{background:var(--white);border-radius:var(--r);width:100%;max-width:680px;box-shadow:var(--sh2);position:relative;margin:auto}
-.mh{padding:18px 22px;border-bottom:1.5px solid var(--slateb);display:flex;align-items:center;justify-content:space-between}
-.mh h3{font-size:16px;font-weight:800;color:var(--ink)}
-.mcl{border:none;background:none;cursor:pointer;color:var(--ink3);font-size:20px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center}
-.mcl:hover{background:var(--slate);color:var(--ink)}
-.mb{padding:22px}
-.mf{padding:20px 22px;border-top:1.5px solid var(--slateb);display:flex;gap:8px;justify-content:flex-end}
-
-/* ─── STEPS ──────────────────────────────────────────────────────────────── */
-.steps{display:flex;gap:0;margin-bottom:24px;border:1.5px solid var(--slateb);border-radius:var(--r);overflow:hidden}
-.step{flex:1;padding:12px 10px;text-align:center;background:var(--slate);border-right:1.5px solid var(--slateb);cursor:pointer;transition:background .15s}
-.step:last-child{border-right:none}
-.step.on{background:var(--seal);color:var(--sea)}
-.step.done{background:var(--emeraldl);color:var(--emerald)}
-.step-n{font-size:11px;font-weight:800;display:block;margin-bottom:2px}
-.step-l{font-size:10px;font-weight:600;color:inherit;opacity:.75}
-
-/* ─── TABLE ──────────────────────────────────────────────────────────────── */
-.tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.tbl td{padding:9px 12px;border-bottom:1px solid var(--slateb);vertical-align:top}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--seal)}
-.mc{text-align:center;font-size:11px;font-weight:700;border-radius:5px;padding:3px 0}
-.mc.E{background:var(--rosel);color:var(--rose)}
-.mc.R{background:var(--amberl);color:var(--amber)}
-.mc.O{background:var(--emeraldl);color:var(--emerald)}
-.mc.nd{background:var(--slateb);color:var(--slated)}
-
-/* ─── PHOTO THUMBS ───────────────────────────────────────────────────────── */
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:10px}
-.photo-thumb{aspect-ratio:1;border-radius:var(--r3);overflow:hidden;position:relative;background:var(--slate)}
-.photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-thumb .ph-rm{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
-
-/* ─── REPORT ─────────────────────────────────────────────────────────────── */
-.rpt-doc-card{background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
-.rpt-doc-hd{background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
-.rpt-doc-nm{font-size:15px;font-weight:800}
-.rpt-doc-sub{font-size:11px;opacity:.7;margin-top:2px}
-.rpt-ev-row{padding:12px 18px;border-bottom:1px solid var(--slateb);display:flex;gap:12px}
-.rpt-ev-row:last-child{border-bottom:none}
-.rpt-ev-type{width:36px;height:36px;border-radius:8px;background:var(--seal);color:var(--sea);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:11px}
-.rpt-photos{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.rpt-photos img{width:44px;height:44px;object-fit:cover;border-radius:5px;border:1.5px solid var(--slateb)}
-
-/* ─── INSTAGRAM CARD ─────────────────────────────────────────────────────── */
-.insta-card{border:1.5px solid var(--slateb);border-radius:var(--r);overflow:hidden;background:#fff}
-.insta-hd{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);padding:10px 14px;display:flex;align-items:center;gap:8px}
-.insta-hd span{color:#fff;font-weight:700;font-size:13px}
-.insta-img{aspect-ratio:1;overflow:hidden}
-.insta-img img{width:100%;height:100%;object-fit:cover}
-.insta-cap{padding:12px 14px;font-size:12px;color:var(--ink2);line-height:1.6}
-
-/* ─── SPLASH ─────────────────────────────────────────────────────────────── */
-#splsh{position:fixed;inset:0;background:linear-gradient(145deg,#0f1f38,#0f2d5e,#0e4872);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px}
-#splsh h2{font-size:28px;font-weight:900;color:#fff;letter-spacing:-.5px}
-#splsh p{font-size:13px;color:rgba(255,255,255,.65);text-align:center;max-width:340px;line-height:1.7}
-.gbtn{display:flex;align-items:center;gap:10px;padding:13px 28px;border-radius:12px;border:none;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 24px rgba(0,0,0,.25);font-weight:700;color:#111;transition:all .2s}
-.gbtn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
-.splsh-logo{width:68px;height:68px;background:rgba(255,255,255,.12);border-radius:18px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.2);font-size:32px}
-
-/* ─── EMPTY STATE ────────────────────────────────────────────────────────── */
-.empty{text-align:center;padding:52px 20px;color:var(--ink3)}
-.empty-ico{font-size:40px;margin-bottom:12px;display:block}
-.empty h3{font-size:15px;font-weight:700;color:var(--ink2);margin-bottom:6px}
-.empty p{font-size:12px;line-height:1.6}
-
-/* ─── BUTTON ─────────────────────────────────────────────────────────────── */
-.btn{padding:8px 18px;border-radius:var(--r2);border:1.5px solid transparent;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn.pri{background:var(--sea);color:#fff;border-color:var(--sea)}
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:var(--r2);border:1.5px solid transparent;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn.pri{background:var(--teal);color:#fff;border-color:var(--teal)}
 .btn.pri:hover{background:var(--seam)}
+.btn.nav{background:var(--navym);color:#fff;border-color:var(--navym)}
+.btn.nav:hover{background:var(--navy)}
 .btn.sec{background:var(--white);color:var(--ink2);border-color:var(--slateb)}
 .btn.sec:hover{background:var(--slate)}
-.btn.nav{background:var(--navy);color:#fff;border-color:var(--navy)}
-.btn.nav:hover{background:var(--navym)}
-.btn.dan{background:var(--rosel);color:var(--rose);border-color:#fca5a5}
-.btn.dan:hover{background:#fecaca}
-.btn.sm{padding:5px 12px;font-size:11px}
-.btn.lg{padding:11px 24px;font-size:14px}
+.btn.dan{background:var(--rosel);color:var(--rosem);border-color:#fca5a5}
+.btn.amb{background:var(--amberl);color:var(--amber);border-color:#fde68a}
+.btn.sm{padding:4px 10px;font-size:11px}
+.btn.lg{padding:10px 22px;font-size:14px}
 
-/* ─── TOAST ──────────────────────────────────────────────────────────────── */
-#toast{position:fixed;bottom:22px;right:22px;background:#1a1a1a;color:#fff;padding:11px 20px;border-radius:11px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:320px}
+/* EV SELECTOR */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin:10px 0}
+.ev-card{border:2px solid var(--slateb);border-radius:var(--r2);padding:9px 11px;cursor:pointer;transition:all .16s;position:relative;user-select:none;background:var(--white)}
+.ev-card:hover{border-color:var(--teal);background:var(--teall)}
+.ev-card.sel{border-color:var(--teal);background:var(--teall);box-shadow:0 0 0 2px rgba(14,116,144,.2)}
+.ev-card .eic{width:30px;height:30px;border-radius:6px;background:var(--slate);display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:5px;transition:all .14s}
+.ev-card.sel .eic{background:var(--teal);color:#fff}
+.ev-sig{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--teal)}
+.ev-nm{font-size:11px;font-weight:700;color:var(--ink);margin-top:1px;line-height:1.3}
+.ev-req{position:absolute;top:7px;right:7px;font-size:8px;font-weight:800;padding:1px 5px;border-radius:4px}
+.E{background:var(--rosel);color:var(--rosem)}
+.R{background:var(--amberl);color:var(--amberm)}
+.O{background:var(--greenl);color:var(--green)}
+
+/* UPLOAD */
+.upzone{border:2px dashed var(--slateb);border-radius:var(--r);padding:22px;text-align:center;cursor:pointer;transition:all .16s;background:var(--slate);position:relative}
+.upzone:hover,.upzone.drag{border-color:var(--teal);background:var(--teall)}
+.upzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;margin-top:9px}
+.pth{aspect-ratio:1;border-radius:6px;overflow:hidden;position:relative;background:var(--slateb)}
+.pth img{width:100%;height:100%;object-fit:cover}
+.pth .prm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.65);color:#fff;border:none;border-radius:4px;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;line-height:1}
+.up-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.up-item{display:flex;align-items:center;gap:5px;background:var(--white);border:1.5px solid var(--slateb);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600}
+.urm{border:none;background:none;cursor:pointer;color:var(--rosem);font-size:14px;padding:0 1px}
+
+/* STATUS */
+.bdg{display:inline-block;padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;letter-spacing:.2px}
+.bdg.pend{background:var(--amberl);color:var(--amberm)}
+.bdg.apro{background:var(--greenl);color:var(--green)}
+.bdg.rev{background:var(--rosel);color:var(--rosem)}
+.bdg.arq{background:var(--slateb);color:var(--slated)}
+
+/* EVIDENCE LIST */
+.ev-row{background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r2);padding:12px 15px;margin-bottom:7px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;transition:box-shadow .15s}
+.ev-row:hover{box-shadow:0 2px 12px rgba(0,0,0,.09)}
+.ev-row-ico{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--seal)}
+.ev-row-body{flex:1;min-width:0}
+.ev-row-tit{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.ev-row-meta{font-size:10.5px;color:var(--ink3);display:flex;gap:7px;flex-wrap:wrap}
+.ev-row-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.ev-chips{display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end}
+.evc{width:22px;height:18px;border-radius:4px;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--seal);color:var(--teal);border:1px solid rgba(14,116,144,.15)}
+.evc.has{background:var(--teal);color:#fff}
+
+/* MODAL */
+.ovl{position:fixed;inset:0;background:rgba(8,15,30,.55);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
+.ovl.on{display:flex}
+.modal{background:var(--white);border-radius:var(--r);width:100%;max-width:680px;box-shadow:var(--sh2);margin:auto;position:relative}
+.mh{padding:16px 20px;border-bottom:1.5px solid var(--slateb);display:flex;align-items:center;justify-content:space-between}
+.mh h3{font-size:15px;font-weight:800;color:var(--ink)}
+.mcl{border:none;background:none;cursor:pointer;color:var(--ink3);font-size:18px;width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.mcl:hover{background:var(--slate)}
+.mb{padding:20px}
+.mf{padding:14px 20px;border-top:1.5px solid var(--slateb);display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+
+/* RELATÓRIO */
+.rpt-doc{background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.rpt-hd{background:linear-gradient(135deg,var(--navy),var(--navym));color:#fff;padding:13px 17px}
+.rpt-hd h3{font-size:14px;font-weight:800;margin-bottom:2px}
+.rpt-hd p{font-size:10.5px;opacity:.7}
+.rpt-hd-stats{display:flex;gap:14px;margin-top:8px}
+.rpt-hd-stat{text-align:center}
+.rpt-hd-stat .v{font-size:18px;font-weight:800}
+.rpt-hd-stat .l{font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.4px}
+.rpt-ev{padding:11px 17px;border-bottom:1px solid var(--slateb);display:flex;gap:11px;cursor:pointer}
+.rpt-ev:last-child{border-bottom:none}
+.rpt-ev:hover{background:var(--slate)}
+.rpt-ev-ico{width:34px;height:34px;border-radius:7px;background:var(--seal);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rpt-ev-fotos{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.rpt-ev-fotos img{width:36px;height:36px;object-fit:cover;border-radius:5px;border:1px solid var(--slateb)}
+.rpt-ev-chips{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.rpt-chip{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--seal);color:var(--teal)}
+
+/* MATRIZ TABLE */
+.mtbl{width:100%;border-collapse:collapse;font-size:11px}
+.mtbl th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.mtbl td{padding:7px 10px;border-bottom:1px solid var(--slateb);vertical-align:middle}
+.mtbl tr:last-child td{border-bottom:none}
+.mtbl tr:hover td{background:var(--slate)}
+.mc{text-align:center;font-size:10px;font-weight:800;border-radius:4px;padding:2px 0}
+
+/* PROGRESS */
+.prog{height:5px;background:var(--slateb);border-radius:3px;overflow:hidden}
+.prog-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--seam))}
+
+/* FILTER BAR */
+.fb-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.fb-bar input{padding:6px 11px;border-radius:16px;border:1.5px solid var(--slateb);font-size:12px;font-family:inherit;outline:none;background:var(--white);min-width:180px}
+.fb-bar input:focus{border-color:var(--teal)}
+.ft{padding:4px 11px;border-radius:13px;border:1.5px solid var(--slateb);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink2);transition:all .14s}
+.ft:hover{background:var(--teall);color:var(--teal)}
+.ft.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* VINCULOS WIDGET */
+.vk-line{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--slateb);font-size:11px}
+.vk-line:last-child{border-bottom:none}
+.vk-type{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.vk-weight{display:flex;gap:2px}
+.vkw{width:7px;height:7px;border-radius:2px;background:var(--slateb)}
+.vkw.on{background:var(--teal)}
+
+/* SPLASH */
+#splsh{position:fixed;inset:0;background:linear-gradient(145deg,#060e1d,#0c2340,#0c3456);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#splsh h2{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.4px}
+#splsh p{font-size:12.5px;color:rgba(255,255,255,.6);text-align:center;max-width:300px;line-height:1.7}
+.gbtn{display:flex;align-items:center;gap:9px;padding:12px 24px;border-radius:10px;border:none;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.25);font-weight:700;color:#111;transition:all .18s}
+.gbtn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,0,0,.3)}
+.sl-ico{width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:15px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2);font-size:28px}
+
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:10px;font-size:12.5px;z-index:9999;opacity:0;transition:opacity .22s;pointer-events:none;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.22);max-width:300px}
 #toast.on{opacity:1}
 
-/* ─── COMPLETUDE WIDGET ─────────────────────────────────────────────────── */
-.comp-widget{background:var(--white);border:1.5px solid var(--slateb);border-radius:var(--r);padding:14px 16px}
-.comp-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:10px}
-.comp-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.comp-sig{font-size:9px;font-weight:800;color:var(--sea);width:28px;flex-shrink:0;text-transform:uppercase}
-.comp-bar{flex:1;height:7px;background:var(--slateb);border-radius:4px;overflow:hidden}
-.comp-fill{height:100%;border-radius:4px;background:var(--sea)}
-.comp-pct{font-size:10px;font-weight:700;color:var(--ink2);width:28px;text-align:right}
+/* EMPTY */
+.empty{text-align:center;padding:44px 20px;color:var(--ink3)}
+.empty .ei{font-size:36px;margin-bottom:10px;display:block}
+.empty h3{font-size:14px;font-weight:700;color:var(--ink2);margin-bottom:5px}
+.empty p{font-size:12px;line-height:1.6}
 
-/* ─── SECTION DIVIDER ────────────────────────────────────────────────────── */
-.sec-div{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--ink3);padding:12px 0 8px;border-top:1.5px solid var(--slateb);margin-top:16px}
-.sec-div:first-child{border-top:none;margin-top:0;padding-top:0}
+/* VINCULOS COLORS */
+.vt-orient{background:#dbeafe;color:#1e40af}
+.vt-coorient{background:#ede9fe;color:#5b21b6}
+.vt-banca{background:var(--greenl);color:var(--green)}
+.vt-acao{background:var(--amberl);color:var(--amberm)}
+.vt-colab{background:var(--teall);color:var(--teal)}
+.vt-disciplina{background:#fce7f3;color:#9d174d}
 
-/* ─── FILTER BAR ─────────────────────────────────────────────────────────── */
-#filter-bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-#filter-bar input{padding:7px 12px;border-radius:18px;border:1.5px solid var(--slateb);font-size:12px;font-family:inherit;outline:none;width:200px;background:var(--white)}
-#filter-bar input:focus{border-color:var(--sea)}
-.ftag{padding:5px 12px;border-radius:14px;border:1.5px solid var(--slateb);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;color:var(--ink2);transition:all .15s}
-.ftag:hover{background:var(--seal);color:var(--sea)}
-.ftag.on{background:var(--sea);color:#fff;border-color:var(--sea)}
-
-/* ─── INSTAGRAM PREVIEW ──────────────────────────────────────────────────── */
-.ig-preview{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);padding:2px;border-radius:10px;display:inline-block}
-.ig-inner{background:#fff;border-radius:9px;padding:10px 13px;font-size:12px}
-
-@media(max-width:640px){
-  .pg,.pgfull{padding:12px}
-  #subnav{padding:0 12px}
-  #statr{gap:12px;padding:10px 12px}
-  .st{padding:0 10px}
-}
+@media(max-width:600px){.pg{padding:10px}.ch{padding:10px 13px}.cb{padding:12px 13px}}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splsh">
-  <div class="splsh-logo">📋</div>
+  <div class="sl-ico">📋</div>
   <h2>SiGEv</h2>
-  <p>Sistema de Gestão de Evidências<br>ProfÁgua · UNEMAT Campus Cáceres<br>Gestão e Regulação de Recursos Hídricos</p>
+  <p>Sistema de Gestão de Evidências<br>ProfÁgua · UNEMAT Campus Cáceres<br>Coleta CAPES · Plataforma Sucupira</p>
   <button class="gbtn" onclick="doLogin()">
-    <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+    <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
     Entrar com Google
   </button>
 </div>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <a id="brand" href="#">
-    <div class="brand-icon">📋</div>
-    <div class="brand-text"><h1>SiGEv · ProfÁgua</h1><p>Sistema de Gestão de Evidências · UNEMAT</p></div>
+<div id="tb">
+  <a id="br" href="#">
+    <div class="bico">📋</div>
+    <div><div class="bh1">SiGEv · ProfÁgua</div><div class="bh2">UNEMAT Cáceres · Recursos Hídricos</div></div>
   </a>
-  <nav id="mainnav">
-    <button class="ntab on" onclick="goP('inicio',this)">Início</button>
-    <button class="ntab" onclick="goP('nova',this)">Nova Evidência</button>
-    <button class="ntab" onclick="goP('minhas',this)">Minhas</button>
-    <button class="ntab" onclick="goP('relatorio',this)">Relatório</button>
-    <button class="ntab" onclick="goP('matriz',this)">Matriz CAPES</button>
-    <button class="ntab" id="btn-coord" style="display:none" onclick="goP('coordenacao',this)">Coordenação</button>
+  <nav id="mnav">
+    <button class="nt on" onclick="goP('home',this)">Início</button>
+    <button class="nt" onclick="goP('nova',this)">+ Registrar</button>
+    <button class="nt" onclick="goP('minhas',this)">Minhas Evidências</button>
+    <button class="nt" onclick="goP('relatorio',this)">Relatório</button>
+    <button class="nt" onclick="goP('docentes',this)">Docentes & Vínculos</button>
+    <button class="nt" onclick="goP('matriz',this)">Matriz CAPES</button>
+    <button class="nt" id="btn-coord" style="display:none" onclick="goP('coord',this)">Coordenação</button>
+    <a class="nt" href="index.html" style="color:rgba(255,255,255,.55);text-decoration:none">🕸 AquaNet</a>
   </nav>
-  <div id="topright">
-    <div id="uinfo" style="display:none;align-items:center;gap:7px">
+  <div id="uarea">
+    <div id="uinfo" style="display:none;align-items:center;gap:6px">
       <img id="uph" src=""/><span id="unm"></span>
     </div>
-    <button class="tbtn acc" id="btnlog" onclick="doLogin()">Entrar com Google</button>
-    <button class="tbtn out" id="btnout" style="display:none" onclick="doLogout()">Sair</button>
+    <button class="xb acc" id="btnlog" onclick="doLogin()">Entrar</button>
+    <button class="xb out" id="btnout" style="display:none" onclick="doLogout()">Sair</button>
   </div>
 </div>
 
-<!-- STAT ROW -->
-<div id="statr">
-  <div class="st"><div class="std" style="background:var(--sea)"></div><div><div class="stv" id="st-tot">—</div><div class="stl">Evidências</div></div></div>
-  <div class="st"><div class="std" style="background:var(--amber)"></div><div><div class="stv" id="st-pend">—</div><div class="stl">Pendentes</div></div></div>
-  <div class="st"><div class="std" style="background:var(--emerald)"></div><div><div class="stv" id="st-apro">—</div><div class="stl">Aprovadas</div></div></div>
-  <div class="st"><div class="std" style="background:var(--rose)"></div><div><div class="stv" id="st-rev">—</div><div class="stl">Em revisão</div></div></div>
-  <div class="st"><div class="std" style="background:var(--navy)"></div><div><div class="stv" id="st-doc">—</div><div class="stl">Docentes ativos</div></div></div>
-  <div class="st"><div class="std" style="background:#7c3aed"></div><div><div class="stv" id="st-fotos">—</div><div class="stl">Fotos</div></div></div>
+<div id="sb">
+  <div class="si"><div class="sid" style="background:var(--teal)"></div><div><div class="siv" id="st0">—</div><div class="sil">Evidências</div></div></div>
+  <div class="si"><div class="sid" style="background:var(--amberm)"></div><div><div class="siv" id="st1">—</div><div class="sil">Pendentes</div></div></div>
+  <div class="si"><div class="sid" style="background:var(--green)"></div><div><div class="siv" id="st2">—</div><div class="sil">Aprovadas</div></div></div>
+  <div class="si"><div class="sid" style="background:var(--navy)"></div><div><div class="siv" id="st3">—</div><div class="sil">Docentes</div></div></div>
+  <div class="si"><div class="sid" style="background:#7c3aed"></div><div><div class="siv" id="st4">—</div><div class="sil">Fotos</div></div></div>
+  <div class="si"><div class="sid" style="background:var(--rosem)"></div><div><div class="siv" id="st5">—</div><div class="sil">Vínculos</div></div></div>
 </div>
 
-<!-- PAGE: INÍCIO -->
-<div class="pg on" id="pg-inicio">
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px">
-    <div class="card" style="cursor:pointer;transition:box-shadow .15s" onclick="goP('nova',document.querySelector('[onclick*=nova]'))" onmouseover="this.style.boxShadow='0 6px 24px rgba(14,116,144,.15)'" onmouseout="this.style.boxShadow=''">
-      <div class="cb" style="text-align:center;padding:28px 20px">
-        <div style="font-size:36px;margin-bottom:10px">📝</div>
-        <div style="font-size:15px;font-weight:800;color:var(--sea);margin-bottom:5px">Nova Evidência</div>
-        <div style="font-size:12px;color:var(--ink3);line-height:1.5">Registrar PTT, projeto, evento, visita, parceria ou ação institucional</div>
+<!-- ── HOME ── -->
+<div class="pg on" id="pg-home">
+  <div class="g3" style="margin-bottom:16px">
+    <div class="card" style="cursor:pointer" onclick="goP('nova',document.querySelector('[onclick*=nova]'))">
+      <div class="cb" style="text-align:center;padding:24px 18px">
+        <div style="font-size:32px;margin-bottom:8px">📝</div>
+        <div style="font-size:14px;font-weight:800;color:var(--teal);margin-bottom:4px">Registrar Evidência</div>
+        <div style="font-size:11px;color:var(--ink3)">PTT, projeto, visita, evento, publicação, ação de extensão</div>
       </div>
     </div>
-    <div class="card" style="cursor:pointer;transition:box-shadow .15s" onclick="goP('relatorio',document.querySelector('[onclick*=relatorio]'))" onmouseover="this.style.boxShadow='0 6px 24px rgba(14,116,144,.15)'" onmouseout="this.style.boxShadow=''">
-      <div class="cb" style="text-align:center;padding:28px 20px">
-        <div style="font-size:36px;margin-bottom:10px">📊</div>
-        <div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:5px">Relatório Geral</div>
-        <div style="font-size:12px;color:var(--ink3);line-height:1.5">Visualizar e exportar evidências por docente, tipo ou período</div>
+    <div class="card" style="cursor:pointer" onclick="goP('relatorio',document.querySelector('[onclick*=relatorio]'))">
+      <div class="cb" style="text-align:center;padding:24px 18px">
+        <div style="font-size:32px;margin-bottom:8px">📊</div>
+        <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:4px">Relatório do Programa</div>
+        <div style="font-size:11px;color:var(--ink3)">Por docente, tipo, período — exportável para Sucupira/CAPES</div>
       </div>
     </div>
-    <div class="card" style="cursor:pointer;transition:box-shadow .15s" onclick="goP('matriz',document.querySelector('[onclick*=matriz]'))" onmouseover="this.style.boxShadow='0 6px 24px rgba(14,116,144,.15)'" onmouseout="this.style.boxShadow=''">
-      <div class="cb" style="text-align:center;padding:28px 20px">
-        <div style="font-size:36px;margin-bottom:10px">📐</div>
-        <div style="font-size:15px;font-weight:800;color:var(--amber);margin-bottom:5px">Matriz CAPES</div>
-        <div style="font-size:12px;color:var(--ink3);line-height:1.5">O que documentar para cada tipo de PTT segundo critérios CAPES</div>
+    <div class="card" style="cursor:pointer" onclick="goP('docentes',document.querySelector('[onclick*=docentes]'))">
+      <div class="cb" style="text-align:center;padding:24px 18px">
+        <div style="font-size:32px;margin-bottom:8px">🔗</div>
+        <div style="font-size:14px;font-weight:800;color:var(--amberm);margin-bottom:4px">Docentes & Vínculos</div>
+        <div style="font-size:11px;color:var(--ink3)">Orientações, bancas, disciplinas, coorientações, parcerias</div>
       </div>
     </div>
   </div>
-
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
-    <div class="card">
-      <div class="ch"><h2>🕐 Últimas evidências registradas</h2></div>
-      <div id="inicio-list" style="padding:4px 0"><div class="empty"><span class="empty-ico">📂</span><h3>Nenhuma evidência ainda</h3><p>Clique em "Nova Evidência" para começar</p></div></div>
+  <div class="g13">
+    <div>
+      <div class="card">
+        <div class="ch"><h2>🕐 Últimas evidências</h2><button class="btn sec sm" onclick="goP('nova',document.querySelector('[onclick*=nova]'))">+ Nova</button></div>
+        <div id="home-list"></div>
+      </div>
     </div>
     <div>
-      <div class="comp-widget" style="margin-bottom:12px">
-        <div class="comp-title">Completude por tipo de evidência</div>
-        <div id="comp-bars"></div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="ch"><h2>📈 Cobertura de evidências</h2></div>
+        <div class="cb"><div id="cov-bars"></div></div>
       </div>
       <div class="card">
-        <div class="ch"><h2>💡 Guia rápido</h2></div>
-        <div class="cb" style="font-size:12px;line-height:1.8;color:var(--ink2)">
-          <div style="margin-bottom:8px"><strong style="color:var(--rose)">E — Essencial:</strong> obrigatório para validação CAPES</div>
-          <div style="margin-bottom:8px"><strong style="color:var(--amber)">R — Recomendado:</strong> fortalece a evidência de impacto</div>
-          <div><strong style="color:var(--slated)">O — Opcional:</strong> amplia reconhecimento externo</div>
-          <hr style="margin:10px 0;border-color:var(--slateb)"/>
-          <div style="font-size:11px;color:var(--ink3)">📸 Fotos comunicam ao Instagram automaticamente quando marcado<br/><br/>📤 Coordenação recebe notificação a cada nova evidência enviada</div>
+        <div class="ch"><h2>💡 Critérios CAPES</h2></div>
+        <div class="cb" style="font-size:11.5px;color:var(--ink2);line-height:1.9">
+          <div><span style="color:var(--rosem);font-weight:700">E — Essencial:</span> obrigatório · ausência inviabiliza validação</div>
+          <div><span style="color:var(--amberm);font-weight:700">R — Recomendado:</span> fortalece evidência de impacto</div>
+          <div><span style="color:var(--green);font-weight:700">O — Opcional:</span> demonstra alcance e reconhecimento</div>
+          <hr style="margin:9px 0;border-color:var(--slateb)"/>
+          <div style="font-size:10.5px;color:var(--ink3)">📤 Coordenação é notificada a cada envio<br/>📸 Fotos ficam disponíveis no relatório visual<br/>🔗 <a href="index.html" style="color:var(--teal)">AquaNet</a> — visualizar rede de relações</div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- PAGE: NOVA EVIDÊNCIA -->
+
+<!-- ── NOVA EVIDÊNCIA ── -->
 <div class="pg" id="pg-nova">
   <div class="card">
     <div class="ch">
       <h2>📝 Registrar Nova Evidência</h2>
-      <div style="display:flex;gap:8px">
-        <button class="btn sec sm" onclick="limparForm()">Limpar</button>
-        <button class="btn pri" onclick="salvarEvidencia()">💾 Enviar à Coordenação</button>
+      <div style="display:flex;gap:7px">
+        <button class="btn sec sm" onclick="limpar()">Limpar</button>
+        <button class="btn nav" onclick="salvar()">💾 Enviar à Coordenação</button>
       </div>
     </div>
     <div class="cb">
-      <!-- STEP 1: Identificação -->
-      <div class="sec-div">1 — Identificação da Atividade</div>
-      <div class="fg fg2" style="margin-top:12px">
-        <div class="fl">
-          <label>Tipo de Atividade <span class="req">*</span></label>
-          <select id="n-tipo" onchange="onTipoChange(this.value)">
-            <option value="">Selecione o tipo...</option>
-            <option value="PTT / Produto Técnico">🏗️ PTT / Produto Técnico</option>
-            <option value="TCC / Dissertação">🎓 TCC / Dissertação</option>
-            <option value="Projeto de Pesquisa">🔬 Projeto de Pesquisa</option>
-            <option value="Projeto de Extensão">🌱 Projeto de Extensão</option>
-            <option value="Parceria Institucional">🤝 Parceria Institucional</option>
-            <option value="Evento Científico">🎤 Evento Científico</option>
-            <option value="Visita Técnica">🏛️ Visita Técnica</option>
-            <option value="Capacitação / Oficina">📚 Capacitação / Oficina</option>
-            <option value="Publicação">📄 Publicação</option>
-            <option value="Ação de Extensão">🌐 Ação de Extensão</option>
-            <option value="Divulgação Instagram">📱 Divulgação Instagram</option>
-            <option value="Banca / Avaliação">⚖️ Banca / Avaliação</option>
+
+      <div class="fsec">1 — Identificação</div>
+      <div class="g2"><div class="fl">
+        <label>Tipo de Atividade <span class="rq">*</span></label>
+        <select id="n-tipo" onchange="onTipo(this.value)">
+          <option value="">Selecione...</option>
+          <option>🏗️ PTT / Produto Técnico</option>
+          <option>🎓 TCC / Dissertação</option>
+          <option>🔬 Projeto de Pesquisa</option>
+          <option>🌱 Projeto de Extensão</option>
+          <option>🤝 Parceria Institucional</option>
+          <option>🎤 Evento Científico</option>
+          <option>🏛️ Visita Técnica</option>
+          <option>📚 Capacitação / Oficina</option>
+          <option>📄 Publicação / Artigo</option>
+          <option>🌐 Ação de Extensão</option>
+          <option>📱 Divulgação / Instagram</option>
+          <option>⚖️ Banca / Avaliação</option>
+          <option>🏆 Premiação / Destaque</option>
+          <option>🤲 Serviço à Sociedade</option>
+        </select>
+      </div>
+      <div class="fl">
+        <label>Docente Responsável <span class="rq">*</span></label>
+        <select id="n-doc">
+          <option value="">Selecione...</option>
+          <option>Adley Bergson G. de Abreu</option>
+          <option>Alexandre Gonçalves Porto</option>
+          <option>Amintas Nazareth Rossete</option>
+          <option>Anderson Marques do Amaral</option>
+          <option>Claumir Cesar Muniz</option>
+          <option>Érico Fernando O. Martins</option>
+          <option>Ernandes Sobreira Oliveira Junior</option>
+          <option>Fátima Aparecida S. Iocca</option>
+          <option>Francisco Lledo dos Santos</option>
+          <option>Rodrigo Bruno Zanin</option>
+          <option>Solange A. Arrolho da Silva</option>
+          <option>Solange Kimie Ikeda Castrillon</option>
+          <option>Tadeu Miranda de Queiroz</option>
+          <option>Wilkinson Lopes Lazaro</option>
+        </select>
+      </div></div>
+
+      <div class="fl"><label>Título <span class="rq">*</span></label>
+        <input id="n-tit" placeholder="Descrição objetiva da atividade ou produto"/></div>
+
+      <div class="g3"><div class="fl"><label>Data <span class="rq">*</span></label><input id="n-dat" type="date"/></div>
+      <div class="fl"><label>Município / UF</label><input id="n-mun" placeholder="Cáceres-MT"/></div>
+      <div class="fl"><label>Local / Instituição</label><input id="n-loc" placeholder="Prefeitura Municipal, SEMA..."/></div></div>
+
+      <div class="g2"><div class="fl"><label>Parceiro / Beneficiário</label><input id="n-par" placeholder="SEMA-MT, ANA, Comitê de Bacia..."/></div>
+      <div class="fl"><label>Nº de Participantes</label><input id="n-npt" type="number" min="0" placeholder="0"/></div></div>
+
+      <div class="fl"><label>Discente Vinculado</label><select id="n-dis"><option value="">Nenhum / não se aplica</option></select></div>
+
+      <div class="fl"><label>Descrição completa <span class="rq">*</span></label>
+        <textarea id="n-desc" rows="4" placeholder="Descreva: o que foi feito, com quem, onde, como, e quais os resultados alcançados. Inclua dados quantitativos (ex: 45 técnicos, 3 municípios, 127 alunos)..."></textarea></div>
+
+      <!-- PTT BLOCK -->
+      <div id="blk-ptt" style="display:none">
+        <div class="fsec">2 — PTT Relacionado</div>
+        <div class="g2"><div class="fl"><label>Tipo de PTT</label>
+          <select id="n-ptp" onchange="onPTT(this.value)">
+            <option value="">Não se aplica</option>
+            <option>Relatório Técnico Conclusivo</option><option>Protocolo de Monitoramento</option>
+            <option>Procedimento Operacional Padrão (POP)</option><option>Material Didático / Educativo</option>
+            <option>Manual ou Guia Técnico</option><option>Plataforma / Sistema Digital</option>
+            <option>Aplicativo Móvel ou Web</option><option>Banco de Dados / Dataset</option>
+            <option>Mapa Temático / Geodados</option><option>Kit ou Instrumento de Diagnóstico</option>
+            <option>Modelo Conceitual / Computacional</option><option>Projeto Técnico / Plano de Gestão</option>
+            <option>Artigo Científico Aplicado</option><option>Norma / Instrução Técnica</option>
+            <option>Jogo Educativo / Gamificação</option><option>Vídeo / Podcast / Multimídia</option>
+            <option>Tecnologia Social / Apropriada</option><option>Modelo de Governança / Gestão</option>
+            <option>Instrumento de Política Pública</option><option>Arr. Institucional / Rede Colaborativa</option>
+            <option>Metodologia Aplicada / Processo Inovador</option>
           </select>
         </div>
-        <div class="fl">
-          <label>Docente Responsável <span class="req">*</span></label>
-          <select id="n-docente">
-            <option value="">Selecione o docente...</option>
-            <option>Adley Bergson G. de Abreu</option>
-            <option>Alexandre Gonçalves Porto</option>
-            <option>Amintas Nazareth Rossete</option>
-            <option>Anderson Marques do Amaral</option>
-            <option>Claumir Cesar Muniz</option>
-            <option>Érico Fernando O. Martins</option>
-            <option>Ernandes Sobreira Oliveira Junior</option>
-            <option>Fátima Aparecida S. Iocca</option>
-            <option>Francisco Lledo dos Santos</option>
-            <option>Rodrigo Bruno Zanin</option>
-            <option>Solange A. Arrolho da Silva</option>
-            <option>Solange Kimie Ikeda Castrillon</option>
-            <option>Tadeu Miranda de Queiroz</option>
-            <option>Wilkinson Lopes Lazaro</option>
+        <div class="fl"><label>Nível de Maturidade</label>
+          <select id="n-ptl">
+            <option value="">—</option>
+            <option value="N1">N1 — Conceitual (proposta/projeto)</option>
+            <option value="N2">N2 — Protótipo (testado em escala reduzida)</option>
+            <option value="N3">N3 — Implementado (em uso pelo parceiro)</option>
           </select>
-        </div>
-      </div>
-      <div class="fg fg1">
-        <div class="fl"><label>Título da Atividade <span class="req">*</span></label>
-          <input id="n-titulo" placeholder="Ex: Visita técnica à Prefeitura de Cáceres — entrega do PTT de qualidade da água"/></div>
-      </div>
-      <div class="fg fg3">
-        <div class="fl"><label>Data <span class="req">*</span></label><input id="n-data" type="date"/></div>
-        <div class="fl"><label>Município / UF</label><input id="n-mun" placeholder="Ex: Cáceres-MT"/></div>
-        <div class="fl"><label>Local / Instituição</label><input id="n-local" placeholder="Ex: Prefeitura Municipal de Cáceres"/></div>
-      </div>
-      <div class="fg fg2">
-        <div class="fl"><label>Parceiro / Beneficiário</label><input id="n-parceiro" placeholder="Ex: SEMA-MT, ANA, Comitê de Bacia..."/></div>
-        <div class="fl"><label>Nº de Participantes</label><input id="n-part" type="number" min="0" placeholder="0"/></div>
-      </div>
-      <div class="fg fg1">
-        <div class="fl"><label>Descrição / Relatório da Atividade <span class="req">*</span></label>
-          <textarea id="n-desc" rows="4" placeholder="Descreva o que foi feito, com quem, onde e com quais resultados. Inclua dados quantitativos quando disponíveis (ex: 45 técnicos capacitados, 3 municípios atendidos)..."></textarea></div>
+        </div></div>
+        <div class="fl"><label>Título do PTT</label><input id="n-ptit" placeholder="Título completo do produto técnico"/></div>
+        <div id="ptt-sug" style="display:none;padding:10px 13px;background:var(--teall);border-radius:var(--r2);border:1.5px solid rgba(14,116,144,.2);font-size:11px;margin-top:4px"></div>
       </div>
 
-      <!-- PTT Block -->
-      <div id="bloco-ptt" style="display:none">
-        <div class="sec-div">2 — PTT Relacionado</div>
-        <div class="fg fg2" style="margin-top:12px">
-          <div class="fl"><label>Tipo de PTT</label>
-            <select id="n-ptt-tipo">
-              <option value="">Não se aplica</option>
-              <option>Relatório Técnico Conclusivo</option>
-              <option>Protocolo de Monitoramento</option>
-              <option>Procedimento Operacional Padrão (POP)</option>
-              <option>Material Didático / Educativo</option>
-              <option>Manual ou Guia Técnico</option>
-              <option>Plataforma / Sistema Digital</option>
-              <option>Aplicativo Móvel ou Web</option>
-              <option>Banco de Dados / Dataset</option>
-              <option>Mapa Temático / Geodados</option>
-              <option>Kit ou Instrumento de Diagnóstico</option>
-              <option>Modelo Conceitual / Computacional</option>
-              <option>Projeto Técnico / Plano de Gestão</option>
-              <option>Artigo Científico Aplicado</option>
-              <option>Norma / Instrução Técnica</option>
-              <option>Jogo Educativo / Gamificação</option>
-              <option>Tecnologia Social / Apropriada</option>
-              <option>Modelo de Governança / Gestão</option>
-              <option>Instrumento de Política Pública</option>
-              <option>Arranjo Institucional / Rede Colaborativa</option>
-              <option>Metodologia Aplicada / Processo Inovador</option>
-              <option>Vídeo / Podcast / Recurso Multimídia</option>
-            </select>
-          </div>
-          <div class="fl"><label>Nível de Maturidade</label>
-            <select id="n-ptt-nivel">
-              <option value="">—</option>
-              <option value="N1">N1 — Conceitual (proposta/projeto)</option>
-              <option value="N2">N2 — Protótipo (testado em escala reduzida)</option>
-              <option value="N3">N3 — Implementado (em uso pelo parceiro)</option>
-            </select>
-          </div>
-        </div>
-        <div class="fg fg1">
-          <div class="fl"><label>Título do PTT</label><input id="n-ptt-titulo" placeholder="Título completo do produto técnico"/></div>
-        </div>
-        <!-- Sugestão de evidências baseada no tipo de PTT -->
-        <div id="ptt-sugestao" style="display:none;margin-top:8px;padding:12px 14px;background:var(--seal);border-radius:var(--r2);border:1.5px solid rgba(14,116,144,.2)">
-          <div style="font-size:11px;font-weight:700;color:var(--sea);margin-bottom:6px">📐 Evidências recomendadas para este PTT:</div>
-          <div id="ptt-sugestao-list" style="font-size:11px;color:var(--ink2);line-height:1.8"></div>
-        </div>
+      <!-- INSTAGRAM BLOCK -->
+      <div id="blk-insta" style="display:none">
+        <div class="fsec">Divulgação Instagram</div>
+        <div class="g2"><div class="fl"><label>Link do post</label><input id="n-igl" type="url" placeholder="https://instagram.com/p/..."/></div>
+        <div class="fl"><label>@perfil</label><input id="n-igp" placeholder="@profagua.unemat"/></div></div>
+        <div class="fl"><label>Legenda publicada</label><textarea id="n-igc" rows="3" placeholder="Texto do post..."></textarea></div>
       </div>
 
-      <!-- Instagram Block -->
-      <div id="bloco-insta" style="display:none">
-        <div class="sec-div">Instagram / Divulgação</div>
-        <div class="fg fg2" style="margin-top:12px">
-          <div class="fl"><label>Link da publicação Instagram</label><input id="n-insta-link" type="url" placeholder="https://instagram.com/p/..."/></div>
-          <div class="fl"><label>Perfil / Conta</label><input id="n-insta-perfil" placeholder="@profagua.unemat"/></div>
-        </div>
-        <div class="fg fg1">
-          <div class="fl"><label>Legenda / Caption do post</label>
-            <textarea id="n-insta-leg" rows="3" placeholder="Texto que foi publicado no Instagram..."></textarea></div>
-        </div>
-        <div style="padding:10px 14px;background:linear-gradient(135deg,rgba(131,58,180,.08),rgba(253,29,29,.05));border-radius:var(--r2);border:1.5px solid rgba(131,58,180,.2);font-size:11px;color:var(--ink2);margin-top:4px">
-          📱 <strong>Comunicação automática:</strong> ao salvar, a coordenação recebe notificação com o preview do post. Adicione fotos abaixo para gerar o card visual.
-        </div>
-      </div>
+      <div class="fsec">3 — Tipos de Evidência</div>
+      <div style="font-size:11px;color:var(--ink3);margin:6px 0 8px">Marque todos os tipos de evidência incluídos neste registro. A borda colorida indica o grau de exigência para o tipo de PTT selecionado.</div>
+      <div class="ev-grid" id="ev-sel"></div>
 
-      <!-- STEP 3: Tipos de Evidência -->
-      <div class="sec-div">3 — Tipos de Evidência Incluídos</div>
-      <div style="font-size:11px;color:var(--ink3);margin:8px 0 10px">Marque todos os tipos de evidência que você está enviando neste registro:</div>
-      <div class="ev-grid" id="ev-selector"></div>
-
-      <!-- STEP 4: Fotos -->
-      <div class="sec-div">4 — Registro Fotográfico</div>
-      <div class="up-zone" id="foto-zone">
-        <input type="file" id="foto-input" accept="image/*" multiple onchange="handleFotos(this)"/>
-        <div class="up-ico">📸</div>
-        <div class="up-txt">Clique ou arraste para adicionar fotos</div>
-        <div class="up-sub">JPG, PNG, WEBP · Máx 5 MB por foto · Múltiplas fotos aceitas</div>
+      <div class="fsec">4 — Registro Fotográfico</div>
+      <div class="upzone" id="fz">
+        <input type="file" id="fi" accept="image/*" multiple onchange="addFotos(this)"/>
+        <div style="font-size:26px;margin-bottom:6px">📸</div>
+        <div style="font-size:12.5px;font-weight:700;color:var(--ink2)">Clique ou arraste fotos</div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:3px">JPG / PNG / WEBP · máx 4 MB por foto · múltiplas aceitas</div>
       </div>
-      <div class="photo-grid" id="foto-preview" style="margin-top:8px"></div>
+      <div class="photo-grid" id="fp"></div>
 
-      <!-- STEP 5: Documentos & Links -->
-      <div class="sec-div">5 — Documentos PDF e Links</div>
-      <div class="fg fg1" style="margin-top:10px">
-        <div class="fl"><label>Links externos (DOI, Zenodo, Repositório, Diário Oficial, GitHub...)</label>
-          <div class="frow">
-            <input id="link-input" type="url" placeholder="https://zenodo.org/... ou DOI ou link institucional"/>
-            <button class="btn sec sm" onclick="addLink()">+ Adicionar</button>
-          </div>
+      <div class="fsec">5 — Documentos & Links</div>
+      <div class="frow"><input id="li" type="url" placeholder="DOI, Zenodo, repositório, Diário Oficial, GitHub, Instagram..."/><button class="btn sec sm" onclick="addLink()">+ Link</button></div>
+      <div id="ll" class="up-list" style="margin:6px 0 10px"></div>
+      <div class="upzone"><input type="file" id="di" accept=".pdf,.doc,.docx,.xlsx,.zip" multiple onchange="addDocs(this)"/>
+        <div style="font-size:22px;margin-bottom:5px">📎</div>
+        <div style="font-size:12px;font-weight:700;color:var(--ink2)">Anexar documentos (PDF, Word, Excel, ZIP)</div>
+        <div style="font-size:10.5px;color:var(--ink3);margin-top:2px">Atas, protocolos, portarias, listas de presença, questionários</div>
+      </div>
+      <div id="dl" class="up-list" style="margin-top:7px"></div>
+
+      <div class="fsec">6 — Publicação e Contexto CAPES</div>
+      <div class="g2"><div class="fl"><label>Observações adicionais para a coordenação</label>
+        <textarea id="n-obs" rows="3" placeholder="Informações complementares, pendências, solicitações..."></textarea></div>
+      <div>
+        <div class="fl"><label>Visível no Instagram</label>
+          <select id="n-igv"><option value="nao">Não compartilhar</option><option value="sim">Sim — gerar card para Instagram</option></select>
         </div>
-      </div>
-      <div id="link-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
-      <div class="up-zone" style="margin-top:12px">
-        <input type="file" id="doc-input" accept=".pdf,.doc,.docx,.xlsx,.xls,.zip" multiple onchange="handleDocs(this)"/>
-        <div class="up-ico">📎</div>
-        <div class="up-txt">Anexar documentos (PDF, Word, Excel, ZIP)</div>
-        <div class="up-sub">Atas, protocolos, portarias, relatórios, listas de presença, questionários...</div>
-      </div>
-      <div id="doc-list" class="up-list" style="margin-top:8px"></div>
-
-      <!-- STEP 6: Observações -->
-      <div class="sec-div">6 — Observações e Destino</div>
-      <div class="fg fg2" style="margin-top:12px">
-        <div class="fl"><label>Observações adicionais</label>
-          <textarea id="n-obs" rows="3" placeholder="Informações complementares para a coordenação..."></textarea></div>
-        <div class="fl">
-          <label>Visível no Instagram</label>
-          <select id="n-insta-vis">
-            <option value="nao">Não compartilhar</option>
-            <option value="sim">Sim — gerar card para Instagram</option>
-          </select>
-          <div style="margin-top:8px">
-          <label>Discente vinculado (opcional)</label>
-          <select id="n-discente">
-            <option value="">Nenhum</option>
-          </select>
-          </div>
+        <div class="fl"><label>Ano para Coleta CAPES</label>
+          <select id="n-ano"><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select>
         </div>
-      </div>
+      </div></div>
 
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1.5px solid var(--slateb)">
-        <button class="btn sec" onclick="limparForm()">Cancelar</button>
-        <button class="btn nav lg" onclick="salvarEvidencia()">💾 Enviar à Coordenação</button>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1.5px solid var(--slateb)">
+        <button class="btn sec" onclick="limpar()">Cancelar</button>
+        <button class="btn nav lg" onclick="salvar()">💾 Enviar à Coordenação</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PAGE: MINHAS EVIDÊNCIAS -->
+<!-- ── MINHAS ── -->
 <div class="pg" id="pg-minhas">
   <div class="card">
-    <div class="ch">
-      <h2>📁 Minhas Evidências</h2>
-      <button class="btn pri sm" onclick="goP('nova',document.querySelector('[onclick*=nova]'))">+ Nova</button>
-    </div>
-    <div class="cb" style="padding-bottom:4px">
-      <div id="filter-bar">
-        <input id="srch-min" type="text" placeholder="🔍 Buscar..." oninput="filtrarMinhas(this.value)"/>
-        <button class="ftag on" data-f="todos" onclick="setFiltro(this,'todos')">Todos</button>
-        <button class="ftag" data-f="pendente" onclick="setFiltro(this,'pendente')">Pendentes</button>
-        <button class="ftag" data-f="aprovado" onclick="setFiltro(this,'aprovado')">Aprovados</button>
-        <button class="ftag" data-f="revisao" onclick="setFiltro(this,'revisao')">Em revisão</button>
+    <div class="ch"><h2>📁 Minhas Evidências</h2><button class="btn pri sm" onclick="goP('nova',document.querySelector('[onclick*=nova]'))">+ Nova</button></div>
+    <div class="cb" style="padding-bottom:6px">
+      <div class="fb-bar">
+        <input type="text" placeholder="🔍 Buscar..." oninput="filtMin(this.value)" id="srchm"/>
+        <button class="ft on" data-f="todos" onclick="setFt(this,'todos')">Todos</button>
+        <button class="ft" data-f="pendente" onclick="setFt(this,'pendente')">Pendentes</button>
+        <button class="ft" data-f="aprovado" onclick="setFt(this,'aprovado')">Aprovados</button>
+        <button class="ft" data-f="revisao" onclick="setFt(this,'revisao')">Em revisão</button>
       </div>
     </div>
-    <div id="lista-minhas" style="padding:0 4px 8px"></div>
+    <div id="lista-min"></div>
   </div>
 </div>
 
-<!-- PAGE: RELATÓRIO -->
+<!-- ── RELATÓRIO ── -->
 <div class="pg" id="pg-relatorio">
   <div class="card" style="margin-bottom:14px">
-    <div class="ch"><h2>📊 Relatório de Evidências</h2>
-      <div style="display:flex;gap:8px">
-        <select id="rpt-docente" class="btn sec sm" onchange="gerarRelatorio()" style="font-size:11px;padding:4px 10px">
+    <div class="ch"><h2>📊 Relatório do Programa</h2>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <select id="rf-doc" onchange="gerarRpt()" style="padding:5px 9px;border-radius:6px;border:1.5px solid var(--slateb);font-size:11px;font-family:inherit">
           <option value="">Todos os docentes</option>
+          <option>Adley Bergson G. de Abreu</option><option>Alexandre Gonçalves Porto</option>
+          <option>Amintas Nazareth Rossete</option><option>Anderson Marques do Amaral</option>
+          <option>Claumir Cesar Muniz</option><option>Érico Fernando O. Martins</option>
+          <option>Ernandes Sobreira Oliveira Junior</option><option>Fátima Aparecida S. Iocca</option>
+          <option>Francisco Lledo dos Santos</option><option>Rodrigo Bruno Zanin</option>
+          <option>Solange A. Arrolho da Silva</option><option>Solange Kimie Ikeda Castrillon</option>
+          <option>Tadeu Miranda de Queiroz</option><option>Wilkinson Lopes Lazaro</option>
         </select>
-        <select id="rpt-tipo" class="btn sec sm" onchange="gerarRelatorio()" style="font-size:11px;padding:4px 10px">
+        <select id="rf-tp" onchange="gerarRpt()" style="padding:5px 9px;border-radius:6px;border:1.5px solid var(--slateb);font-size:11px;font-family:inherit">
           <option value="">Todos os tipos</option>
-          <option>PTT / Produto Técnico</option>
-          <option>TCC / Dissertação</option>
-          <option>Projeto de Pesquisa</option>
-          <option>Projeto de Extensão</option>
-          <option>Parceria Institucional</option>
-          <option>Evento Científico</option>
-          <option>Visita Técnica</option>
-          <option>Capacitação / Oficina</option>
-          <option>Publicação</option>
-          <option>Ação de Extensão</option>
-          <option>Divulgação Instagram</option>
-          <option>Banca / Avaliação</option>
+          <option>🏗️ PTT / Produto Técnico</option><option>🎓 TCC / Dissertação</option>
+          <option>🔬 Projeto de Pesquisa</option><option>🌱 Projeto de Extensão</option>
+          <option>🤝 Parceria Institucional</option><option>🎤 Evento Científico</option>
+          <option>🏛️ Visita Técnica</option><option>📚 Capacitação / Oficina</option>
+          <option>📄 Publicação / Artigo</option><option>🌐 Ação de Extensão</option>
         </select>
-        <select id="rpt-ano" class="btn sec sm" onchange="gerarRelatorio()" style="font-size:11px;padding:4px 10px">
+        <select id="rf-ano" onchange="gerarRpt()" style="padding:5px 9px;border-radius:6px;border:1.5px solid var(--slateb);font-size:11px;font-family:inherit">
           <option value="">Todos os anos</option>
           <option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option>
         </select>
-        <button class="btn nav sm" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+        <button class="btn sec sm" onclick="expCSV()">⬇️ CSV Sucupira</button>
+        <button class="btn nav sm" onclick="window.print()">🖨️ Imprimir</button>
       </div>
     </div>
-    <div id="rpt-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:14px 20px;border-bottom:1.5px solid var(--slateb)"></div>
-    <div id="rpt-content" style="padding:4px 0"></div>
+    <div id="rpt-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;padding:13px 18px;border-bottom:1.5px solid var(--slateb)"></div>
+    <div id="rpt-body"></div>
   </div>
 </div>
 
-<!-- PAGE: MATRIZ CAPES -->
+<!-- ── DOCENTES & VÍNCULOS ── -->
+<div class="pg" id="pg-docentes">
+  <div class="g13">
+    <div>
+      <div class="card">
+        <div class="ch"><h2>👥 Docentes do Programa</h2></div>
+        <div id="doc-list"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="ch"><h2>🔗 Registrar Vínculo</h2></div>
+        <div class="cb">
+          <div class="fl"><label>Pessoa A</label><select id="va"><option value="">Selecione...</option></select></div>
+          <div class="fl"><label>Tipo de Vínculo</label>
+            <select id="vt">
+              <option value="orient">Orientação Principal</option>
+              <option value="coorient">Coorientação</option>
+              <option value="banca">Participação em Banca</option>
+              <option value="acao">Ação / Projeto Conjunto</option>
+              <option value="colab">Colaboração / Parceria</option>
+              <option value="disciplina">Disciplina Ministrada</option>
+            </select>
+          </div>
+          <div class="fl"><label>Pessoa B / Contexto</label><select id="vb"><option value="">Selecione...</option></select></div>
+          <div class="fl"><label>Peso (1–5)</label>
+            <input type="range" id="vpeso" min="1" max="5" value="2" oninput="document.getElementById('vpv').textContent=this.value" style="width:100%"/>
+            <div style="text-align:center;font-size:12px;font-weight:700;color:var(--teal)">Peso: <span id="vpv">2</span></div>
+          </div>
+          <div class="fl"><label>Descrição / Contexto</label><textarea id="vdesc" rows="2" placeholder="Ex: Orientação da dissertação sobre qualidade da água..."></textarea></div>
+          <button class="btn nav" style="width:100%" onclick="salvarVinc()">Salvar Vínculo</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><h2>Vínculos cadastrados</h2></div>
+        <div id="vinc-list" style="padding:4px 0"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MATRIZ CAPES ── -->
 <div class="pg" id="pg-matriz">
   <div class="card">
     <div class="ch">
       <h2>📐 Matriz PTT × Evidência CAPES</h2>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span style="font-size:11px;color:var(--ink3)">Legenda:</span>
-        <span class="badge" style="background:var(--rosel);color:var(--rose)">E Essencial</span>
-        <span class="badge" style="background:var(--amberl);color:var(--amber)">R Recomendado</span>
-        <span class="badge" style="background:var(--emeraldl);color:var(--emerald)">O Opcional</span>
+      <div style="display:flex;gap:6px;align-items:center;font-size:11px;flex-wrap:wrap">
+        <span class="bdg" style="background:var(--rosel);color:var(--rosem)">E Essencial</span>
+        <span class="bdg" style="background:var(--amberl);color:var(--amberm)">R Recomendado</span>
+        <span class="bdg" style="background:var(--greenl);color:var(--green)">O Opcional</span>
       </div>
     </div>
-    <div style="overflow-x:auto;padding:4px">
-      <table class="tbl" id="tbl-matriz"></table>
-    </div>
+    <div style="overflow-x:auto;padding:4px"><table class="mtbl" id="tbl-mat"></table></div>
   </div>
   <div class="card">
-    <div class="ch"><h2>📋 Checklist do Dossiê</h2></div>
+    <div class="ch"><h2>✅ Checklist do Dossiê</h2></div>
     <div class="cb">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="g2">
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--rose);margin-bottom:8px">🔴 Itens Obrigatórios</div>
-          <div id="checklist-obrig"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--rosem);margin-bottom:8px">🔴 Itens Obrigatórios</div>
+          <div id="cl-ob"></div>
         </div>
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px">🟡 Recomendados</div>
-          <div id="checklist-rec"></div>
-          <div style="font-size:12px;font-weight:700;color:var(--slated);margin-top:12px;margin-bottom:8px">⚪ Opcionais</div>
-          <div id="checklist-opc"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--amberm);margin-bottom:8px">🟡 Recomendados</div>
+          <div id="cl-rc"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--slated);margin-top:12px;margin-bottom:8px">⚪ Opcionais</div>
+          <div id="cl-op"></div>
         </div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--navyl);border-radius:var(--r2);font-size:11px;color:var(--navy)">
+        <strong>Nomenclatura do dossiê digital:</strong><br/>
+        <code style="background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:11px">DOSSIE_PTT_[Sobrenome]_[Ano]_[TipoPTT]</code><br/>
+        Exemplo: <code style="background:rgba(255,255,255,.7);padding:2px 6px;border-radius:4px;font-size:11px">DOSSIE_PTT_SILVA_2025_POP_Monitoramento</code>
       </div>
     </div>
   </div>
 </div>
 
-<!-- PAGE: COORDENAÇÃO -->
-<div class="pg" id="pg-coordenacao">
+<!-- ── COORDENAÇÃO ── -->
+<div class="pg" id="pg-coord">
   <div class="card">
-    <div class="ch">
-      <h2>🏛️ Painel da Coordenação</h2>
-      <div style="display:flex;gap:8px">
-        <select id="coord-status-f" onchange="filtrarCoord()" style="padding:5px 10px;border-radius:7px;border:1.5px solid var(--slateb);font-size:12px;font-family:inherit">
-          <option value="">Todos os status</option>
-          <option value="pendente">Pendentes</option>
-          <option value="aprovado">Aprovados</option>
-          <option value="revisao">Em revisão</option>
+    <div class="ch"><h2>🏛️ Painel da Coordenação</h2>
+      <div style="display:flex;gap:7px">
+        <select id="cf-st" onchange="renderCoord()" style="padding:5px 9px;border-radius:6px;border:1.5px solid var(--slateb);font-size:11px;font-family:inherit">
+          <option value="">Todos</option><option value="pendente">Pendentes</option>
+          <option value="aprovado">Aprovados</option><option value="revisao">Em revisão</option>
         </select>
-        <button class="btn nav sm" onclick="exportarTudo()">⬇️ Exportar tudo CSV</button>
+        <button class="btn sec sm" onclick="expCSV()">⬇️ Exportar CSV</button>
       </div>
     </div>
-    <div id="coord-list" style="padding:4px 0"></div>
+    <div id="coord-lst"></div>
   </div>
 </div>
 
-<!-- MODAL: VER EVIDÊNCIA -->
-<div class="ovl" id="modal-ver" onclick="if(event.target===this)fecharModal('modal-ver')">
-  <div class="modal" style="max-width:720px">
-    <div class="mh">
-      <h3 id="mv-titulo">Evidência</h3>
-      <button class="mcl" onclick="fecharModal('modal-ver')">✕</button>
-    </div>
-    <div class="mb" id="mv-body"></div>
-    <div class="mf" id="mv-footer"></div>
+<!-- MODAL VER -->
+<div class="ovl" id="mov" onclick="if(event.target===this)fM('mov')">
+  <div class="modal" style="max-width:700px">
+    <div class="mh"><h3 id="mv-tit">Evidência</h3><button class="mcl" onclick="fM('mov')">✕</button></div>
+    <div class="mb" id="mv-body" style="max-height:72vh;overflow-y:auto"></div>
+    <div class="mf" id="mv-ft"></div>
   </div>
 </div>
 
-<!-- MODAL: COMENTÁRIO COORD -->
-<div class="ovl" id="modal-coment" onclick="if(event.target===this)fecharModal('modal-coment')">
-  <div class="modal" style="max-width:480px">
-    <div class="mh"><h3>💬 Comentário da Coordenação</h3><button class="mcl" onclick="fecharModal('modal-coment')">✕</button></div>
+<!-- MODAL DOCENTE DETALHE -->
+<div class="ovl" id="mdoc" onclick="if(event.target===this)fM('mdoc')">
+  <div class="modal" style="max-width:620px">
+    <div class="mh"><h3 id="md-tit">Docente</h3><button class="mcl" onclick="fM('mdoc')">✕</button></div>
+    <div class="mb" id="md-body" style="max-height:75vh;overflow-y:auto"></div>
+    <div class="mf"><button class="btn sec" onclick="fM('mdoc')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- MODAL COMENTÁRIO -->
+<div class="ovl" id="mcom" onclick="if(event.target===this)fM('mcom')">
+  <div class="modal" style="max-width:460px">
+    <div class="mh"><h3>💬 Comentário da Coordenação</h3><button class="mcl" onclick="fM('mcom')">✕</button></div>
     <div class="mb">
       <div class="fl"><label>Status</label>
-        <select id="coord-status-sel">
+        <select id="c-st">
           <option value="pendente">🕐 Pendente</option>
-          <option value="aprovado">✅ Aprovado</option>
-          <option value="revisao">🔄 Em revisão — solicitar ajuste</option>
+          <option value="aprovado">✅ Aprovado pela Coordenação</option>
+          <option value="revisao">🔄 Em revisão — aguardando ajuste</option>
           <option value="arquivo">📦 Arquivado</option>
         </select>
       </div>
-      <div class="fl" style="margin-top:12px"><label>Comentário</label>
-        <textarea id="coord-coment-txt" rows="4" placeholder="Feedback para o discente/docente..."></textarea></div>
+      <div class="fl" style="margin-top:10px"><label>Comentário</label>
+        <textarea id="c-txt" rows="4" placeholder="Feedback para o docente/discente..."></textarea></div>
     </div>
     <div class="mf">
-      <button class="btn sec" onclick="fecharModal('modal-coment')">Cancelar</button>
-      <button class="btn pri" onclick="salvarComentario()">Salvar</button>
+      <button class="btn sec" onclick="fM('mcom')">Cancelar</button>
+      <button class="btn nav" onclick="salvarComent()">Salvar</button>
     </div>
   </div>
 </div>
+
+<div id="toast"></div>
+
 <script>
-// ─── FIREBASE ────────────────────────────────────────────────────────────────
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
 const FC={
   apiKey:"AIzaSyCpmnySKsKSGevj1bsuuCSxadlxYPfEH7Q",
   authDomain:"aquanet-profagua.firebaseapp.com",
@@ -713,28 +677,38 @@ const ADMINS=['xnob5hHsrDdxdxKi3R2VPNwQtv23','y39GeOJgVQeyHQYsxrJcpbpvpo32','nGx
 firebase.initializeApp(FC);
 const DB=firebase.database();
 
-// ─── CONSTANTES ──────────────────────────────────────────────────────────────
-const EV_TIPOS=[
-  {id:'DEF',icon:'📋',nome:'Entrega Formal',         desc:'Protocolo/ofício assinado pelo parceiro'},
-  {id:'ANA',icon:'📜',nome:'Ato Normativo',           desc:'Portaria, resolução, deliberação oficial'},
-  {id:'RAP',icon:'📝',nome:'Relatório de Aplicação',  desc:'Relatório técnico com resultados documentados'},
-  {id:'LPR',icon:'✅',nome:'Lista de Presença',       desc:'Registro nominal de participantes'},
-  {id:'QAV',icon:'📊',nome:'Questionário / Avaliação',desc:'Formulário de satisfação e impacto'},
-  {id:'RFA',icon:'📷',nome:'Reg. Fotográfico',        desc:'Fotos ou vídeos da atividade'},
-  {id:'DEB',icon:'💬',nome:'Declaração Beneficiário', desc:'Depoimento ou declaração de beneficiário'},
-  {id:'DIM',icon:'📈',nome:'Dados de Impacto',        desc:'Indicadores quantitativos mensuráveis'},
-  {id:'DOI',icon:'🔗',nome:'DOI / Repositório',       desc:'Zenodo, GitHub, repositório UNEMAT'},
-  {id:'CTT',icon:'📌',nome:'Citação em Terceiros',    desc:'Referência em trabalho externo'},
+// ── DADOS DOCENTES ────────────────────────────────────────────────────────────
+const DOCENTES=[
+  {id:'doc-adley',    nome:'Adley Bergson G. de Abreu',     cat:'PERMANENTE',area:'Ferramentas de Gestão · Instrumentos da Política RH',linha:'A',discip:'MPA 023 — Poluição das Águas'},
+  {id:'doc-alexandre',nome:'Alexandre Gonçalves Porto',      cat:'PERMANENTE',area:'Ciência e Tecnologia de Sementes · Segurança Hídrica',linha:'D',discip:'—'},
+  {id:'doc-amintas',  nome:'Amintas Nazareth Rossete',       cat:'PERMANENTE',area:'Planejamento e Gestão de RH · Governança',linha:'C',discip:'MPA 002 — Hidrologia e Qualidade; MPA 025 — Desastres'},
+  {id:'doc-anderson', nome:'Anderson Marques do Amaral',     cat:'PERMANENTE',area:'Ecologia e Gestão Ambiental · Segurança Hídrica',linha:'D',discip:'—'},
+  {id:'doc-claumir',  nome:'Claumir Cesar Muniz',            cat:'PERMANENTE',area:'Segurança Hídrica · Desastres e Riscos',linha:'D',discip:'MPA 025 — Desastres Naturais e Riscos'},
+  {id:'doc-erico',    nome:'Érico Fernando O. Martins',      cat:'PERMANENTE',area:'Geotecnologia · Metodologias de Gestão',linha:'B',discip:'MPA 007 — Geotecnologia Aplicada à Gestão Hídrica'},
+  {id:'doc-ernandes', nome:'Ernandes Sobreira Oliveira Junior',cat:'COLABORADOR',area:'Biogeoquímica · GEE · Ecossistemas Aquáticos · Segurança Hídrica',linha:'D',discip:'PPGCA / CELBE / LIPAN / ProfÁgua',email:'ernandes.sobreira@unemat.br'},
+  {id:'doc-fatima',   nome:'Fátima Aparecida S. Iocca',      cat:'PERMANENTE',area:'Ferramentas de Gestão · Instrumentos da Política RH',linha:'A',discip:'MPA 002; MPA 005 — Seminário I; MPA 006 — Seminário II'},
+  {id:'doc-francisco',nome:'Francisco Lledo dos Santos',     cat:'PERMANENTE',area:'Hidrologia Avançada · Ferramentas de Gestão',linha:'A',discip:'MPA 011 — Hidrologia Avançada'},
+  {id:'doc-rodrigo',  nome:'Rodrigo Bruno Zanin',            cat:'PERMANENTE',area:'Geotecnologia · Metodologias de Gestão',linha:'B',discip:'MPA 007 — Geotecnologia'},
+  {id:'doc-solange-a',nome:'Solange A. Arrolho da Silva',    cat:'PERMANENTE',area:'Planejamento e Gestão de RH · Gestão Participativa',linha:'C',discip:'MPA 004 — Instrumentos; MPA 012 — Gestão Participativa'},
+  {id:'doc-solange-k',nome:'Solange Kimie Ikeda Castrillon', cat:'PERMANENTE',area:'Governança · Segurança Hídrica · Usos Múltiplos',linha:'D',discip:'MPA 003 — Governança das Águas; MPA 014 — Gestão das Águas'},
+  {id:'doc-tadeu',    nome:'Tadeu Miranda de Queiroz',       cat:'PERMANENTE',area:'Agronomia · Irrigação e Drenagem · Metodologia',linha:'B',discip:'MPA 001 — Metodologia Científica; MPA 013 — Hidrometria'},
+  {id:'doc-wilkinson',nome:'Wilkinson Lopes Lazaro',         cat:'PERMANENTE',area:'Qualidade de Água · Planejamento de RH',linha:'C',discip:'MPA 027 — Qualidade de Água em rios e reservatórios'},
 ];
 
-const TIPO_ATIV_ICONS={
-  'PTT / Produto Técnico':'🏗️','TCC / Dissertação':'🎓','Projeto de Pesquisa':'🔬',
-  'Projeto de Extensão':'🌱','Parceria Institucional':'🤝','Evento Científico':'🎤',
-  'Visita Técnica':'🏛️','Capacitação / Oficina':'📚','Publicação':'📄',
-  'Ação de Extensão':'🌐','Divulgação Instagram':'📱','Banca / Avaliação':'⚖️'
-};
+const EV_TIPOS=[
+  {id:'DEF',icon:'📋',nome:'Entrega Formal',     desc:'Protocolo/ofício assinado pelo parceiro'},
+  {id:'ANA',icon:'📜',nome:'Ato Normativo',       desc:'Portaria, resolução, deliberação oficial'},
+  {id:'RAP',icon:'📝',nome:'Rel. de Aplicação',   desc:'Relatório técnico com resultados'},
+  {id:'LPR',icon:'✅',nome:'Lista de Presença',   desc:'Registro nominal de participantes'},
+  {id:'QAV',icon:'📊',nome:'Quest. / Avaliação',  desc:'Formulário satisfação/impacto'},
+  {id:'RFA',icon:'📷',nome:'Reg. Fotográfico',    desc:'Fotos ou vídeos da atividade'},
+  {id:'DEB',icon:'💬',nome:'Decl. Beneficiário',  desc:'Depoimento ou declaração'},
+  {id:'DIM',icon:'📈',nome:'Dados de Impacto',    desc:'Indicadores quantitativos'},
+  {id:'DOI',icon:'🔗',nome:'DOI / Repositório',   desc:'Zenodo, GitHub, UNEMAT'},
+  {id:'CTT',icon:'📌',nome:'Citação Terceiros',   desc:'Referência em trabalho externo'},
+];
 
-const MATRIZ_PTT=[
+const MATRIZ=[
   {nome:'Relatório Técnico Conclusivo',   ev:{DEF:'E',ANA:'R',RAP:'E',LPR:'O',QAV:'O',RFA:'R',DEB:'O',DIM:'R',DOI:'E',CTT:'R'}},
   {nome:'Protocolo de Monitoramento',     ev:{DEF:'E',ANA:'R',RAP:'E',LPR:'O',QAV:'O',RFA:'R',DEB:'O',DIM:'E',DOI:'E',CTT:'O'}},
   {nome:'Procedimento Operacional Padrão',ev:{DEF:'E',ANA:'R',RAP:'E',LPR:'O',QAV:'O',RFA:'R',DEB:'R',DIM:'O',DOI:'R',CTT:'O'}},
@@ -758,599 +732,535 @@ const MATRIZ_PTT=[
   {nome:'Metodologia Aplicada / Processo',ev:{DEF:'E',ANA:'R',RAP:'E',LPR:'R',QAV:'E',RFA:'E',DEB:'R',DIM:'E',DOI:'E',CTT:'R'}},
 ];
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let USER=null, EVIDENCIAS={}, DISCENTES=[];
-let fotosB64=[], docsB64=[], links=[], evSelecionados=new Set();
-let editandoKey=null, comentandoKey=null, filtroStatus='todos';
+const TIPO_ICO={'🏗️ PTT / Produto Técnico':'🏗️','🎓 TCC / Dissertação':'🎓','🔬 Projeto de Pesquisa':'🔬','🌱 Projeto de Extensão':'🌱','🤝 Parceria Institucional':'🤝','🎤 Evento Científico':'🎤','🏛️ Visita Técnica':'🏛️','📚 Capacitação / Oficina':'📚','📄 Publicação / Artigo':'📄','🌐 Ação de Extensão':'🌐','📱 Divulgação / Instagram':'📱','⚖️ Banca / Avaliação':'⚖️','🏆 Premiação / Destaque':'🏆','🤲 Serviço à Sociedade':'🤲'};
+const VT_LABEL={orient:'Orientação',coorient:'Coorientação',banca:'Banca',acao:'Ação conjunta',colab:'Colaboração',disciplina:'Disciplina'};
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let USER=null, EV={}, VINC={}, MEMBERS={};
+let fotosB64=[],docsB64=[],lnks=[],evSel=new Set();
+let editKey=null,comentKey=null,ftSt='todos';
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
 firebase.auth().onAuthStateChanged(function(u){
   if(u){
     USER=u;
     document.getElementById('splsh').style.display='none';
     document.getElementById('uinfo').style.display='flex';
     document.getElementById('uph').src=u.photoURL||'';
-    document.getElementById('unm').textContent=(u.displayName||u.email||'').split(' ')[0];
+    document.getElementById('unm').textContent=(u.displayName||'').split(' ')[0];
     document.getElementById('btnlog').style.display='none';
     document.getElementById('btnout').style.display='';
-    if(ADMINS.includes(u.uid)){
-      document.getElementById('btn-coord').style.display='';
-    }
-    loadData();
+    if(ADMINS.includes(u.uid)) document.getElementById('btn-coord').style.display='';
+    loadAll();
   } else {
     USER=null;
     document.getElementById('splsh').style.display='flex';
     document.getElementById('uinfo').style.display='none';
     document.getElementById('btnlog').style.display='';
     document.getElementById('btnout').style.display='none';
-    document.getElementById('btn-coord').style.display='none';
   }
 });
 function doLogin(){firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){toast('Erro: '+e.message);});}
 function doLogout(){firebase.auth().signOut();}
 
-// ─── LOAD ─────────────────────────────────────────────────────────────────────
-function loadData(){
-  DB.ref('evidencias').on('value',function(s){
-    EVIDENCIAS=s.val()||{};
-    updStats(); renderInicio(); renderMinhas(''); gerarRelatorio();
-    if(ADMINS.includes(USER?USER.uid:'')) renderCoordenacao();
-  });
-  // Load discentes from AquaNet
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+function loadAll(){
+  DB.ref('evidencias').on('value',function(s){EV=s.val()||{};updStats();renderHome();renderMin('');gerarRpt();if(ADMINS.includes(USER?USER.uid:''))renderCoord();});
+  DB.ref('aquanet/links').on('value',function(s){VINC=s.val()||{};renderVincList();updStats();});
   DB.ref('aquanet/members').once('value').then(function(s){
-    var m=s.val()||{};
-    DISCENTES=Object.values(m).filter(function(x){return x.type==='discente'||x.type==='egresso';}).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
-    var sel=document.getElementById('n-discente');
-    if(sel){
-      sel.innerHTML='<option value="">Nenhum</option>'+DISCENTES.map(function(d){return '<option value="'+d.id+'">'+d.label+'</option>';}).join('');
-    }
-    var rsels=['rpt-docente'];
-    rsels.forEach(function(id){
-      var el=document.getElementById(id);
-      if(el&&el.tagName==='SELECT'){
-        // already has docentes hardcoded
-      }
-    });
+    MEMBERS=s.val()||{};
+    populateVincSelects();
+    var disc=Object.values(MEMBERS).filter(function(m){return m.type==='discente'||m.type==='egresso';}).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+    var sel=document.getElementById('n-dis');
+    if(sel) sel.innerHTML='<option value="">Nenhum</option>'+disc.map(function(d){return '<option value="'+d.id+'">'+d.label+(d.ano?' ('+d.ano+')':'')+'</option>';}).join('');
   });
-  renderMatriz();
-  renderChecklist();
-  buildEvSelector('');
-  buildCompBars();
+  renderMatriz();renderChecklist();buildEvSel('');renderDocList();buildCovBars();
 }
 
-// ─── STATS ────────────────────────────────────────────────────────────────────
 function updStats(){
-  var arr=Object.values(EVIDENCIAS);
-  var pend=arr.filter(function(e){return !e.status||e.status==='pendente';}).length;
-  var apro=arr.filter(function(e){return e.status==='aprovado';}).length;
-  var rev=arr.filter(function(e){return e.status==='revisao';}).length;
-  var docs=new Set(arr.map(function(e){return e.docente;})).size;
-  var fotos=arr.reduce(function(s,e){return s+(e.fotos?e.fotos.length:0);},0);
-  document.getElementById('st-tot').textContent=arr.length;
-  document.getElementById('st-pend').textContent=pend;
-  document.getElementById('st-apro').textContent=apro;
-  document.getElementById('st-rev').textContent=rev;
-  document.getElementById('st-doc').textContent=docs;
-  document.getElementById('st-fotos').textContent=fotos;
-  buildCompBars();
+  var arr=Object.values(EV);
+  document.getElementById('st0').textContent=arr.length;
+  document.getElementById('st1').textContent=arr.filter(function(e){return !e.status||e.status==='pendente';}).length;
+  document.getElementById('st2').textContent=arr.filter(function(e){return e.status==='aprovado';}).length;
+  document.getElementById('st3').textContent=new Set(arr.map(function(e){return e.docente;})).size;
+  document.getElementById('st4').textContent=arr.reduce(function(s,e){return s+(e.fotos?e.fotos.length:0);},0);
+  document.getElementById('st5').textContent=Object.keys(VINC).length;
+  buildCovBars();
 }
 
-function buildCompBars(){
-  var arr=Object.values(EVIDENCIAS);
-  var counts={};
-  EV_TIPOS.forEach(function(et){counts[et.id]=0;});
-  arr.forEach(function(e){if(e.evTipos)e.evTipos.forEach(function(t){if(counts[t]!==undefined)counts[t]++;});});
-  var max=Math.max(1,Math.max.apply(null,Object.values(counts)));
-  var el=document.getElementById('comp-bars');
+function buildCovBars(){
+  var arr=Object.values(EV),cnt={};
+  EV_TIPOS.forEach(function(et){cnt[et.id]=0;});
+  arr.forEach(function(e){if(e.evTipos)e.evTipos.forEach(function(t){if(cnt[t]!==undefined)cnt[t]++;});});
+  var mx=Math.max(1,Math.max.apply(null,Object.values(cnt)));
+  var el=document.getElementById('cov-bars');
   if(!el) return;
   el.innerHTML=EV_TIPOS.map(function(et){
-    var pct=Math.round((counts[et.id]/max)*100);
-    return '<div class="comp-row"><span class="comp-sig">'+et.id+'</span>'+
-      '<div class="comp-bar"><div class="comp-fill" style="width:'+pct+'%"></div></div>'+
-      '<span class="comp-pct">'+counts[et.id]+'</span></div>';
+    var p=Math.round(cnt[et.id]/mx*100);
+    return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'+
+      '<span style="font-size:9px;font-weight:800;color:var(--teal);width:28px">'+et.id+'</span>'+
+      '<div class="prog" style="flex:1"><div class="prog-f" style="width:'+p+'%"></div></div>'+
+      '<span style="font-size:10px;font-weight:700;color:var(--ink2);width:20px;text-align:right">'+cnt[et.id]+'</span></div>';
   }).join('');
 }
 
-// ─── NAV ──────────────────────────────────────────────────────────────────────
+// ── NAV ───────────────────────────────────────────────────────────────────────
 function goP(id,btn){
-  document.querySelectorAll('.pg,.pgfull').forEach(function(p){p.classList.remove('on');});
-  document.querySelectorAll('.ntab').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nt').forEach(function(b){b.classList.remove('on');});
   var el=document.getElementById('pg-'+id);
   if(el) el.classList.add('on');
   if(btn) btn.classList.add('on');
-  if(id==='coordenacao') renderCoordenacao();
-  if(id==='relatorio') gerarRelatorio();
+  if(id==='relatorio') gerarRpt();
+  if(id==='coord') renderCoord();
 }
+window.goP=goP;
 
-// ─── EV SELECTOR ─────────────────────────────────────────────────────────────
-function buildEvSelector(pttTipo){
-  var mat=pttTipo?MATRIZ_PTT.find(function(m){return m.nome===pttTipo;}):null;
-  var el=document.getElementById('ev-selector');
+// ── EV SELECTOR ───────────────────────────────────────────────────────────────
+function buildEvSel(pttNome){
+  var mat=pttNome?MATRIZ.find(function(m){return m.nome===pttNome;}):null;
+  var el=document.getElementById('ev-sel');
   if(!el) return;
   el.innerHTML='';
   EV_TIPOS.forEach(function(et){
     var req=mat?mat.ev[et.id]:'';
     var card=document.createElement('div');
-    card.className='ev-card'+(req?' req-'+req:'');
-    if(evSelecionados.has(et.id)) card.classList.add('sel');
-    card.innerHTML='<div class="ev-icon">'+et.icon+'</div>'+
-      '<div class="ev-sig">'+et.id+'</div>'+
-      '<div class="ev-name">'+et.nome+'</div>'+
+    card.className='ev-card'+(req?' ev-req-'+req:'');
+    if(evSel.has(et.id)) card.classList.add('sel');
+    if(req) card.style.borderLeftWidth='3px';
+    card.innerHTML='<div class="eic">'+et.icon+'</div>'+
+      '<div class="ev-sig">'+et.id+'</div><div class="ev-nm">'+et.nome+'</div>'+
       (req?'<span class="ev-req '+req+'">'+req+'</span>':'');
     card.addEventListener('click',function(){
-      if(evSelecionados.has(et.id)){evSelecionados.delete(et.id);card.classList.remove('sel');card.querySelector('.ev-icon').style.background='';card.querySelector('.ev-icon').style.color='';}
-      else{evSelecionados.add(et.id);card.classList.add('sel');}
+      if(evSel.has(et.id)){evSel.delete(et.id);card.classList.remove('sel');}
+      else{evSel.add(et.id);card.classList.add('sel');}
     });
     el.appendChild(card);
   });
 }
-
-function onTipoChange(val){
-  var showPTT=val==='PTT / Produto Técnico'||val==='TCC / Dissertação';
-  var showInsta=val==='Divulgação Instagram';
-  document.getElementById('bloco-ptt').style.display=showPTT?'':'none';
-  document.getElementById('bloco-insta').style.display=showInsta?'':'none';
+function onTipo(v){
+  var showPTT=v.includes('PTT')||v.includes('TCC');
+  var showIG=v.includes('Instagram');
+  document.getElementById('blk-ptt').style.display=showPTT?'':'none';
+  document.getElementById('blk-insta').style.display=showIG?'':'none';
 }
-
-function onPTTTipoChange(val){
-  var mat=MATRIZ_PTT.find(function(m){return m.nome===val;});
-  var el=document.getElementById('ptt-sugestao');
-  if(!mat){if(el)el.style.display='none';return;}
-  if(el){
-    el.style.display='block';
-    var E=EV_TIPOS.filter(function(e){return mat.ev[e.id]==='E';});
-    var R=EV_TIPOS.filter(function(e){return mat.ev[e.id]==='R';});
-    document.getElementById('ptt-sugestao-list').innerHTML=
-      '<span style="color:var(--rose);font-weight:700">Essenciais:</span> '+E.map(function(e){return e.id;}).join(' · ')+'<br/>'+
-      '<span style="color:var(--amber);font-weight:700">Recomendados:</span> '+R.map(function(e){return e.id;}).join(' · ');
+function onPTT(v){
+  var mat=MATRIZ.find(function(m){return m.nome===v;});
+  var sg=document.getElementById('ptt-sug');
+  if(!mat||!v){if(sg)sg.style.display='none';buildEvSel('');return;}
+  if(sg){
+    sg.style.display='block';
+    var E=EV_TIPOS.filter(function(e){return mat.ev[e.id]==='E';}).map(function(e){return '<strong style="color:var(--rosem)">'+e.id+'</strong>';}).join(' ');
+    var R=EV_TIPOS.filter(function(e){return mat.ev[e.id]==='R';}).map(function(e){return '<strong style="color:var(--amberm)">'+e.id+'</strong>';}).join(' ');
+    sg.innerHTML='📐 <strong>Essenciais:</strong> '+E+' &nbsp;·&nbsp; <strong>Recomendados:</strong> '+R;
   }
-  buildEvSelector(val);
+  buildEvSel(v);
 }
+window.onTipo=onTipo;window.onPTT=onPTT;
 
-// watch ptt tipo change
-document.addEventListener('change',function(e){
-  if(e.target.id==='n-ptt-tipo') onPTTTipoChange(e.target.value);
-});
-
-// ─── FOTOS ────────────────────────────────────────────────────────────────────
-function handleFotos(input){
-  Array.from(input.files).forEach(function(file){
-    if(file.size>5*1024*1024){toast('Foto muito grande: '+file.name+' (máx 5 MB)');return;}
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      var b64=ev.target.result;
-      fotosB64.push({name:file.name,data:b64,size:file.size});
-      renderFotoPreview();
-    };
-    reader.readAsDataURL(file);
+// ── FOTOS ─────────────────────────────────────────────────────────────────────
+function addFotos(inp){
+  Array.from(inp.files).forEach(function(f){
+    if(f.size>4*1024*1024){toast(f.name+': muito grande (máx 4 MB)');return;}
+    var r=new FileReader();
+    r.onload=function(ev){fotosB64.push({name:f.name,data:ev.target.result});renderFP();};
+    r.readAsDataURL(f);
   });
-  input.value='';
+  inp.value='';
 }
-
-function renderFotoPreview(){
-  var el=document.getElementById('foto-preview');
-  el.innerHTML='';
+function renderFP(){
+  var el=document.getElementById('fp');el.innerHTML='';
   fotosB64.forEach(function(f,i){
-    var div=document.createElement('div');
-    div.className='photo-thumb';
-    var img=document.createElement('img');
-    img.src=f.data;img.alt=f.name;
-    var btn=document.createElement('button');
-    btn.className='ph-rm';btn.innerHTML='✕';
-    btn.addEventListener('click',function(){fotosB64.splice(i,1);renderFotoPreview();});
-    div.appendChild(img);div.appendChild(btn);
-    el.appendChild(div);
+    var d=document.createElement('div');d.className='pth';
+    var img=document.createElement('img');img.src=f.data;
+    var rm=document.createElement('button');rm.className='prm';rm.innerHTML='✕';
+    rm.addEventListener('click',function(){fotosB64.splice(i,1);renderFP();});
+    d.appendChild(img);d.appendChild(rm);el.appendChild(d);
   });
 }
-
-function handleDocs(input){
-  Array.from(input.files).forEach(function(file){
-    if(file.size>15*1024*1024){toast('Arquivo muito grande: '+file.name+' (máx 15 MB)');return;}
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      docsB64.push({name:file.name,data:ev.target.result,type:file.type,size:file.size});
-      renderDocList();
-    };
-    reader.readAsDataURL(file);
-  });
-  input.value='';
+function addDocs(inp){
+  Array.from(inp.files).forEach(function(f){
+    docsB64.push({name:f.name,type:f.type,size:f.size});renderDL();
+  });inp.value='';
 }
-
-function renderDocList(){
-  var el=document.getElementById('doc-list');
-  el.innerHTML='';
+function renderDL(){
+  var el=document.getElementById('dl');el.innerHTML='';
   docsB64.forEach(function(d,i){
-    var span=document.createElement('div');
-    span.className='up-item';
-    span.innerHTML='📄 <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+d.name+'</span>'+
-      '<span style="color:var(--ink3);font-size:10px">'+(Math.round(d.size/1024))+'KB</span>';
-    var rm=document.createElement('button');rm.className='up-rm';rm.innerHTML='✕';
-    rm.addEventListener('click',function(){docsB64.splice(i,1);renderDocList();});
-    span.appendChild(rm);
-    el.appendChild(span);
+    var s=document.createElement('div');s.className='up-item';
+    s.innerHTML='📄 <span style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+d.name+'</span><span style="color:var(--ink3);font-size:10px">'+(Math.round(d.size/1024))+'KB</span>';
+    var rm=document.createElement('button');rm.className='urm';rm.innerHTML='✕';
+    rm.addEventListener('click',function(){docsB64.splice(i,1);renderDL();});
+    s.appendChild(rm);el.appendChild(s);
   });
 }
-
 function addLink(){
-  var inp=document.getElementById('link-input');
-  var v=inp.value.trim();
+  var v=document.getElementById('li').value.trim();
   if(!v){toast('Cole um link válido.');return;}
-  links.push(v); inp.value=''; renderLinkList();
+  lnks.push(v);document.getElementById('li').value='';renderLL();
 }
-function renderLinkList(){
-  var el=document.getElementById('link-list');
-  el.innerHTML='';
-  links.forEach(function(lk,i){
-    var span=document.createElement('div');
-    span.className='up-item';
-    span.innerHTML='🔗 <a href="'+lk+'" target="_blank" style="color:var(--sea);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">'+lk.replace(/^https?:\/\//,'').substring(0,40)+'</a>';
-    var rm=document.createElement('button');rm.className='up-rm';rm.innerHTML='✕';
-    rm.addEventListener('click',function(){links.splice(i,1);renderLinkList();});
-    span.appendChild(rm);
-    el.appendChild(span);
+function renderLL(){
+  var el=document.getElementById('ll');el.innerHTML='';
+  lnks.forEach(function(lk,i){
+    var s=document.createElement('div');s.className='up-item';
+    s.innerHTML='🔗 <a href="'+lk+'" target="_blank" style="color:var(--teal);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">'+lk.replace(/^https?:\/\//,'').substring(0,38)+'…</a>';
+    var rm=document.createElement('button');rm.className='urm';rm.innerHTML='✕';
+    rm.addEventListener('click',function(){lnks.splice(i,1);renderLL();});
+    s.appendChild(rm);el.appendChild(s);
   });
 }
+window.addFotos=addFotos;window.addDocs=addDocs;window.addLink=addLink;
 
-// ─── SALVAR ───────────────────────────────────────────────────────────────────
-function salvarEvidencia(){
+// ── SALVAR ────────────────────────────────────────────────────────────────────
+function salvar(){
   if(!USER){toast('Faça login primeiro.');return;}
   var tipo=document.getElementById('n-tipo').value;
-  var titulo=document.getElementById('n-titulo').value.trim();
-  var data=document.getElementById('n-data').value;
+  var tit=document.getElementById('n-tit').value.trim();
+  var dat=document.getElementById('n-dat').value;
   var desc=document.getElementById('n-desc').value.trim();
-  var docente=document.getElementById('n-docente').value;
+  var doc=document.getElementById('n-doc').value;
   if(!tipo){toast('Selecione o tipo de atividade.');return;}
-  if(!titulo){toast('Informe o título.');return;}
-  if(!data){toast('Informe a data.');return;}
+  if(!tit){toast('Informe o título.');return;}
+  if(!dat){toast('Informe a data.');return;}
   if(!desc){toast('Descreva a atividade.');return;}
-  if(!docente){toast('Selecione o docente responsável.');return;}
-
-  var ev={
-    tipo,titulo,data,desc,docente,
+  if(!doc){toast('Selecione o docente responsável.');return;}
+  var ev={tipo,titulo:tit,data:dat,desc,docente:doc,
     mun:document.getElementById('n-mun').value.trim(),
-    local:document.getElementById('n-local').value.trim(),
-    parceiro:document.getElementById('n-parceiro').value.trim(),
-    participantes:parseInt(document.getElementById('n-part').value)||0,
+    local:document.getElementById('n-loc').value.trim(),
+    parceiro:document.getElementById('n-par').value.trim(),
+    participantes:parseInt(document.getElementById('n-npt').value)||0,
+    discente:document.getElementById('n-dis').value,
     obs:document.getElementById('n-obs').value.trim(),
-    pttTipo:document.getElementById('n-ptt-tipo')?document.getElementById('n-ptt-tipo').value:'',
-    pttNivel:document.getElementById('n-ptt-nivel')?document.getElementById('n-ptt-nivel').value:'',
-    pttTitulo:document.getElementById('n-ptt-titulo')?document.getElementById('n-ptt-titulo').value.trim():'',
-    instaLink:document.getElementById('n-insta-link')?document.getElementById('n-insta-link').value.trim():'',
-    instaPerfil:document.getElementById('n-insta-perfil')?document.getElementById('n-insta-perfil').value.trim():'',
-    instaLeg:document.getElementById('n-insta-leg')?document.getElementById('n-insta-leg').value.trim():'',
-    instaVis:document.getElementById('n-insta-vis')?document.getElementById('n-insta-vis').value:'nao',
-    discente:document.getElementById('n-discente')?document.getElementById('n-discente').value:'',
-    evTipos:Array.from(evSelecionados),
-    fotos:fotosB64.map(function(f){return {name:f.name,data:f.data.substring(0,100000)};}), // limit 100KB per photo
-    docs:docsB64.map(function(d){return {name:d.name,type:d.type};}), // store metadata only
-    links:links,
-    uid:USER.uid,
-    autorNome:USER.displayName||USER.email,
-    autorFoto:USER.photoURL||'',
-    status:'pendente',
-    criadoEm:new Date().toISOString(),
-    ts:Date.now()
+    ano:document.getElementById('n-ano').value,
+    pttTipo:document.getElementById('n-ptp')?document.getElementById('n-ptp').value:'',
+    pttNivel:document.getElementById('n-ptl')?document.getElementById('n-ptl').value:'',
+    pttTitulo:document.getElementById('n-ptit')?document.getElementById('n-ptit').value.trim():'',
+    igLink:document.getElementById('n-igl')?document.getElementById('n-igl').value.trim():'',
+    igVis:document.getElementById('n-igv')?document.getElementById('n-igv').value:'nao',
+    evTipos:Array.from(evSel),
+    fotos:fotosB64.map(function(f){return {name:f.name,data:f.data.substring(0,100000)};}),
+    docs:docsB64.map(function(d){return {name:d.name,type:d.type,size:d.size};}),
+    links:lnks,
+    uid:USER.uid,autorNome:USER.displayName||USER.email,autorFoto:USER.photoURL||'',
+    status:'pendente',criadoEm:new Date().toISOString(),ts:Date.now()
   };
-
-  var ref=editandoKey?DB.ref('evidencias/'+editandoKey):DB.ref('evidencias').push();
-  ref.set(ev).then(function(){
-    toast(editandoKey?'Evidência atualizada!':'Evidência enviada à coordenação!');
-    limparForm();
-    goP('minhas',document.querySelector('[onclick*=minhas]'));
-  }).catch(function(err){toast('Erro: '+err.message);});
+  var ref=editKey?DB.ref('evidencias/'+editKey):DB.ref('evidencias').push();
+  ref.set(ev).then(function(){toast(editKey?'Atualizado!':'Enviado à coordenação!');limpar();goP('minhas',document.querySelectorAll('.nt')[2]);}).catch(function(e){toast('Erro: '+e.message);});
 }
-
-function limparForm(){
-  editandoKey=null;
-  ['n-tipo','n-titulo','n-data','n-mun','n-local','n-parceiro','n-part','n-desc','n-docente','n-obs','n-insta-vis'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el){if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';}
-  });
-  fotosB64=[];docsB64=[];links=[];evSelecionados=new Set();
-  renderFotoPreview();renderDocList();renderLinkList();buildEvSelector('');
-  ['bloco-ptt','bloco-insta'].forEach(function(id){document.getElementById(id).style.display='none';});
+function limpar(){
+  editKey=null;fotosB64=[];docsB64=[];lnks=[];evSel=new Set();
+  ['n-tipo','n-tit','n-dat','n-mun','n-loc','n-par','n-npt','n-desc','n-doc','n-obs','n-dis','n-igv'].forEach(function(id){var el=document.getElementById(id);if(el){if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';}});
+  ['blk-ptt','blk-insta'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+  renderFP();renderDL();renderLL();buildEvSel('');
 }
+window.salvar=salvar;window.limpar=limpar;
 
-// ─── RENDER INICIO ────────────────────────────────────────────────────────────
-function renderInicio(){
-  var arr=Object.entries(EVIDENCIAS).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);}).slice(0,6);
-  var el=document.getElementById('inicio-list');
-  if(!arr.length){el.innerHTML='<div class="empty"><span class="empty-ico">📂</span><h3>Nenhuma evidência ainda</h3><p>Clique em "Nova Evidência" para começar</p></div>';return;}
-  el.innerHTML='';
-  arr.forEach(function(entry){
-    var k=entry[0],e=entry[1];
-    el.appendChild(makeEvRow(k,e));
-  });
-}
-
-// ─── RENDER MINHAS ────────────────────────────────────────────────────────────
-function renderMinhas(q){
-  var el=document.getElementById('lista-minhas');
-  if(!el) return;
-  var arr=Object.entries(EVIDENCIAS).filter(function(entry){
-    var e=entry[1];
-    var mine=!USER||e.uid===USER.uid||ADMINS.includes(USER?USER.uid:'');
-    var statusOk=filtroStatus==='todos'||e.status===filtroStatus||(!e.status&&filtroStatus==='pendente');
-    var qOk=!q||((e.titulo||'').toLowerCase().includes(q.toLowerCase())||(e.docente||'').toLowerCase().includes(q.toLowerCase()));
-    return mine&&statusOk&&qOk;
-  }).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
-  if(!arr.length){el.innerHTML='<div class="empty"><span class="empty-ico">📂</span><h3>Nenhuma evidência encontrada</h3><p>Ajuste os filtros ou registre uma nova evidência</p></div>';return;}
-  el.innerHTML='';
-  arr.forEach(function(entry){el.appendChild(makeEvRow(entry[0],entry[1]));});
-}
-
-function filtrarMinhas(q){renderMinhas(q);}
-function setFiltro(btn,val){
-  filtroStatus=val;
-  document.querySelectorAll('.ftag').forEach(function(b){b.classList.remove('on');});
-  btn.classList.add('on');
-  renderMinhas(document.getElementById('srch-min').value);
-}
-
-function makeEvRow(k,e){
-  var icon=TIPO_ATIV_ICONS[e.tipo]||'📌';
-  var colors={'pendente':'var(--amber)','aprovado':'var(--emerald)','revisao':'var(--rose)','arquivo':'var(--slated)'};
-  var bg={'pendente':'var(--amberl)','aprovado':'var(--emeraldl)','revisao':'var(--rosel)','arquivo':'var(--slateb)'};
+// ── ROW FACTORY ───────────────────────────────────────────────────────────────
+function makeRow(k,e){
+  var ico=TIPO_ICO[e.tipo]||'📌';
   var st=e.status||'pendente';
-  var row=document.createElement('div');
-  row.className='ev-row';
-  var evCounts=document.createElement('div');
-  evCounts.className='ev-count';
-  EV_TIPOS.forEach(function(et){
-    var filled=e.evTipos&&e.evTipos.includes(et.id);
-    var span=document.createElement('div');
-    span.className='evc'+(filled?' filled':'');
-    span.title=et.nome;
-    span.textContent=et.id;
-    evCounts.appendChild(span);
-  });
-  row.innerHTML='<div class="ev-row-icon" style="background:var(--seal)">'+icon+'</div>'+
+  var stcl={pendente:'pend',aprovado:'apro',revisao:'rev',arquivo:'arq'}[st]||'pend';
+  var stlb={pendente:'Pendente',aprovado:'Aprovado',revisao:'Em revisão',arquivo:'Arquivado'}[st]||st;
+  var row=document.createElement('div');row.className='ev-row';
+  var chips='';
+  EV_TIPOS.forEach(function(et){var has=e.evTipos&&e.evTipos.includes(et.id);chips+='<div class="evc'+(has?' has':'')+'" title="'+et.nome+'">'+et.id+'</div>';});
+  row.innerHTML='<div class="ev-row-ico">'+ico+'</div>'+
     '<div class="ev-row-body">'+
-      '<div class="ev-row-title">'+e.titulo+'</div>'+
+      '<div class="ev-row-tit">'+e.titulo+'</div>'+
       '<div class="ev-row-meta">'+
         '<span>👤 '+e.docente+'</span>'+
-        '<span>📅 '+(e.data||'')+'</span>'+
+        '<span>📅 '+e.data+'</span>'+
         (e.mun?'<span>📍 '+e.mun+'</span>':'')+
-        (e.participantes?'<span>👥 '+e.participantes+' participantes</span>':'')+
+        (e.participantes?'<span>👥 '+e.participantes+'</span>':'')+
+        (e.fotos&&e.fotos.length?'<span>📸 '+e.fotos.length+'</span>':'')+
       '</div>'+
     '</div>'+
-    '<div class="ev-row-right"></div>';
-  var right=row.querySelector('.ev-row-right');
-  var badge=document.createElement('span');
-  badge.className='badge';badge.style.background=bg[st];badge.style.color=colors[st];
-  badge.textContent={pendente:'Pendente',aprovado:'Aprovado',revisao:'Em revisão',arquivo:'Arquivado'}[st]||st;
-  right.appendChild(badge);
-  right.appendChild(evCounts);
-  if(e.fotos&&e.fotos.length){
-    var fp=document.createElement('div');
-    fp.style.cssText='font-size:10px;color:var(--ink3);text-align:right';
-    fp.textContent='📸 '+e.fotos.length+' foto'+(e.fotos.length>1?'s':'');
-    right.appendChild(fp);
-  }
-  row.addEventListener('click',function(){abrirModal(k,e);});
+    '<div class="ev-row-right">'+
+      '<span class="bdg '+stcl+'">'+stlb+'</span>'+
+      '<div class="ev-chips">'+chips+'</div>'+
+    '</div>';
+  row.addEventListener('click',function(){verEv(k,e);});
   return row;
 }
 
-// ─── MODAL VER ────────────────────────────────────────────────────────────────
-function abrirModal(k,e){
-  document.getElementById('mv-titulo').textContent=e.titulo;
-  var body=document.getElementById('mv-body');
-  var st=e.status||'pendente';
-  var colors={'pendente':'var(--amber)','aprovado':'var(--emerald)','revisao':'var(--rose)','arquivo':'var(--slated)'};
-  var bg={'pendente':'var(--amberl)','aprovado':'var(--emeraldl)','revisao':'var(--rosel)','arquivo':'var(--slateb)'};
-  body.innerHTML=
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'+
-      '<span class="badge" style="background:var(--seal);color:var(--sea)">'+(TIPO_ATIV_ICONS[e.tipo]||'📌')+' '+e.tipo+'</span>'+
-      '<span class="badge" style="background:'+bg[st]+';color:'+colors[st]+'">'+(e.status||'Pendente')+'</span>'+
-      (e.pttTipo?'<span class="badge" style="background:var(--navyl);color:var(--navy)">🏗️ '+e.pttTipo+'</span>':'')+
-      (e.pttNivel?'<span class="badge" style="background:var(--amberl);color:var(--amber)">'+e.pttNivel+'</span>':'')+
-    '</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'+
-      '<div><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Docente</div><div style="font-size:13px;font-weight:700">'+e.docente+'</div></div>'+
-      '<div><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Data</div><div style="font-size:13px">'+e.data+'</div></div>'+
-      (e.local?'<div><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Local</div><div style="font-size:13px">'+e.local+'</div></div>':'')+
-      (e.parceiro?'<div><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Parceiro</div><div style="font-size:13px">'+e.parceiro+'</div></div>':'')+
-    '</div>'+
-    '<div style="background:var(--slate);border-radius:var(--r2);padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2);margin-bottom:14px">'+e.desc+'</div>'+
-    (e.evTipos&&e.evTipos.length?'<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Tipos de evidência incluídos</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+e.evTipos.map(function(t){var et=EV_TIPOS.find(function(x){return x.id===t;});return et?'<span class="badge" style="background:var(--seal);color:var(--sea)">'+et.icon+' '+et.id+' — '+et.nome+'</span>':'';}).join('')+'</div></div>':'')+
-    (e.fotos&&e.fotos.length?'<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Fotos</div><div class="photo-grid">'+e.fotos.map(function(f){return '<div class="photo-thumb"><img src="'+f.data+'" alt="'+f.name+'"/></div>';}).join('')+'</div></div>':'')+
-    (e.links&&e.links.length?'<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Links</div>'+e.links.map(function(l){return '<a href="'+l+'" target="_blank" style="display:block;color:var(--sea);font-size:12px;margin-bottom:4px">🔗 '+l+'</a>';}).join('')+'</div>':'')+
-    (e.comentarioCoordenacao?'<div style="background:var(--navyl);border:1.5px solid rgba(26,79,138,.2);border-radius:var(--r2);padding:12px 14px;font-size:12px;line-height:1.6"><strong style="color:var(--navy)">💬 Comentário da Coordenação:</strong><br/>'+e.comentarioCoordenacao+'</div>':'');
-
-  var footer=document.getElementById('mv-footer');
-  footer.innerHTML='';
-  var closebtn=document.createElement('button');closebtn.className='btn sec';closebtn.textContent='Fechar';
-  closebtn.addEventListener('click',function(){fecharModal('modal-ver');});
-  footer.appendChild(closebtn);
-  if(USER&&(e.uid===USER.uid||ADMINS.includes(USER.uid))){
-    var delbtn=document.createElement('button');delbtn.className='btn dan';delbtn.textContent='🗑️ Excluir';
-    delbtn.addEventListener('click',function(){if(confirm('Excluir esta evidência?')){DB.ref('evidencias/'+k).remove();fecharModal('modal-ver');toast('Excluída.');}});
-    footer.appendChild(delbtn);
-  }
-  if(ADMINS.includes(USER?USER.uid:'')){
-    var cbtn=document.createElement('button');cbtn.className='btn nav';cbtn.textContent='💬 Comentar / Alterar status';
-    cbtn.addEventListener('click',function(){abrirComentario(k,e);});
-    footer.appendChild(cbtn);
-  }
-  abrirModal_show();
-}
-function abrirModal_show(){document.getElementById('modal-ver').classList.add('on');}
-function fecharModal(id){document.getElementById(id).classList.remove('on');}
-
-// ─── COMENTÁRIO COORD ────────────────────────────────────────────────────────
-function abrirComentario(k,e){
-  comentandoKey=k;
-  document.getElementById('coord-status-sel').value=e.status||'pendente';
-  document.getElementById('coord-coment-txt').value=e.comentarioCoordenacao||'';
-  document.getElementById('modal-coment').classList.add('on');
-}
-function salvarComentario(){
-  if(!comentandoKey) return;
-  var status=document.getElementById('coord-status-sel').value;
-  var txt=document.getElementById('coord-coment-txt').value.trim();
-  DB.ref('evidencias/'+comentandoKey).update({status,comentarioCoordenacao:txt,atualizadoEm:new Date().toISOString()}).then(function(){
-    toast('Status atualizado!');fecharModal('modal-coment');comentandoKey=null;
-  });
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function renderHome(){
+  var el=document.getElementById('home-list');if(!el)return;
+  var arr=Object.entries(EV).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);}).slice(0,5);
+  el.innerHTML='';
+  if(!arr.length){el.innerHTML='<div class="empty"><span class="ei">📂</span><h3>Nenhuma evidência</h3><p>Clique em "+ Registrar" para começar</p></div>';return;}
+  arr.forEach(function(entry){el.appendChild(makeRow(entry[0],entry[1]));});
 }
 
-// ─── COORDENAÇÃO ─────────────────────────────────────────────────────────────
-function renderCoordenacao(){
-  var el=document.getElementById('coord-list');
-  if(!el) return;
-  var fval=document.getElementById('coord-status-f')?document.getElementById('coord-status-f').value:'';
-  var arr=Object.entries(EVIDENCIAS).filter(function(entry){
-    return !fval||entry[1].status===fval||(!entry[1].status&&fval==='pendente');
+// ── MINHAS ────────────────────────────────────────────────────────────────────
+function renderMin(q){
+  var el=document.getElementById('lista-min');if(!el)return;
+  var arr=Object.entries(EV).filter(function(entry){
+    var e=entry[1];
+    var mine=!USER||e.uid===USER.uid||ADMINS.includes(USER?USER.uid:'');
+    var stok=ftSt==='todos'||e.status===ftSt||(!e.status&&ftSt==='pendente');
+    var qok=!q||((e.titulo||'').toLowerCase().includes(q.toLowerCase())||(e.docente||'').toLowerCase().includes(q.toLowerCase()));
+    return mine&&stok&&qok;
   }).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
   el.innerHTML='';
-  if(!arr.length){el.innerHTML='<div class="empty"><span class="empty-ico">✅</span><h3>Tudo em dia!</h3><p>Nenhuma evidência com este filtro.</p></div>';return;}
-  arr.forEach(function(entry){el.appendChild(makeEvRow(entry[0],entry[1]));});
+  if(!arr.length){el.innerHTML='<div class="empty" style="padding:32px"><span class="ei">📂</span><h3>Nenhuma evidência aqui</h3><p>Ajuste os filtros ou registre uma nova</p></div>';return;}
+  arr.forEach(function(entry){el.appendChild(makeRow(entry[0],entry[1]));});
 }
-function filtrarCoord(){renderCoordenacao();}
+function filtMin(q){renderMin(q);}
+function setFt(btn,val){ftSt=val;document.querySelectorAll('.ft').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');renderMin(document.getElementById('srchm').value);}
+window.filtMin=filtMin;window.setFt=setFt;
 
-// ─── RELATÓRIO ────────────────────────────────────────────────────────────────
-function gerarRelatorio(){
-  var fDoc=(document.getElementById('rpt-docente')||{}).value||'';
-  var fTipo=(document.getElementById('rpt-tipo')||{}).value||'';
-  var fAno=(document.getElementById('rpt-ano')||{}).value||'';
-  var arr=Object.entries(EVIDENCIAS).filter(function(entry){
-    var e=entry[1];
-    return (!fDoc||e.docente===fDoc)&&(!fTipo||e.tipo===fTipo)&&(!fAno||(e.data||'').startsWith(fAno));
+// ── VER EVIDÊNCIA ─────────────────────────────────────────────────────────────
+function verEv(k,e){
+  document.getElementById('mv-tit').textContent=e.titulo;
+  var st=e.status||'pendente';
+  var stcl={pendente:'pend',aprovado:'apro',revisao:'rev',arquivo:'arq'}[st]||'pend';
+  var stlb={pendente:'Pendente',aprovado:'Aprovado',revisao:'Em revisão',arquivo:'Arquivado'}[st]||st;
+  var fotos=e.fotos&&e.fotos.length?'<div style="margin:14px 0"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">📸 Registro Fotográfico</div><div class="photo-grid">'+e.fotos.map(function(f){return '<div class="pth"><img src="'+f.data+'" alt="foto"/></div>';}).join('')+'</div></div>':'';
+  var evchips=e.evTipos&&e.evTipos.length?'<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Tipos de evidência</div><div style="display:flex;gap:4px;flex-wrap:wrap">'+e.evTipos.map(function(t){var et=EV_TIPOS.find(function(x){return x.id===t;});return et?'<span style="background:var(--teall);color:var(--teal);font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px">'+et.icon+' '+et.id+' — '+et.nome+'</span>':'';}).join('')+'</div></div>':'';
+  var links=e.links&&e.links.length?'<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Links / DOIs</div>'+e.links.map(function(l){return '<a href="'+l+'" target="_blank" style="display:block;color:var(--teal);font-size:11.5px;margin-bottom:3px">🔗 '+l+'</a>';}).join('')+'</div>':'';
+  var coment=e.comentarioCoordenacao?'<div style="background:var(--navyl);border:1.5px solid rgba(15,45,94,.15);border-radius:var(--r2);padding:11px 13px;font-size:12px;line-height:1.6;margin-top:12px"><strong style="color:var(--navym)">💬 Coordenação:</strong><br/>'+e.comentarioCoordenacao+'</div>':'';
+  document.getElementById('mv-body').innerHTML=
+    '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">'+
+      '<span class="bdg" style="background:var(--teall);color:var(--teal)">'+(TIPO_ICO[e.tipo]||'📌')+' '+e.tipo+'</span>'+
+      '<span class="bdg '+stcl+'">'+stlb+'</span>'+
+      (e.pttTipo?'<span class="bdg" style="background:var(--navyl);color:var(--navym)">🏗️ '+e.pttTipo+(e.pttNivel?' · '+e.pttNivel:'')+'</span>':'')+
+      (e.ano?'<span class="bdg" style="background:var(--slateb);color:var(--slated)">CAPES '+e.ano+'</span>':'')+
+    '</div>'+
+    '<div class="g2" style="margin-bottom:12px">'+
+      '<div><div style="font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Docente</div><div style="font-size:13px;font-weight:700">'+e.docente+'</div></div>'+
+      '<div><div style="font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Data</div><div style="font-size:13px">'+e.data+'</div></div>'+
+      (e.local?'<div><div style="font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Local</div><div style="font-size:13px">'+e.local+'</div></div>':'<div></div>')+
+      (e.parceiro?'<div><div style="font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Parceiro</div><div style="font-size:13px">'+e.parceiro+'</div></div>':'<div></div>')+
+    '</div>'+
+    '<div style="background:var(--slate);border-radius:var(--r2);padding:11px 13px;font-size:13px;line-height:1.7;color:var(--ink2);margin-bottom:12px">'+e.desc+'</div>'+
+    evchips+fotos+links+coment;
+  var ft=document.getElementById('mv-ft');ft.innerHTML='';
+  var cb=document.createElement('button');cb.className='btn sec';cb.textContent='Fechar';
+  cb.addEventListener('click',function(){fM('mov');});ft.appendChild(cb);
+  if(USER&&(e.uid===USER.uid||ADMINS.includes(USER.uid))){
+    var db=document.createElement('button');db.className='btn dan';db.textContent='🗑️ Excluir';
+    db.addEventListener('click',function(){if(confirm('Excluir?')){DB.ref('evidencias/'+k).remove();fM('mov');toast('Excluída.');}});
+    ft.appendChild(db);
+  }
+  if(ADMINS.includes(USER?USER.uid:'')){
+    var cmb=document.createElement('button');cmb.className='btn nav';cmb.textContent='💬 Comentar / Status';
+    cmb.addEventListener('click',function(){comentKey=k;document.getElementById('c-st').value=e.status||'pendente';document.getElementById('c-txt').value=e.comentarioCoordenacao||'';fM('mov');oM('mcom');});
+    ft.appendChild(cmb);
+  }
+  oM('mov');
+}
+function salvarComent(){
+  if(!comentKey)return;
+  DB.ref('evidencias/'+comentKey).update({status:document.getElementById('c-st').value,comentarioCoordenacao:document.getElementById('c-txt').value.trim(),atualizadoEm:new Date().toISOString()}).then(function(){toast('Status atualizado!');fM('mcom');comentKey=null;});
+}
+function oM(id){document.getElementById(id).classList.add('on');}
+function fM(id){document.getElementById(id).classList.remove('on');}
+window.salvarComent=salvarComent;window.fM=fM;
+
+// ── RELATÓRIO ─────────────────────────────────────────────────────────────────
+function gerarRpt(){
+  var fd=document.getElementById('rf-doc')?document.getElementById('rf-doc').value:'';
+  var ft=document.getElementById('rf-tp')?document.getElementById('rf-tp').value:'';
+  var fa=document.getElementById('rf-ano')?document.getElementById('rf-ano').value:'';
+  var arr=Object.entries(EV).filter(function(en){
+    var e=en[1];
+    return (!fd||e.docente===fd)&&(!ft||e.tipo===ft)&&(!fa||e.ano===fa||(e.data||'').startsWith(fa));
   }).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
-
-  // Stats
   var st=document.getElementById('rpt-stats');
   if(st){
-    var tipoCount={};
-    var evCount={};
-    EV_TIPOS.forEach(function(et){evCount[et.id]=0;});
-    arr.forEach(function(entry){
-      var e=entry[1];
-      tipoCount[e.tipo]=(tipoCount[e.tipo]||0)+1;
-      if(e.evTipos)e.evTipos.forEach(function(t){if(evCount[t]!==undefined)evCount[t]++;});
-    });
-    st.innerHTML='<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Total: '+arr.length+' evidência'+(arr.length!==1?'s':'')+' · '+Object.keys(tipoCount).length+' tipo'+(Object.keys(tipoCount).length!==1?'s':'')+' · '+new Set(arr.map(function(e){return e[1].docente;})).size+' docente'+(new Set(arr.map(function(e){return e[1].docente;})).size!==1?'s':'')+'</div>'+
-    Object.entries(tipoCount).map(function(tc){return '<div style="background:var(--seal);border-radius:7px;padding:8px 10px"><div style="font-size:18px;font-weight:800;color:var(--sea)">'+tc[1]+'</div><div style="font-size:10px;color:var(--ink3);font-weight:600">'+tc[0]+'</div></div>';}).join('');
+    var tc={},apro=0,fotos=0,ptts=0;
+    arr.forEach(function(en){var e=en[1];tc[e.tipo]=(tc[e.tipo]||0)+1;if(e.status==='aprovado')apro++;if(e.fotos)fotos+=e.fotos.length;if((e.tipo||'').includes('PTT'))ptts++;});
+    var docs=new Set(arr.map(function(en){return en[1].docente;})).size;
+    st.innerHTML='<div style="grid-column:1/-1;font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">Total: '+arr.length+' evidências · '+docs+' docente'+(docs!==1?'s':'')+' · '+apro+' aprovada'+(apro!==1?'s':'')+' · 📸 '+fotos+' foto'+(fotos!==1?'s':'')+' · 🏗️ '+ptts+' PTT'+(ptts!==1?'s':'')+'</div>'+
+    Object.entries(tc).map(function(tc){return '<div style="background:var(--seal);border-radius:7px;padding:9px 11px"><div style="font-size:19px;font-weight:800;color:var(--teal)">'+tc[1]+'</div><div style="font-size:10px;color:var(--ink3);font-weight:600;margin-top:1px">'+tc[0].replace(/^[^\s]+\s/,'')+'</div></div>';}).join('');
   }
-
-  // Group by docente
+  var bd=document.getElementById('rpt-body');if(!bd)return;
+  if(!arr.length){bd.innerHTML='<div class="empty" style="padding:36px"><span class="ei">📊</span><h3>Nenhuma evidência</h3><p>Ajuste os filtros acima</p></div>';return;}
   var byDoc={};
-  arr.forEach(function(entry){
-    var e=entry[1];
-    if(!byDoc[e.docente])byDoc[e.docente]=[];
-    byDoc[e.docente].push({key:entry[0],ev:e});
-  });
-
-  var content=document.getElementById('rpt-content');
-  if(!content) return;
-  if(!arr.length){content.innerHTML='<div class="empty"><span class="empty-ico">📊</span><h3>Nenhuma evidência encontrada</h3><p>Ajuste os filtros ou registre evidências</p></div>';return;}
-  content.innerHTML='';
-  Object.entries(byDoc).forEach(function(docEntry){
-    var docNm=docEntry[0], evs=docEntry[1];
-    var card=document.createElement('div');
-    card.className='rpt-doc-card';
-    var apro=evs.filter(function(x){return x.ev.status==='aprovado';}).length;
-    var fotos=evs.reduce(function(s,x){return s+(x.ev.fotos?x.ev.fotos.length:0);},0);
-    card.innerHTML='<div class="rpt-doc-hd"><div><div class="rpt-doc-nm">'+docNm+'</div><div class="rpt-doc-sub">'+evs.length+' evidência'+(evs.length!==1?'s':'')+' · '+apro+' aprovada'+(apro!==1?'s':'')+' · 📸 '+fotos+' foto'+(fotos!==1?'s':'')+'</div></div></div>';
+  arr.forEach(function(en){var e=en[1];if(!byDoc[e.docente])byDoc[e.docente]=[];byDoc[e.docente].push({k:en[0],e:e});});
+  bd.innerHTML='';
+  Object.entries(byDoc).forEach(function(de){
+    var dnm=de[0],evs=de[1];
+    var apro=evs.filter(function(x){return x.e.status==='aprovado';}).length;
+    var fotos=evs.reduce(function(s,x){return s+(x.e.fotos?x.e.fotos.length:0);},0);
+    var ptts=evs.filter(function(x){return (x.e.tipo||'').includes('PTT');}).length;
+    var docInfo=DOCENTES.find(function(d){return d.nome===dnm;})||{};
+    var card=document.createElement('div');card.className='rpt-doc';
+    card.innerHTML='<div class="rpt-hd">'+
+      '<h3>'+dnm+(docInfo.cat?' <span style="font-size:10px;opacity:.6;font-weight:500">('+docInfo.cat+')</span>':' ')+'</h3>'+
+      '<p>'+(docInfo.area||'')+'</p>'+
+      (docInfo.discip&&docInfo.discip!=='—'?'<p style="margin-top:2px;font-size:10px;opacity:.55">📚 '+docInfo.discip+'</p>':'')+
+      '<div class="rpt-hd-stats">'+
+        '<div class="rpt-hd-stat"><div class="v">'+evs.length+'</div><div class="l">Evidências</div></div>'+
+        '<div class="rpt-hd-stat"><div class="v">'+apro+'</div><div class="l">Aprovadas</div></div>'+
+        '<div class="rpt-hd-stat"><div class="v">'+ptts+'</div><div class="l">PTTs</div></div>'+
+        '<div class="rpt-hd-stat"><div class="v">'+fotos+'</div><div class="l">Fotos</div></div>'+
+      '</div></div>';
     evs.forEach(function(item){
-      var e=item.ev;
-      var row=document.createElement('div');
-      row.className='rpt-ev-row';
-      row.style.cursor='pointer';
-      var st=e.status||'pendente';
-      var stc={'pendente':'var(--amber)','aprovado':'var(--emerald)','revisao':'var(--rose)'}[st]||'var(--slated)';
-      row.innerHTML='<div class="rpt-ev-type">'+(TIPO_ATIV_ICONS[e.tipo]||'📌')+'</div>'+
+      var e=item.e;
+      var row=document.createElement('div');row.className='rpt-ev';row.style.cursor='pointer';
+      var stcl={pendente:'pend',aprovado:'apro',revisao:'rev'}[e.status||'pendente']||'pend';
+      row.innerHTML='<div class="rpt-ev-ico">'+(TIPO_ICO[e.tipo]||'📌')+'</div>'+
         '<div style="flex:1;min-width:0">'+
           '<div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px">'+e.titulo+'</div>'+
-          '<div style="font-size:11px;color:var(--ink3);display:flex;gap:8px;flex-wrap:wrap">'+
-            '<span>'+e.tipo+'</span><span>📅 '+e.data+'</span>'+
+          '<div style="font-size:10.5px;color:var(--ink3);display:flex;gap:7px;flex-wrap:wrap">'+
+            '<span>'+e.tipo.replace(/^[^\s]+\s/,'')+'</span><span>📅 '+e.data+'</span>'+
             (e.mun?'<span>📍 '+e.mun+'</span>':'')+
+            (e.parceiro?'<span>🤝 '+e.parceiro+'</span>':'')+
             (e.participantes?'<span>👥 '+e.participantes+'</span>':'')+
           '</div>'+
-          (e.fotos&&e.fotos.length?'<div class="rpt-photos">'+e.fotos.slice(0,5).map(function(f){return '<img src="'+f.data+'" alt="foto"/>';}).join('')+'</div>':'')+
-          (e.evTipos&&e.evTipos.length?'<div style="margin-top:5px;display:flex;gap:3px;flex-wrap:wrap">'+e.evTipos.map(function(t){return '<span style="background:var(--seal);color:var(--sea);font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px">'+t+'</span>';}).join('')+'</div>':'')+
+          (e.fotos&&e.fotos.length?'<div class="rpt-ev-fotos">'+e.fotos.slice(0,6).map(function(f){return '<img src="'+f.data+'" alt="foto"/>';}).join('')+'</div>':'')+
+          (e.evTipos&&e.evTipos.length?'<div class="rpt-ev-chips">'+e.evTipos.map(function(t){return '<span class="rpt-chip">'+t+'</span>';}).join('')+'</div>':'')+
+          (e.links&&e.links.length?'<div style="margin-top:4px">'+e.links.map(function(l){return '<a href="'+l+'" target="_blank" style="font-size:10px;color:var(--teal);margin-right:7px">🔗 '+l.replace(/^https?:\/\//,'').substring(0,35)+'</a>';}).join('')+'</div>':'')+
         '</div>'+
-        '<div><span class="badge" style="color:'+stc+';background:transparent;border:1.5px solid '+stc+'">'+(e.status||'pendente')+'</span></div>';
-      row.addEventListener('click',function(){abrirModal(item.key,e);});
+        '<div><span class="bdg '+stcl+'" style="white-space:nowrap">'+(e.status||'Pendente')+'</span></div>';
+      row.addEventListener('click',function(){verEv(item.k,e);});
       card.appendChild(row);
     });
-    content.appendChild(card);
+    bd.appendChild(card);
   });
 }
+window.gerarRpt=gerarRpt;
 
-// ─── EXPORTAR CSV ─────────────────────────────────────────────────────────────
-function exportarCSV(){
-  var arr=Object.values(EVIDENCIAS);
-  var cabec=['Título','Tipo','Docente','Data','Município','Local','Parceiro','Participantes','PTT Tipo','PTT Nível','Evidências','Fotos','Links','Status','Criado em'];
-  var rows=[cabec].concat(arr.map(function(e){
-    return [e.titulo,e.tipo,e.docente,e.data,e.mun||'',e.local||'',e.parceiro||'',e.participantes||0,e.pttTipo||'',e.pttNivel||'',(e.evTipos||[]).join(';'),e.fotos?e.fotos.length:0,(e.links||[]).join(';'),e.status||'pendente',e.criadoEm||''];
+// ── CSV ───────────────────────────────────────────────────────────────────────
+function expCSV(){
+  var arr=Object.values(EV);
+  var cab=['Título','Tipo','Docente','Data','Ano CAPES','Município','Local','Parceiro','Nº Participantes','Discente','PTT Tipo','PTT Nível','PTT Título','Evidências CAPES','Nº Fotos','Links','Status','Observações','Criado em'];
+  var rows=[cab].concat(arr.map(function(e){
+    return [e.titulo,e.tipo,e.docente,e.data,e.ano||'',e.mun||'',e.local||'',e.parceiro||'',e.participantes||0,e.discente||'',e.pttTipo||'',e.pttNivel||'',e.pttTitulo||'',(e.evTipos||[]).join(';'),e.fotos?e.fotos.length:0,(e.links||[]).join(';'),e.status||'pendente',e.obs||'',e.criadoEm||''];
   }));
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='relatorio_evidencias_'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(url);
+  var a=document.createElement('a');a.href=url;a.download='profagua_evidencias_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
 }
-function exportarTudo(){exportarCSV();}
+window.expCSV=expCSV;
 
-// ─── MATRIZ ──────────────────────────────────────────────────────────────────
+// ── DOCENTES & VÍNCULOS ───────────────────────────────────────────────────────
+function renderDocList(){
+  var el=document.getElementById('doc-list');if(!el)return;
+  el.innerHTML='';
+  DOCENTES.forEach(function(d){
+    var myEv=Object.values(EV).filter(function(e){return e.docente===d.nome;}).length;
+    var myVk=Object.values(VINC).filter(function(v){return v.aNome===d.nome||v.bNome===d.nome;}).length;
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--slateb);cursor:pointer';
+    row.innerHTML='<div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#60a5fa,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0">'+d.nome.split(' ').filter(function(w){return w.length>2;}).map(function(w){return w[0];}).join('').substring(0,2).toUpperCase()+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:12.5px;font-weight:700;color:var(--ink)">'+d.nome+'</div>'+
+        '<div style="font-size:10px;color:var(--ink3)">'+d.cat+' · Linha '+d.linha+'</div>'+
+        '<div style="font-size:10px;color:var(--ink3)">'+d.area+'</div>'+
+      '</div>'+
+      '<div style="text-align:right;flex-shrink:0">'+
+        '<div style="font-size:11px;color:var(--teal);font-weight:700">'+myEv+' ev.</div>'+
+        '<div style="font-size:10px;color:var(--ink3)">'+myVk+' vínculos</div>'+
+      '</div>';
+    row.addEventListener('mouseover',function(){this.style.background='var(--slate)';});
+    row.addEventListener('mouseout',function(){this.style.background='';});
+    row.addEventListener('click',function(){verDocente(d);});
+    el.appendChild(row);
+  });
+}
+
+function verDocente(d){
+  document.getElementById('md-tit').textContent=d.nome;
+  var myEv=Object.entries(EV).filter(function(en){return en[1].docente===d.nome;});
+  var myVk=Object.entries(VINC).filter(function(en){return en[1].aNome===d.nome||en[1].bNome===d.nome;});
+  var disc=Object.values(MEMBERS).filter(function(m){return m.orientadorId===d.id&&(m.type==='discente'||m.type==='egresso');});
+  document.getElementById('md-body').innerHTML=
+    '<div style="background:linear-gradient(135deg,var(--navy),var(--navym));color:#fff;padding:14px 17px;border-radius:var(--r2);margin-bottom:14px">'+
+      '<div style="font-size:11px;font-weight:700;opacity:.7;margin-bottom:3px">'+d.cat+'</div>'+
+      '<div style="font-size:13px;font-weight:700;margin-bottom:2px">'+d.area+'</div>'+
+      (d.email?'<div style="font-size:11px;opacity:.7">'+d.email+'</div>':'')+
+      '<div style="font-size:11px;opacity:.7;margin-top:4px">📚 '+d.discip+'</div>'+
+    '</div>'+
+    '<div class="g3" style="margin-bottom:14px">'+
+      '<div style="background:var(--teall);border-radius:var(--r2);padding:11px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--teal)">'+myEv.length+'</div><div style="font-size:10px;color:var(--teal);font-weight:600">Evidências</div></div>'+
+      '<div style="background:var(--navyl);border-radius:var(--r2);padding:11px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--navym)">'+disc.length+'</div><div style="font-size:10px;color:var(--navym);font-weight:600">Orientandos</div></div>'+
+      '<div style="background:var(--amberl);border-radius:var(--r2);padding:11px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--amberm)">'+myVk.length+'</div><div style="font-size:10px;color:var(--amberm);font-weight:600">Vínculos</div></div>'+
+    '</div>'+
+    (disc.length?'<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Orientandos</div>'+
+      disc.map(function(m){return '<div style="display:flex;gap:7px;align-items:center;padding:5px 0;border-bottom:1px solid var(--slateb);font-size:11.5px"><span style="font-size:11px;background:'+( m.type==='discente'?'var(--amberl)':'var(--greenl)')+';color:'+( m.type==='discente'?'var(--amberm)':'var(--green)')+';padding:1px 6px;border-radius:4px;font-weight:700">'+( m.type==='discente'?'Ativo':'Egresso')+'</span><span style="font-weight:600">'+m.label+'</span><span style="color:var(--ink3)">'+( m.ano||'')+'</span></div>';}).join('')+'<div style="margin-bottom:14px"></div>':'')
+    +
+    (myVk.length?'<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Vínculos cadastrados</div>'+
+      myVk.map(function(en){var v=en[1];var other=v.aNome===d.nome?v.bNome:v.aNome;var vcl={'orient':'vt-orient','coorient':'vt-coorient','banca':'vt-banca','acao':'vt-acao','colab':'vt-colab','disciplina':'vt-disciplina'}[v.type]||'';return '<div class="vk-line"><span class="vk-type '+vcl+'">'+VT_LABEL[v.type||'colab']+'</span><span style="flex:1;font-size:11.5px;font-weight:600">'+other+'</span><div class="vk-weight">'+[1,2,3,4,5].map(function(n){return '<div class="vkw'+(n<=(v.weight||1)?' on':'')+'"></div>';}).join('')+'</div></div>';}).join(''):'')
+    +
+    (myEv.length?'<div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 7px">Últimas evidências</div>'+
+      myEv.slice(0,5).map(function(en){var e=en[1];return '<div style="font-size:11.5px;padding:5px 0;border-bottom:1px solid var(--slateb)"><span style="font-weight:700">'+e.titulo+'</span> <span style="color:var(--ink3)">· '+e.data+'</span></div>';}).join(''):'');
+  oM('mdoc');
+}
+
+// ── VÍNCULOS ──────────────────────────────────────────────────────────────────
+function populateVincSelects(){
+  var all=Object.values(MEMBERS).sort(function(a,b){return (a.label||'').localeCompare(b.label||'');});
+  var opts=all.map(function(m){var mid=m.id||m._id||'';var tp=m.type==='docente'?'(Docente)':m.type==='egresso'?'(Egresso)':'(Discente)';return '<option value="'+mid+'">'+m.label+' '+tp+'</option>';}).join('');
+  ['va','vb'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML='<option value="">Selecione...</option>'+opts;});
+}
+function salvarVinc(){
+  if(!USER){toast('Faça login.');return;}
+  var a=document.getElementById('va').value;
+  var b=document.getElementById('vb').value;
+  var tp=document.getElementById('vt').value;
+  var peso=parseInt(document.getElementById('vpeso').value)||2;
+  var desc=document.getElementById('vdesc').value.trim();
+  if(!a||!b){toast('Selecione as duas pessoas.');return;}
+  if(a===b){toast('Escolha pessoas diferentes.');return;}
+  if(!MEMBERS[a]||!MEMBERS[b]){toast('Membro não encontrado. Aguarde o carregamento completo.');return;}
+  var data={a,b,type:tp,weight:peso,desc,aNome:MEMBERS[a].label||'',bNome:MEMBERS[b].label||'',createdBy:USER.uid,ts:Date.now()};
+  DB.ref('aquanet/links').push(data).then(function(){toast('Vínculo salvo!');document.getElementById('vdesc').value='';}).catch(function(e){toast('Erro: '+e.message);});
+}
+function renderVincList(){
+  var el=document.getElementById('vinc-list');if(!el)return;
+  var items=Object.entries(VINC).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
+  el.innerHTML='';
+  if(!items.length){el.innerHTML='<div style="padding:18px;text-align:center;font-size:12px;color:var(--ink3)">Nenhum vínculo cadastrado</div>';return;}
+  items.slice(0,12).forEach(function(entry){
+    var k=entry[0],v=entry[1];
+    var vcl={orient:'vt-orient',coorient:'vt-coorient',banca:'vt-banca',acao:'vt-acao',colab:'vt-colab',disciplina:'vt-disciplina'}[v.type]||'';
+    var row=document.createElement('div');row.className='vk-line';row.style.padding='7px 16px';
+    row.innerHTML='<span class="vk-type '+vcl+'">'+VT_LABEL[v.type||'colab']+'</span>'+
+      '<div style="flex:1;min-width:0"><span style="font-size:11px;font-weight:700">'+v.aNome+'</span><span style="color:var(--ink3);font-size:10px"> ↔ </span><span style="font-size:11px;font-weight:700">'+v.bNome+'</span>'+(v.desc?'<div style="font-size:10px;color:var(--ink3)">'+v.desc+'</div>':'')+' </div>'+
+      '<div class="vk-weight">'+[1,2,3,4,5].map(function(n){return '<div class="vkw'+(n<=(v.weight||1)?' on':'')+'"></div>';}).join('')+'</div>';
+    var rm=document.createElement('button');rm.style.cssText='border:none;background:none;cursor:pointer;color:var(--rosem);font-size:14px;padding:0 4px;flex-shrink:0';rm.innerHTML='✕';
+    rm.addEventListener('click',function(){if(confirm('Excluir este vínculo?')){DB.ref('aquanet/links/'+k).remove();toast('Removido.');}});
+    row.appendChild(rm);
+    el.appendChild(row);
+  });
+}
+window.salvarVinc=salvarVinc;
+
+// ── COORDENAÇÃO ───────────────────────────────────────────────────────────────
+function renderCoord(){
+  var el=document.getElementById('coord-lst');if(!el)return;
+  var fv=document.getElementById('cf-st')?document.getElementById('cf-st').value:'';
+  var arr=Object.entries(EV).filter(function(en){return !fv||en[1].status===fv||(!en[1].status&&fv==='pendente');}).sort(function(a,b){return (b[1].ts||0)-(a[1].ts||0);});
+  el.innerHTML='';
+  if(!arr.length){el.innerHTML='<div class="empty" style="padding:36px"><span class="ei">✅</span><h3>Tudo em dia!</h3><p>Nenhuma evidência com este filtro</p></div>';return;}
+  arr.forEach(function(entry){el.appendChild(makeRow(entry[0],entry[1]));});
+}
+window.renderCoord=renderCoord;
+
+// ── MATRIZ ────────────────────────────────────────────────────────────────────
 function renderMatriz(){
-  var el=document.getElementById('tbl-matriz');
-  if(!el) return;
+  var el=document.getElementById('tbl-mat');if(!el)return;
   var cols=EV_TIPOS.map(function(e){return e.id;});
-  var ths='<tr><th style="min-width:160px">Tipo de PTT</th>'+cols.map(function(c){return '<th style="min-width:50px;text-align:center">'+c+'</th>';}).join('')+'</tr>';
-  var trs=MATRIZ_PTT.map(function(row){
-    return '<tr><td style="font-size:11px;font-weight:600">'+row.nome+'</td>'+cols.map(function(c){var v=row.ev[c]||'';return '<td class="mc'+(v?' '+v:'')+'">'+v+'</td>';}).join('')+'</tr>';
-  }).join('');
-  el.innerHTML=ths+trs;
+  el.innerHTML='<tr><th style="min-width:170px">Tipo de PTT</th>'+cols.map(function(c){return '<th style="text-align:center;min-width:44px">'+c+'</th>';}).join('')+'</tr>'+
+    MATRIZ.map(function(row){
+      return '<tr><td style="font-size:11px;font-weight:600">'+row.nome+'</td>'+cols.map(function(c){var v=row.ev[c]||'';return '<td class="mc'+(v?' '+v:'nd')+'">'+v+'</td>';}).join('')+'</tr>';
+    }).join('');
 }
 
-// ─── CHECKLIST ───────────────────────────────────────────────────────────────
+// ── CHECKLIST ─────────────────────────────────────────────────────────────────
 function renderChecklist(){
-  var items_obrig=[
-    'Capa do dossiê (título PTT, mestrando, orientador, data defesa, parceiro)',
-    'Ficha de classificação do PTT (tipo CAPES, linha de pesquisa, palavras-chave, nível)',
-    'Cópia do produto completo (PDF, ZIP, URL ou código-fonte)',
-    'Documento de Entrega Formal ao parceiro (DEF — protocolo ou ofício assinado)',
-    'Relatório de Aplicação ou Validação do PTT (RAP)',
-    'Registro Fotográfico ou Audiovisual das etapas principais (RFA)',
-    'URL ou DOI do depósito no repositório (DOI)',
-  ];
-  var items_rec=[
-    'Questionário de Avaliação com respostas (mínimo 5 respondentes) (QAV)',
-    'Lista de Presença de capacitação ou oficina (LPR)',
-    'Declaração ou Depoimento de Beneficiário/Gestor parceiro (DEB)',
-    'Dados quantitativos de impacto com comparação antes/depois (DIM)',
-  ];
-  var items_opc=[
-    'Citação do PTT em trabalho acadêmico ou técnico de terceiros (CTT)',
-    'Comprovante de ISBN ou registro em órgão competente',
-    'Matéria jornalística ou de divulgação científica sobre o PTT',
-  ];
-  function makeCheck(items,color){
-    return items.map(function(i){return '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12px;line-height:1.5"><span style="color:'+color+';font-size:14px;flex-shrink:0">☐</span><span style="color:var(--ink2)">'+i+'</span></div>';}).join('');
-  }
-  var o=document.getElementById('checklist-obrig');
-  var r=document.getElementById('checklist-rec');
-  var op=document.getElementById('checklist-opc');
-  if(o) o.innerHTML=makeCheck(items_obrig,'var(--rose)');
-  if(r) r.innerHTML=makeCheck(items_rec,'var(--amber)');
-  if(op) op.innerHTML=makeCheck(items_opc,'var(--slated)');
+  function mk(items,col){return items.map(function(t){return '<div style="display:flex;gap:7px;margin-bottom:7px;font-size:11.5px;line-height:1.5"><span style="color:'+col+';flex-shrink:0">☐</span><span style="color:var(--ink2)">'+t+'</span></div>';}).join('');}
+  var ob=document.getElementById('cl-ob');var rc=document.getElementById('cl-rc');var op=document.getElementById('cl-op');
+  if(ob)ob.innerHTML=mk(['Capa do dossiê (título PTT, mestrando, orientador, data defesa, parceiro)','Ficha de classificação CAPES (tipo, linha, palavras-chave, nível de maturidade)','Cópia completa do produto (PDF, URL, código-fonte ou ZIP)','DEF — Entrega Formal ao parceiro (protocolo/ofício assinado)','RAP — Relatório de Aplicação ou Validação do PTT','RFA — Registro Fotográfico das etapas principais','DOI — URL ou DOI do depósito em repositório'],'var(--rosem)');
+  if(rc)rc.innerHTML=mk(['QAV — Questionário de Avaliação (mín. 5 respondentes)','LPR — Lista de Presença de capacitação ou oficina','DEB — Declaração ou depoimento de beneficiário/gestor','DIM — Dados quantitativos de impacto (antes/depois)'],'var(--amberm)');
+  if(op)op.innerHTML=mk(['CTT — Citação em trabalho de terceiros','Comprovante de ISBN ou registro','Matéria jornalística ou de divulgação científica'],'var(--slated)');
 }
 
-// ─── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg){
-  var el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('on');
-  setTimeout(function(){el.classList.remove('on');},3200);
-}
-
-// Expose
-window.goP=goP;window.doLogin=doLogin;window.doLogout=doLogout;
-window.onTipoChange=onTipoChange;window.handleFotos=handleFotos;window.handleDocs=handleDocs;
-window.addLink=addLink;window.salvarEvidencia=salvarEvidencia;window.limparForm=limparForm;
-window.filtrarMinhas=filtrarMinhas;window.setFiltro=setFiltro;
-window.gerarRelatorio=gerarRelatorio;window.exportarCSV=exportarCSV;window.exportarTudo=exportarTudo;
-window.fecharModal=fecharModal;window.salvarComentario=salvarComentario;
-window.filtrarCoord=filtrarCoord;
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');setTimeout(function(){el.classList.remove('on');},3000);}
 </script>
 <div id="toast"></div>
 </body>
